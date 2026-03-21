@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { X, Send, Hash, Circle } from 'lucide-react';
+import { X, Send, Hash, Circle, Brain } from 'lucide-react';
 import type { AgentChatMessage } from '../types';
 
 interface AgentChatProps {
@@ -7,15 +7,173 @@ interface AgentChatProps {
   onClose: () => void;
 }
 
-type Channel = 'manager' | 'jacob' | 'angie';
+type Channel = 'manager' | 'jacob' | 'angie' | 'brain';
 
-const CHANNELS: { id: Channel; label: string; description: string; color: string; online: boolean }[] = [
+const CHANNELS: { id: Channel; label: string; description: string; color: string; online: boolean; special?: boolean }[] = [
+  { id: 'brain', label: 'brain', description: 'Configure your workspace with plain English', color: 'text-amber-400', online: true, special: true },
   { id: 'manager', label: 'agent-manager', description: 'General commands & status', color: 'text-blue-400', online: true },
   { id: 'jacob', label: 'jacob', description: 'Talk directly to Jacob', color: 'text-green-400', online: true },
   { id: 'angie', label: 'angie', description: 'Talk directly to Angie', color: 'text-purple-400', online: false },
 ];
 
+/** Read preferences from localStorage */
+function getPrefs(): Record<string, unknown> {
+  try {
+    return JSON.parse(localStorage.getItem('user_preferences') || '{}');
+  } catch {
+    return {};
+  }
+}
+
+/** Write preferences to localStorage */
+function setPrefs(update: Record<string, unknown>): void {
+  try {
+    const current = getPrefs();
+    localStorage.setItem('user_preferences', JSON.stringify({ ...current, ...update }));
+  } catch {}
+}
+
+/** Brain channel: parse natural language commands and update user_preferences */
+function brainReply(message: string): string {
+  const msg = message.toLowerCase();
+  const prefs = getPrefs();
+
+  // Layout changes
+  if (msg.includes('stats') && (msg.includes('top') || msg.includes('first'))) {
+    const widgetOrder = ['stats', ...(Array.isArray(prefs.widgetOrder) ? (prefs.widgetOrder as string[]).filter(w => w !== 'stats') : ['contacts', 'agents'])];
+    setPrefs({ widgetOrder });
+    return '✅ Done! Stats moved to the top of your dashboard. Refresh to see the change.';
+  }
+  if (msg.includes('contacts') && (msg.includes('first') || msg.includes('top'))) {
+    setPrefs({ layout: 'contacts_first' });
+    return '✅ Layout updated to Contacts First. Your dashboard will show the contact grid front and center.';
+  }
+  if (msg.includes('messages') && (msg.includes('first') || msg.includes('inbox'))) {
+    setPrefs({ layout: 'messages_first' });
+    return '✅ Switched to Messages First layout. Your inbox is now the main view.';
+  }
+  if (msg.includes('pipeline') && (msg.includes('first') || msg.includes('kanban'))) {
+    setPrefs({ layout: 'pipeline_first' });
+    return '✅ Pipeline/Kanban view is now your default layout.';
+  }
+  if (msg.includes('overview') && msg.includes('first')) {
+    setPrefs({ layout: 'overview_first' });
+    return '✅ Overview First layout restored — stats, pipeline, and recent activity.';
+  }
+
+  // Tone changes
+  if (msg.includes('tone') || msg.includes('style')) {
+    const toneMap: Record<string, string> = {
+      'casual': 'casual', 'friendly': 'casual',
+      'professional': 'professional', 'formal': 'professional',
+      'urgent': 'urgent', 'aggressive': 'urgent',
+      'empathetic': 'empathetic', 'warm': 'empathetic',
+      'bold': 'bold', 'confident': 'bold',
+    };
+    for (const [keyword, tone] of Object.entries(toneMap)) {
+      if (msg.includes(keyword)) {
+        setPrefs({ agentTone: tone });
+        return `✅ Agent tone updated to **${tone}**. New messages will reflect this style.`;
+      }
+    }
+    return '🤔 I can set the tone to: professional, casual, urgent, empathetic, or bold. Which one?';
+  }
+
+  // Filter changes
+  if (msg.includes('hot leads') || msg.includes('only hot') || msg.includes('show hot')) {
+    const filters = (prefs.filters as Record<string, unknown>) || {};
+    setPrefs({ filters: { ...filters, default: 'hot' } });
+    return '✅ Default filter set to **Hot Leads**. Your dashboard will show hot leads by default.';
+  }
+  if (msg.includes('all leads') || msg.includes('show all') || msg.includes('remove filter')) {
+    const filters = (prefs.filters as Record<string, unknown>) || {};
+    setPrefs({ filters: { ...filters, default: 'all' } });
+    return '✅ Filter cleared. Showing all leads by default.';
+  }
+  if (msg.includes('new leads') || msg.includes('fresh leads')) {
+    const filters = (prefs.filters as Record<string, unknown>) || {};
+    setPrefs({ filters: { ...filters, default: 'new' } });
+    return '✅ Default filter set to **New Leads**.';
+  }
+
+  // Capability toggles
+  if (msg.includes('voice') && (msg.includes('off') || msg.includes('disable') || msg.includes('turn off'))) {
+    const caps = (prefs.agentCapabilities as Record<string, unknown>) || {};
+    setPrefs({ agentCapabilities: { ...caps, voiceNotes: false } });
+    return '✅ Voice notes disabled. Your agent will no longer send voice messages.';
+  }
+  if (msg.includes('voice') && (msg.includes('on') || msg.includes('enable') || msg.includes('turn on'))) {
+    const caps = (prefs.agentCapabilities as Record<string, unknown>) || {};
+    setPrefs({ agentCapabilities: { ...caps, voiceNotes: true } });
+    return '✅ Voice notes enabled! Your agent will now send voice messages when appropriate.';
+  }
+  if ((msg.includes('sms') || msg.includes('text')) && (msg.includes('off') || msg.includes('disable'))) {
+    const caps = (prefs.agentCapabilities as Record<string, unknown>) || {};
+    setPrefs({ agentCapabilities: { ...caps, sms: false } });
+    return '⚠️ SMS outreach disabled. Your agent will stop sending text messages.';
+  }
+  if ((msg.includes('sms') || msg.includes('text')) && (msg.includes('on') || msg.includes('enable'))) {
+    const caps = (prefs.agentCapabilities as Record<string, unknown>) || {};
+    setPrefs({ agentCapabilities: { ...caps, sms: true } });
+    return '✅ SMS outreach re-enabled. Your agent will resume sending messages.';
+  }
+  if (msg.includes('auto') && msg.includes('reply') && (msg.includes('off') || msg.includes('disable'))) {
+    const caps = (prefs.agentCapabilities as Record<string, unknown>) || {};
+    setPrefs({ agentCapabilities: { ...caps, autoReply: false } });
+    return '✅ Auto-reply disabled. Incoming messages will wait for manual response.';
+  }
+  if (msg.includes('auto') && msg.includes('reply') && (msg.includes('on') || msg.includes('enable'))) {
+    const caps = (prefs.agentCapabilities as Record<string, unknown>) || {};
+    setPrefs({ agentCapabilities: { ...caps, autoReply: true } });
+    return '✅ Auto-reply enabled. Your agent will respond to leads automatically.';
+  }
+  if (msg.includes('notifications') && (msg.includes('off') || msg.includes('disable'))) {
+    setPrefs({ notificationPrefs: { smsReply: false, docReceived: false, dealUpdate: false } });
+    return '✅ All notifications muted.';
+  }
+  if (msg.includes('notifications') && (msg.includes('on') || msg.includes('enable'))) {
+    setPrefs({ notificationPrefs: { smsReply: true, docReceived: true, dealUpdate: true } });
+    return '✅ All notifications enabled. You\'ll be alerted for replies, documents, and deal updates.';
+  }
+
+  // Show current preferences
+  if (msg.includes('settings') || msg.includes('preferences') || msg.includes('config') || msg.includes('what') && msg.includes('set')) {
+    const current = getPrefs();
+    const caps = (current.agentCapabilities as Record<string, unknown>) || {};
+    return `📋 **Current Settings:**\n` +
+      `• Layout: ${current.layout || 'overview_first'}\n` +
+      `• Tone: ${current.agentTone || 'professional'}\n` +
+      `• Default filter: ${(current.filters as any)?.default || 'all'}\n` +
+      `• SMS: ${caps.sms !== false ? '✅' : '❌'} | Email: ${caps.email !== false ? '✅' : '❌'} | Auto-reply: ${caps.autoReply !== false ? '✅' : '❌'}\n` +
+      `• Voice notes: ${caps.voiceNotes ? '✅' : '❌'} | Call bridge: ${caps.callBridge ? '✅' : '❌'}`;
+  }
+
+  // Help
+  if (msg.includes('help') || msg.includes('what can') || msg.includes('commands')) {
+    return `🧠 **Brain Channel — What I can do:**\n\n` +
+      `**Layout**\n` +
+      `• "Move stats to the top"\n` +
+      `• "Switch to contacts first"\n` +
+      `• "Show pipeline view"\n\n` +
+      `**Agent Tone**\n` +
+      `• "Change tone to casual"\n` +
+      `• "Make agent more professional"\n\n` +
+      `**Filters**\n` +
+      `• "Show only hot leads"\n` +
+      `• "Show all leads"\n\n` +
+      `**Capabilities**\n` +
+      `• "Turn off voice notes"\n` +
+      `• "Enable auto-reply"\n` +
+      `• "Disable notifications"\n\n` +
+      `**Info**\n` +
+      `• "Show my settings"`;
+  }
+
+  return `🧠 I didn't quite catch that. Try:\n• "Move stats to the top"\n• "Change tone to casual"\n• "Show only hot leads"\n• "Turn off voice notes"\n\nOr type **help** to see all commands.`;
+}
+
 function agentReply(channel: Channel, message: string): string {
+  if (channel === 'brain') return brainReply(message);
   const msg = message.toLowerCase();
   if (channel === 'manager') {
     if (msg.includes('status')) return '📊 All systems operational. Jacob is active (23 messages sent today). Angie is offline. Database healthy.';
@@ -42,8 +200,14 @@ function formatTs(d: Date): string {
 }
 
 export function AgentChat({ open, onClose }: AgentChatProps) {
-  const [channel, setChannel] = useState<Channel>('manager');
+  const [channel, setChannel] = useState<Channel>('brain');
   const [histories, setHistories] = useState<Record<Channel, AgentChatMessage[]>>({
+    brain: [
+      {
+        id: '0', channel: 'brain', role: 'agent', ts: new Date(Date.now() - 30000),
+        text: '🧠 Brain channel online. Talk to me in plain English to configure your workspace.\n\nExamples:\n• "Move stats to the top"\n• "Change tone to casual"\n• "Show only hot leads"\n• "Turn off voice notes"\n\nType **help** to see all commands.',
+      },
+    ],
     manager: [
       {
         id: '1', channel: 'manager', role: 'agent', ts: new Date(Date.now() - 60000),
@@ -163,11 +327,18 @@ export function AgentChat({ open, onClose }: AgentChatProps) {
               key={ch.id}
               onClick={() => setChannel(ch.id)}
               className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-                channel === ch.id ? 'bg-indigo-600/20 text-indigo-300' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                channel === ch.id
+                  ? ch.special ? 'bg-amber-600/20 text-amber-300' : 'bg-indigo-600/20 text-indigo-300'
+                  : 'text-gray-400 hover:bg-gray-800 hover:text-white'
               }`}
             >
-              <Hash size={14} className="flex-shrink-0 text-gray-600" />
+              {ch.special ? (
+                <Brain size={14} className="flex-shrink-0 text-amber-500" />
+              ) : (
+                <Hash size={14} className="flex-shrink-0 text-gray-600" />
+              )}
               <span className="flex-1 text-left font-medium">{ch.label}</span>
+              {ch.special && <span className="text-xs text-amber-600 font-medium">AI</span>}
               <Circle
                 size={8}
                 className={ch.online ? 'text-green-400 fill-green-400' : 'text-gray-600 fill-gray-600'}
@@ -178,7 +349,11 @@ export function AgentChat({ open, onClose }: AgentChatProps) {
 
         {/* Channel header */}
         <div className="flex items-center gap-2 px-4 py-2 border-b border-gray-800 flex-shrink-0 bg-gray-900/50">
-          <Hash size={14} className="text-gray-500" />
+          {activeChannel.special ? (
+            <Brain size={14} className="text-amber-500" />
+          ) : (
+            <Hash size={14} className="text-gray-500" />
+          )}
           <span className={`text-sm font-semibold ${activeChannel.color}`}>{activeChannel.label}</span>
           <span className="text-xs text-gray-600">— {activeChannel.description}</span>
         </div>
@@ -193,13 +368,15 @@ export function AgentChat({ open, onClose }: AgentChatProps) {
                 <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold ${
                   isUser
                     ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white'
+                    : msg.channel === 'brain'
+                    ? 'bg-gradient-to-br from-amber-500 to-orange-600 text-white'
                     : msg.channel === 'jacob'
                     ? 'bg-gradient-to-br from-green-500 to-teal-600 text-white'
                     : msg.channel === 'angie'
                     ? 'bg-gradient-to-br from-purple-500 to-pink-600 text-white'
                     : 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white'
                 }`}>
-                  {isUser ? 'JC' : msg.channel === 'jacob' ? 'JA' : msg.channel === 'angie' ? 'AN' : 'AM'}
+                  {isUser ? 'JC' : msg.channel === 'brain' ? '🧠' : msg.channel === 'jacob' ? 'JA' : msg.channel === 'angie' ? 'AN' : 'AM'}
                 </div>
 
                 <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} min-w-0 max-w-[80%]`}>
@@ -224,13 +401,15 @@ export function AgentChat({ open, onClose }: AgentChatProps) {
           {typing && (
             <div className="flex gap-2.5">
               <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold ${
-                channel === 'jacob'
+                channel === 'brain'
+                  ? 'bg-gradient-to-br from-amber-500 to-orange-600 text-white'
+                  : channel === 'jacob'
                   ? 'bg-gradient-to-br from-green-500 to-teal-600 text-white'
                   : channel === 'angie'
                   ? 'bg-gradient-to-br from-purple-500 to-pink-600 text-white'
                   : 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white'
               }`}>
-                {channel === 'jacob' ? 'JA' : channel === 'angie' ? 'AN' : 'AM'}
+                {channel === 'brain' ? '🧠' : channel === 'jacob' ? 'JA' : channel === 'angie' ? 'AN' : 'AM'}
               </div>
               <div className="bg-gray-800 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />

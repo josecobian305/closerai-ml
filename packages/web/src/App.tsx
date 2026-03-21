@@ -6,6 +6,7 @@ import { ContactGrid } from './components/ContactGrid';
 import { ContactDetail } from './components/ContactDetail';
 import { FloatingSoftphone } from './components/Softphone';
 import { AgentChat } from './components/AgentChat';
+import { Register } from './pages/Register';
 import {
   AgentsView, DashboardView, MessagesView, SmsCampaignsView, EmailView,
   PipelineView, DealsView, DocumentsView, CourtSearchView, ReportsView,
@@ -15,6 +16,14 @@ import { useContacts } from './hooks/useContacts';
 import { fetchStats } from './api';
 import type { Contact, DashboardStats, NavSection } from './types';
 
+// Check if we're on the /register route
+function isRegisterRoute() {
+  return window.location.pathname === '/register' ||
+    window.location.pathname === '/app/register' ||
+    window.location.search.includes('register') ||
+    new URLSearchParams(window.location.search).get('page') === 'register';
+}
+
 function App() {
   const { contacts, loading, error, total, hasMore, loadMore, setFilter, filter } = useContacts();
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
@@ -23,13 +32,41 @@ function App() {
   const [activeSection, setActiveSection] = useState<NavSection>('contacts');
   const [agentChatOpen, setAgentChatOpen] = useState(false);
   const [softphone, setSoftphone] = useState<{ phone: string; name: string } | null>(null);
+  const [showRegister, setShowRegister] = useState(false);
 
   useEffect(() => {
+    // Check hash or search param for register page
+    const checkRoute = () => {
+      const hash = window.location.hash;
+      const search = new URLSearchParams(window.location.search);
+      setShowRegister(
+        hash === '#/register' ||
+        hash === '#register' ||
+        search.get('page') === 'register' ||
+        window.location.pathname.endsWith('/register')
+      );
+    };
+    checkRoute();
+    window.addEventListener('hashchange', checkRoute);
+    window.addEventListener('popstate', checkRoute);
+    return () => {
+      window.removeEventListener('hashchange', checkRoute);
+      window.removeEventListener('popstate', checkRoute);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (showRegister) return;
     fetchStats()
       .then(setStats)
       .catch(console.error)
       .finally(() => setStatsLoading(false));
-  }, []);
+  }, [showRegister]);
+
+  // Show register page if route matches
+  if (showRegister) {
+    return <Register />;
+  }
 
   const handleCall = (contact: Contact) => {
     setSoftphone({ phone: contact.phone, name: contact.firstName || contact.name });
