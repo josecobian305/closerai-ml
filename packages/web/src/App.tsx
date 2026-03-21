@@ -9,11 +9,11 @@ import { FloatingSoftphone } from './components/Softphone';
 import { AgentChat } from './components/AgentChat';
 import { Register } from './pages/Register';
 import { Login } from './pages/Login';
-import {
-  AgentsView, DashboardView, MessagesView, SmsCampaignsView, EmailView,
+import { AgentsView, DashboardView, MessagesView, SmsCampaignsView, EmailView,
   PipelineView, DealsView, DocumentsView, CourtSearchView, ReportsView,
   PaymentsView, DatabaseView, NotificationsView, SettingsView,
 } from './components/Views';
+import { IntegrationsPage } from './components/IntegrationsPage';
 import { useContacts } from './hooks/useContacts';
 import { fetchStats } from './api';
 import type { Contact, DashboardStats, NavSection } from './types';
@@ -182,6 +182,7 @@ function AppInner() {
       case 'database': return <DatabaseView />;
       case 'notifications': return <NotificationsView />;
       case 'settings': return <SettingsView />;
+      case 'integrations': return <IntegrationsPage />;
       default: return null;
     }
   };

@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Users, MessageSquare, Mail, GitBranch,
   Briefcase, FileText, Bot, BarChart3, CreditCard,
   Database, Bell, Settings, Menu, X, ChevronRight,
-  Megaphone, Scale, MessageCircle, LogOut
+  Megaphone, Scale, MessageCircle, LogOut, Plug
 } from 'lucide-react';
 import type { NavSection, UserConfig } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -54,6 +54,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     title: 'System',
     items: [
+      { id: 'integrations', label: 'Integrations', icon: <Plug size={18} /> },
       { id: 'settings', label: 'Settings', icon: <Settings size={18} /> },
     ],
   },

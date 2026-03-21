@@ -119,7 +119,8 @@ export type NavSection =
   | 'payments'
   | 'database'
   | 'notifications'
-  | 'settings';
+  | 'settings'
+  | 'integrations';
 
 /** Agent chat message */
 export interface AgentChatMessage {
