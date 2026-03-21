@@ -1,0 +1,35 @@
+{
+  "userId": "ce0d4449-115d-4860-a181-80cdc815df15",
+  "businessName": "CHC Capital Group",
+  "industry": "Merchant Cash Advance / Finance",
+  "pitch": "Direct lender up to $20 million. SBA, term loans, revenue-based, working capital.",
+  "owner": {
+    "name": "Jose Cobian",
+    "email": "jcobian@chccapitalgroup.com",
+    "phone": "+17862804399"
+  },
+  "agent": {
+    "name": "Jacob",
+    "title": "Head of Processing",
+    "email": "jclaude@chccapitalgroup.com"
+  },
+  "tone": "professional",
+  "leadSources": [
+    "LendingTree"
+  ],
+  "leadAge": "0-48 hours (Fresh)",
+  "documents": [],
+  "phone": {},
+  "layout": "overview_first",
+  "capabilities": {
+    "sms": true,
+    "email": true,
+    "voiceNotes": false,
+    "callBridge": false,
+    "autoReply": true,
+    "docCollection": true,
+    "courtSearch": true,
+    "notifications": true
+  },
+  "createdAt": "2026-03-21T21:08:06.782Z"
+}

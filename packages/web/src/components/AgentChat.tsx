@@ -681,6 +681,38 @@ export function AgentChat({ open, onClose, agentName, agentTitle, onNavigate, on
           <div ref={bottomRef} />
         </div>
 
+        {/* Quick Actions — show when chat is empty or after channel switch */}
+        {histories[channel].length < 2 && (
+          <div className="px-4 py-2 border-t border-gray-800/50 overflow-x-auto">
+            <div className="flex gap-2 text-xs">
+              {channel === 'brain' ? (
+                <>
+                  <button onClick={() => { setInput('Show me my stats'); }} className="shrink-0 px-3 py-1.5 bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 rounded-full hover:bg-indigo-600/30">📊 My Stats</button>
+                  <button onClick={() => { setInput('Show me my hot leads'); }} className="shrink-0 px-3 py-1.5 bg-green-600/20 border border-green-500/30 text-green-300 rounded-full hover:bg-green-600/30">🔥 Hot Leads</button>
+                  <button onClick={() => { setInput('What are my agents doing right now?'); }} className="shrink-0 px-3 py-1.5 bg-purple-600/20 border border-purple-500/30 text-purple-300 rounded-full hover:bg-purple-600/30">🤖 Agent Status</button>
+                  <button onClick={() => { setInput('Change theme to ocean'); }} className="shrink-0 px-3 py-1.5 bg-cyan-600/20 border border-cyan-500/30 text-cyan-300 rounded-full hover:bg-cyan-600/30">🎨 Change Theme</button>
+                  <button onClick={() => { setInput('I have new leads I want to work'); }} className="shrink-0 px-3 py-1.5 bg-amber-600/20 border border-amber-500/30 text-amber-300 rounded-full hover:bg-amber-600/30">📋 New Campaign</button>
+                  <button onClick={() => { setInput('Take me to integrations'); }} className="shrink-0 px-3 py-1.5 bg-gray-600/20 border border-gray-500/30 text-gray-300 rounded-full hover:bg-gray-600/30">🔗 Integrations</button>
+                  <button onClick={() => { setInput('Report a bug'); }} className="shrink-0 px-3 py-1.5 bg-red-600/20 border border-red-500/30 text-red-300 rounded-full hover:bg-red-600/30">🐛 Report Bug</button>
+                </>
+              ) : channel === 'jacob' || channel === 'angie' ? (
+                <>
+                  <button onClick={() => { setInput(`Show me ${channel === 'jacob' ? "Jacob" : "Angie"}'s lead states`); }} className="shrink-0 px-3 py-1.5 bg-blue-600/20 border border-blue-500/30 text-blue-300 rounded-full hover:bg-blue-600/30">📋 Lead States</button>
+                  <button onClick={() => { setInput(`Show me ${channel === 'jacob' ? "Jacob" : "Angie"}'s workspace config`); }} className="shrink-0 px-3 py-1.5 bg-purple-600/20 border border-purple-500/30 text-purple-300 rounded-full hover:bg-purple-600/30">⚙️ View Config</button>
+                  <button onClick={() => { setInput(`Change ${channel === 'jacob' ? "Jacob" : "Angie"}'s tone to casual`); }} className="shrink-0 px-3 py-1.5 bg-amber-600/20 border border-amber-500/30 text-amber-300 rounded-full hover:bg-amber-600/30">🎭 Change Tone</button>
+                  <button onClick={() => { setInput(`Stop outreach to +1`); }} className="shrink-0 px-3 py-1.5 bg-red-600/20 border border-red-500/30 text-red-300 rounded-full hover:bg-red-600/30">🛑 Stop a Lead</button>
+                  <button onClick={() => { setInput(`Send a text from ${channel === 'jacob' ? "Jacob" : "Angie"} to +1`); }} className="shrink-0 px-3 py-1.5 bg-green-600/20 border border-green-500/30 text-green-300 rounded-full hover:bg-green-600/30">📱 Send Text</button>
+                </>
+              ) : (
+                <>
+                  <button onClick={() => { setInput('Show me all agent statuses'); }} className="shrink-0 px-3 py-1.5 bg-blue-600/20 border border-blue-500/30 text-blue-300 rounded-full hover:bg-blue-600/30">📊 All Agents</button>
+                  <button onClick={() => { setInput('How many leads were contacted today?'); }} className="shrink-0 px-3 py-1.5 bg-green-600/20 border border-green-500/30 text-green-300 rounded-full hover:bg-green-600/30">📈 Today's Activity</button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Input */}
         <div className="flex items-end gap-2 px-4 py-3 border-t border-gray-800 flex-shrink-0">
           <button
