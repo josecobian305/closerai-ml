@@ -265,9 +265,12 @@ export function AgentChat({ open, onClose, agentName, agentTitle, onNavigate, on
           break;
         }
         case 'update_preferences': {
-          // Merge into localStorage
+          // Merge into localStorage and force UI refresh
           const current = JSON.parse(localStorage.getItem('user_preferences') || '{}');
-          localStorage.setItem('user_preferences', JSON.stringify({ ...current, ...action.payload }));
+          const updated = { ...current, ...action.payload };
+          localStorage.setItem('user_preferences', JSON.stringify(updated));
+          // Force re-render by reloading — preferences drive the entire layout
+          window.location.reload();
           break;
         }
         case 'refresh_stats': {

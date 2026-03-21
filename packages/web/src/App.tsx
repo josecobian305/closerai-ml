@@ -228,6 +228,14 @@ function AppInner() {
         onClose={() => setAgentChatOpen(false)}
         agentName={user.agent.name}
         agentTitle={user.agent.title}
+        onNavigate={(page, filter) => {
+          setActiveSection(page as any);
+          setAgentChatOpen(false);
+        }}
+        onRefreshStats={() => {
+          // Force re-render by toggling a key
+          setActiveSection((prev) => prev);
+        }}
       />
     </Layout>
   );

@@ -1,0 +1,44 @@
+{
+  "userId": "6fabf9ad-2bba-4b42-ac2a-a8c6b438a8d0",
+  "businessName": "Kikis cooter",
+  "industry": "healthcare",
+  "pitch": "I'm selling feminine products online through Amazon",
+  "owner": {
+    "name": "Kiki",
+    "email": "kiki",
+    "phone": "3058778814"
+  },
+  "agent": {
+    "name": "Sarah",
+    "title": "Head of Sales",
+    "email": "abc@email.com"
+  },
+  "tone": "empathetic",
+  "leadSources": [
+    "LendingTree"
+  ],
+  "leadAge": "30-90d",
+  "documents": [
+    "bank3",
+    "dl",
+    "pnl",
+    "ein"
+  ],
+  "phone": {
+    "areaCode": "954",
+    "portExisting": false,
+    "existingNumber": ""
+  },
+  "layout": "contacts_first",
+  "capabilities": {
+    "sms": true,
+    "email": true,
+    "voiceNotes": true,
+    "callBridge": true,
+    "autoReply": true,
+    "docCollection": true,
+    "courtSearch": true,
+    "notifications": true
+  },
+  "createdAt": "2026-03-21T18:03:35.154Z"
+}
