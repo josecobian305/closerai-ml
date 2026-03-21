@@ -9,6 +9,7 @@
     "test": "jest --passWithNoTests"
   },
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.1014.0",
     "better-sqlite3": "^9.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -29,6 +30,8 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "testMatch": ["**/__tests__/**/*.test.ts"]
+    "testMatch": [
+      "**/__tests__/**/*.test.ts"
+    ]
   }
 }

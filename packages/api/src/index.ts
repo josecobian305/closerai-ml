@@ -7,6 +7,9 @@ import { messagesRouter } from './routes/messages';
 import { statsRouter } from './routes/stats';
 import { agentsRouter } from './routes/agents';
 import { registerRouter } from './routes/register';
+import { brainRouter } from './routes/brain';
+
+ from './routes/register';
 
 const app = express();
 
@@ -24,6 +27,7 @@ app.use('/api/v1/contacts/:phone/messages', messagesRouter);
 app.use('/api/v1/stats', statsRouter);
 app.use('/api/v1/agents', agentsRouter);
 app.use('/api/v1/register', registerRouter);
+app.use('/api/v1/brain', brainRouter);
 app.use('/api/v1/me', registerRouter);
 
 // 404 handler

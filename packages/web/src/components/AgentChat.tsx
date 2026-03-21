@@ -251,7 +251,7 @@ export function AgentChat({ open, onClose, agentName, agentTitle }: AgentChatPro
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, channel]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const text = input.trim();
     if (!text) return;
 
@@ -270,22 +270,62 @@ export function AgentChat({ open, onClose, agentName, agentTitle }: AgentChatPro
     setInput('');
     setTyping(true);
 
-    const delay = 800 + Math.random() * 800;
-    setTimeout(() => {
-      const reply = agentReply(channel, text);
-      const agentMsg: AgentChatMessage = {
-        id: (Date.now() + 1).toString(),
-        channel,
-        role: 'agent',
-        text: reply,
-        ts: new Date(),
-      };
-      setHistories((prev) => ({
-        ...prev,
-        [channel]: [...prev[channel], agentMsg],
-      }));
+    if (channel === 'brain') {
+      // Call real Bedrock Claude via API
+      try {
+        const configStr = localStorage.getItem('user_preferences') || '{}';
+        const config = JSON.parse(configStr);
+        const res = await fetch('/app/api/v1/brain/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, userId: 'user', config }),
+        });
+        const data = await res.json();
+        const reply = data.reply || data.error || 'Hmm, let me think about that...';
+        const agentMsg: AgentChatMessage = {
+          id: (Date.now() + 1).toString(),
+          channel,
+          role: 'agent',
+          text: reply,
+          ts: new Date(),
+        };
+        setHistories((prev) => ({
+          ...prev,
+          [channel]: [...prev[channel], agentMsg],
+        }));
+      } catch {
+        const agentMsg: AgentChatMessage = {
+          id: (Date.now() + 1).toString(),
+          channel,
+          role: 'agent',
+          text: 'Connection issue — try again in a moment.',
+          ts: new Date(),
+        };
+        setHistories((prev) => ({
+          ...prev,
+          [channel]: [...prev[channel], agentMsg],
+        }));
+      }
       setTyping(false);
-    }, delay);
+    } else {
+      // Other channels: use static replies for now
+      const delay = 800 + Math.random() * 800;
+      setTimeout(() => {
+        const reply = agentReply(channel, text);
+        const agentMsg: AgentChatMessage = {
+          id: (Date.now() + 1).toString(),
+          channel,
+          role: 'agent',
+          text: reply,
+          ts: new Date(),
+        };
+        setHistories((prev) => ({
+          ...prev,
+          [channel]: [...prev[channel], agentMsg],
+        }));
+        setTyping(false);
+      }, delay);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
