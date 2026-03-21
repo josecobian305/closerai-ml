@@ -2,11 +2,18 @@ import { useState, useRef, useEffect } from 'react';
 import { X, Send, Hash, Circle, Brain } from 'lucide-react';
 import type { AgentChatMessage } from '../types';
 
+interface BrainAction {
+  type: 'navigate' | 'update_preferences' | 'refresh_stats' | 'show_contact' | 'none';
+  payload?: Record<string, unknown>;
+}
+
 interface AgentChatProps {
   open: boolean;
   onClose: () => void;
   agentName?: string;   // tenant's agent name
   agentTitle?: string;  // tenant's agent title
+  onNavigate?: (page: string, filter?: string) => void;  // parent handles navigation
+  onRefreshStats?: () => void;  // parent re-fetches stats
 }
 
 type Channel = 'manager' | 'jacob' | 'angie' | 'brain';
@@ -201,7 +208,7 @@ function formatTs(d: Date): string {
   return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
 
-export function AgentChat({ open, onClose, agentName, agentTitle }: AgentChatProps) {
+export function AgentChat({ open, onClose, agentName, agentTitle, onNavigate, onRefreshStats }: AgentChatProps) {
   // Build tenant-aware channels: replace jacob/angie with tenant agent if provided
   const agentLabel = agentName ? agentName.toLowerCase().replace(/\s+/g, '-') : 'jacob';
   const agentDisplay = agentName || 'jacob';
@@ -245,6 +252,44 @@ export function AgentChat({ open, onClose, agentName, agentTitle }: AgentChatPro
   const [typing, setTyping] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  /** Handle action instructions returned by the Brain operator */
+  function handleBrainAction(action: BrainAction) {
+    try {
+      switch (action.type) {
+        case 'navigate': {
+          const page = action.payload?.page as string;
+          const filter = action.payload?.filter as string | undefined;
+          if (onNavigate && page) {
+            onNavigate(page, filter);
+          }
+          break;
+        }
+        case 'update_preferences': {
+          // Merge into localStorage
+          const current = JSON.parse(localStorage.getItem('user_preferences') || '{}');
+          localStorage.setItem('user_preferences', JSON.stringify({ ...current, ...action.payload }));
+          break;
+        }
+        case 'refresh_stats': {
+          if (onRefreshStats) onRefreshStats();
+          break;
+        }
+        case 'show_contact': {
+          const phone = action.payload?.contactPhone as string;
+          if (onNavigate && phone) {
+            onNavigate('contacts', phone);
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    } catch (e) {
+      // Non-critical — action failures shouldn't break the chat
+      console.warn('Brain action failed', action, e);
+    }
+  }
+
   const messages = histories[channel];
 
   useEffect(() => {
@@ -271,7 +316,7 @@ export function AgentChat({ open, onClose, agentName, agentTitle }: AgentChatPro
     setTyping(true);
 
     if (channel === 'brain') {
-      // Call real Bedrock Claude via API
+      // Call real Bedrock Claude via API (with tool use — full operator mode)
       try {
         const configStr = localStorage.getItem('user_preferences') || '{}';
         const config = JSON.parse(configStr);
@@ -282,6 +327,12 @@ export function AgentChat({ open, onClose, agentName, agentTitle }: AgentChatPro
         });
         const data = await res.json();
         const reply = data.reply || data.error || 'Hmm, let me think about that...';
+
+        // Handle any frontend actions returned by the Brain
+        if (data.action && data.action.type !== 'none') {
+          handleBrainAction(data.action);
+        }
+
         const agentMsg: AgentChatMessage = {
           id: (Date.now() + 1).toString(),
           channel,

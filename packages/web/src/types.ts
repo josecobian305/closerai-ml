@@ -125,7 +125,7 @@ export type NavSection =
 /** Agent chat message */
 export interface AgentChatMessage {
   id: string;
-  channel: 'manager' | 'jacob' | 'angie';
+  channel: 'manager' | 'jacob' | 'angie' | 'brain';
   role: 'user' | 'agent';
   text: string;
   ts: Date;
