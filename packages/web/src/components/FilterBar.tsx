@@ -1,3 +1,4 @@
+import { Search, X } from 'lucide-react';
 import type { ContactFilter } from '../types';
 
 interface FilterBarProps {
@@ -7,55 +8,87 @@ interface FilterBarProps {
   loading: boolean;
 }
 
-const TIER_CHIPS: Array<{ label: string; value: 'hot' | 'warm' | 'cold' | undefined }> = [
-  { label: 'All', value: undefined },
-  { label: '🔥 Hot', value: 'hot' },
-  { label: '🌤 Warm', value: 'warm' },
-  { label: '❄️ Cold', value: 'cold' },
+interface Chip {
+  label: string;
+  tier?: string;
+  tag?: string;
+}
+
+const CHIPS: Chip[] = [
+  { label: 'All' },
+  { label: '🔥 Hot Leads', tier: 'hot' },
+  { label: '🌤 Warm', tier: 'warm' },
+  { label: '✅ Sent Documents', tag: 'Sent Documents' },
+  { label: '❄️ Cold', tier: 'cold' },
+  { label: '💰 Funded', tag: 'Funded' },
+  { label: '🌿 LendingTree', tag: 'LendingTree' },
+  { label: '📅 October Leads', tag: 'October Leads' },
 ];
 
-/**
- * Search bar + filter chips for the contacts grid.
- */
 export function FilterBar({ filter, onFilterChange, total, loading }: FilterBarProps) {
+  const activeChipIndex = CHIPS.findIndex((c) => {
+    if (!c.tier && !c.tag) return !filter.tier && !filter.tag;
+    if (c.tier) return filter.tier === c.tier && !filter.tag;
+    if (c.tag) return filter.tag === c.tag && !filter.tier;
+    return false;
+  });
+
+  const handleChipClick = (chip: Chip) => {
+    onFilterChange({
+      tier: chip.tier,
+      tag: chip.tag,
+    });
+  };
+
+  const clearSearch = () => onFilterChange({ query: '' });
+
   return (
-    <div className="mb-6 space-y-3">
-      {/* Search */}
+    <div className="mb-5 space-y-3">
+      {/* Search input */}
       <div className="relative">
         <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-          </svg>
+          <Search size={17} className="text-gray-500" />
         </div>
         <input
           type="search"
           value={filter.query}
           onChange={(e) => onFilterChange({ query: e.target.value })}
           placeholder="Search by name, phone, business…"
-          className="w-full pl-12 pr-4 py-3.5 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 text-base focus:outline-none focus:border-indigo-500"
+          className="w-full pl-11 pr-10 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
         />
+        {filter.query && (
+          <button
+            onClick={clearSearch}
+            className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500 hover:text-gray-300"
+          >
+            <X size={16} />
+          </button>
+        )}
       </div>
 
       {/* Filter chips + count */}
       <div className="flex flex-wrap items-center gap-2">
-        {TIER_CHIPS.map((chip) => (
+        {CHIPS.map((chip, i) => (
           <button
             key={chip.label}
-            onClick={() => onFilterChange({ tier: chip.value })}
+            onClick={() => handleChipClick(chip)}
             className={`
-              px-4 py-2 rounded-xl text-sm font-medium transition-colors duration-150
-              ${filter.tier === chip.value
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'}
+              px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-150 whitespace-nowrap
+              ${i === activeChipIndex
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-900/40'
+                : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-700'}
             `}
           >
             {chip.label}
           </button>
         ))}
 
-        <span className="ml-auto text-sm text-gray-500">
-          {loading ? 'Loading…' : `${total.toLocaleString()} contacts`}
+        <span className="ml-auto text-xs text-gray-500 pl-2">
+          {loading ? (
+            <span className="animate-pulse">Loading…</span>
+          ) : (
+            `${total.toLocaleString()} contacts`
+          )}
         </span>
       </div>
     </div>

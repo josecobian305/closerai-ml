@@ -5,11 +5,8 @@ import type {
   AgentStatus,
 } from './types';
 
-const BASE = '/api/v1';
+const BASE = '/app/api/v1';
 
-/**
- * Generic fetch wrapper with error handling.
- */
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
@@ -24,9 +21,6 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-/**
- * Fetch paginated contacts, optionally filtered by query and cursor.
- */
 export function fetchContacts(params: {
   limit?: number;
   startAfterId?: string;
@@ -40,23 +34,28 @@ export function fetchContacts(params: {
   return apiFetch<ContactsResponse>(`/contacts${qs ? `?${qs}` : ''}`);
 }
 
-/**
- * Fetch all messages for a given phone number.
- */
 export function fetchMessages(phone: string): Promise<MessagesResponse> {
   return apiFetch<MessagesResponse>(`/contacts/${encodeURIComponent(phone)}/messages`);
 }
 
-/**
- * Fetch live dashboard stats.
- */
 export function fetchStats(): Promise<DashboardStats> {
   return apiFetch<DashboardStats>('/stats');
 }
 
-/**
- * Fetch agent workspace statuses.
- */
 export function fetchAgents(): Promise<{ agents: AgentStatus[] }> {
   return apiFetch<{ agents: AgentStatus[] }>('/agents');
+}
+
+export function sendMessage(phone: string, text: string): Promise<{ ok: boolean }> {
+  return apiFetch<{ ok: boolean }>(`/contacts/${encodeURIComponent(phone)}/send`, {
+    method: 'POST',
+    body: JSON.stringify({ text }),
+  });
+}
+
+export function saveNote(contactId: string, body: string): Promise<{ ok: boolean }> {
+  return apiFetch<{ ok: boolean }>(`/contacts/${contactId}/notes`, {
+    method: 'POST',
+    body: JSON.stringify({ body }),
+  });
 }

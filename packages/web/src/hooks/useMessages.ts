@@ -2,21 +2,18 @@ import { useState, useEffect } from 'react';
 import { fetchMessages } from '../api';
 import type { Message } from '../types';
 
-/** Return type for useMessages hook */
 export interface UseMessagesResult {
   messages: Message[];
   loading: boolean;
   error: string | null;
+  reload: () => void;
 }
 
-/**
- * Fetches all SMS messages (outbound + inbound replies) for a given phone number.
- * @param phone - E.164 phone number, or null to skip fetching
- */
 export function useMessages(phone: string | null): UseMessagesResult {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [rev, setRev] = useState(0);
 
   useEffect(() => {
     if (!phone) {
@@ -39,10 +36,10 @@ export function useMessages(phone: string | null): UseMessagesResult {
         if (!cancelled) setLoading(false);
       });
 
-    return () => {
-      cancelled = true;
-    };
-  }, [phone]);
+    return () => { cancelled = true; };
+  }, [phone, rev]);
 
-  return { messages, loading, error };
+  const reload = () => setRev((r) => r + 1);
+
+  return { messages, loading, error, reload };
 }

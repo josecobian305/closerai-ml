@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { fetchContacts } from '../api';
 import type { Contact, ContactFilter } from '../types';
 
-/** Return type for useContacts hook */
 export interface UseContactsResult {
   contacts: Contact[];
   loading: boolean;
@@ -17,10 +16,6 @@ export interface UseContactsResult {
 
 const PAGE_SIZE = 24;
 
-/**
- * Fetches and filters contacts from the API.
- * Supports pagination, search, and tier filtering.
- */
 export function useContacts(): UseContactsResult {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(false);
@@ -43,10 +38,14 @@ export function useContacts(): UseContactsResult {
 
         const incoming = result.contacts ?? [];
 
-        // Client-side tier filter
-        const filtered = currentFilter.tier
-          ? incoming.filter((c) => c.tier === currentFilter.tier)
-          : incoming;
+        // Client-side tier/tag filter
+        let filtered = incoming;
+        if (currentFilter.tier) {
+          filtered = filtered.filter((c) => c.tier === currentFilter.tier);
+        }
+        if (currentFilter.tag) {
+          filtered = filtered.filter((c) => c.tags?.includes(currentFilter.tag!));
+        }
 
         setContacts((prev) => (reset ? filtered : [...prev, ...filtered]));
         setTotal(result.meta?.total ?? 0);

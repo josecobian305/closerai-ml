@@ -16,6 +16,14 @@ export interface Contact {
   lastSmsPreview?: string;
   lastSmsTs?: string;
   tier?: string;
+  source?: string;
+  agent?: string;
+  stage?: string;
+  trustScore?: number;
+  industry?: string;
+  revenue?: string;
+  monthlyRevenue?: number;
+  timeInBusiness?: string;
 }
 
 /** Message in a contact's chat log */
@@ -27,6 +35,8 @@ export interface Message {
   agent: string;
   type?: string;
   category?: string;
+  channel?: 'sms' | 'email';
+  subject?: string;
 }
 
 /** Paginated contacts response */
@@ -53,6 +63,8 @@ export interface DashboardStats {
   smsSentToday: number;
   smsSentTotal: number;
   repliesTotal: number;
+  docsReceived?: number;
+  replyRate?: number;
   repliesByCategory: Record<string, number>;
   agentStats: AgentStat[];
   asOf: string;
@@ -86,6 +98,52 @@ export interface AgentStatus {
 /** Filter state for contacts grid */
 export interface ContactFilter {
   query: string;
-  tier?: 'hot' | 'warm' | 'cold';
+  tier?: string;
   hasReplied?: boolean;
+  tag?: string;
+}
+
+/** Nav section identifiers */
+export type NavSection =
+  | 'dashboard'
+  | 'contacts'
+  | 'messages'
+  | 'sms-campaigns'
+  | 'email'
+  | 'pipeline'
+  | 'deals'
+  | 'documents'
+  | 'court-search'
+  | 'ai-agents'
+  | 'reports'
+  | 'payments'
+  | 'database'
+  | 'notifications'
+  | 'settings';
+
+/** Agent chat message */
+export interface AgentChatMessage {
+  id: string;
+  channel: 'manager' | 'jacob' | 'angie';
+  role: 'user' | 'agent';
+  text: string;
+  ts: Date;
+}
+
+/** Note */
+export interface Note {
+  id: string;
+  body: string;
+  createdAt: string;
+  author?: string;
+}
+
+/** Deal */
+export interface Deal {
+  id: string;
+  title: string;
+  value: number;
+  status: string;
+  stage: string;
+  createdAt: string;
 }
