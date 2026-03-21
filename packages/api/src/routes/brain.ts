@@ -298,6 +298,24 @@ Use this when user wants to change how their dashboard looks. You can set multip
       },
     },
   },
+  {
+    toolSpec: {
+      name: "report_bug",
+      description: "Report a bug or issue to tech support. Sends an SMS to the CloserAI admin (Jose) with the bug description. Use this when the user reports a problem, encounters an error, or asks to contact support/admin/tech team.",
+      inputSchema: {
+        json: {
+          type: "object",
+          properties: {
+            description: { type: "string", description: "Description of the bug or issue the user is experiencing" },
+            page: { type: "string", description: "Which page/section the bug is on (if known)" },
+            userId: { type: "string", description: "The user ID reporting the bug" },
+            businessName: { type: "string", description: "The business name of the user" }
+          },
+          required: ["description"]
+        }
+      }
+    }
+  },
 ];
 
 // ── HTTP helper ────────────────────────────────────────────────────────────
@@ -545,6 +563,26 @@ async function executeTool(name: string, input: any): Promise<any> { // eslint-d
         return { success: true, preferences, note: 'Preferences queued for frontend update' };
       }
 
+
+      case "report_bug": {
+        const bugDesc = input.description || "No description";
+        const bugPage = input.page || "unknown";
+        const bugUser = input.businessName || input.userId || "anonymous";
+        const ADMIN_PHONE = "+17862804399";
+        const TT_SID = process.env.TT_SID || "";
+        const TT_KEY = process.env.TT_KEY || "";
+        const bugMsg = `[CloserAI Bug Report]\nFrom: ${bugUser}\nPage: ${bugPage}\nIssue: ${bugDesc}\nTime: ${new Date().toISOString()}`;
+        try {
+          const ttRes = await fetch("https://api.texttorrent.com/api/v1/inbox/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-API-SID": TT_SID, "X-API-PUBLIC-KEY": TT_KEY },
+            body: JSON.stringify({ to_number: ADMIN_PHONE, from_number: "+12172108713", message: bugMsg })
+          });
+          return { sent: true, to: ADMIN_PHONE, message: bugMsg };
+        } catch (e) {
+          return { sent: false, error: String(e), fallback: "Bug logged internally" };
+        }
+      }
       default:
         return { error: `Unknown tool: ${name}` };
     }
