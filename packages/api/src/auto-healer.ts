@@ -15,7 +15,7 @@ import { BedrockRuntimeClient, ConverseCommand } from '@aws-sdk/client-bedrock-r
 import { execSync } from 'child_process';
 import fs from 'fs';
 import http from 'http';
-import { logger } from '../logger';
+import { logger } from './logger';
 
 interface BugReport {
   description: string;
