@@ -645,6 +645,36 @@ export function AgentChat({ open, onClose, agentName, agentTitle, onNavigate, on
 
         {/* Input */}
         <div className="flex items-end gap-2 px-4 py-3 border-t border-gray-800 flex-shrink-0">
+          <button
+            onClick={() => {
+              // Web Speech API - voice input
+              const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+              if (!SpeechRecognition) { alert('Voice input not supported in this browser'); return; }
+              const recognition = new SpeechRecognition();
+              recognition.continuous = false;
+              recognition.interimResults = false;
+              recognition.lang = 'en-US';
+              const btn = document.getElementById('mic-btn');
+              if (btn) { btn.classList.add('animate-pulse', 'bg-red-600'); btn.classList.remove('bg-gray-700'); }
+              recognition.onresult = (event: any) => {
+                const transcript = event.results[0][0].transcript;
+                setInput(transcript);
+                if (btn) { btn.classList.remove('animate-pulse', 'bg-red-600'); btn.classList.add('bg-gray-700'); }
+              };
+              recognition.onerror = () => {
+                if (btn) { btn.classList.remove('animate-pulse', 'bg-red-600'); btn.classList.add('bg-gray-700'); }
+              };
+              recognition.onend = () => {
+                if (btn) { btn.classList.remove('animate-pulse', 'bg-red-600'); btn.classList.add('bg-gray-700'); }
+              };
+              recognition.start();
+            }}
+            id="mic-btn"
+            className="p-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-xl transition-all"
+            title="Voice input — tap to speak"
+          >
+            🎤
+          </button>
           <input
             type="text"
             value={input}

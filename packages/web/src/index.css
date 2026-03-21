@@ -108,3 +108,20 @@ body[style*="invert"] .text-gray-200 {
   --color-text: #1e293b !important;
   --color-muted: #475569 !important;
 }
+
+/* FORCE readable text everywhere - nuclear option */
+body {
+  color: var(--color-text) !important;
+}
+p, span, div, h1, h2, h3, h4, h5, h6, li, td, th, label, a, button, input, textarea, select {
+  color: inherit !important;
+}
+
+/* Chat bubbles need specific contrast */
+[class*="bg-indigo"] p, [class*="bg-indigo"] span, [class*="bg-indigo"] div {
+  color: #ffffff !important;
+}
+[class*="bg-gray-7"] p, [class*="bg-gray-7"] span, [class*="bg-gray-7"] div,
+[class*="bg-gray-8"] p, [class*="bg-gray-8"] span, [class*="bg-gray-8"] div {
+  color: #e2e8f0 !important;
+}
