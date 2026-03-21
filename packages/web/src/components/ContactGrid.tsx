@@ -1,5 +1,6 @@
 import type { Contact } from '../types';
 import { ContactCard } from './ContactCard';
+import { Upload } from 'lucide-react';
 
 interface ContactGridProps {
   contacts: Contact[];
@@ -8,6 +9,7 @@ interface ContactGridProps {
   onLoadMore: () => void;
   onSelectContact: (contact: Contact) => void;
   onCallContact: (contact: Contact) => void;
+  isAdmin?: boolean;
 }
 
 export function ContactGrid({
@@ -17,8 +19,33 @@ export function ContactGrid({
   onLoadMore,
   onSelectContact,
   onCallContact,
+  isAdmin,
 }: ContactGridProps) {
   if (!loading && contacts.length === 0) {
+    // Tenant empty state: prompt to upload leads
+    if (!isAdmin) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+          <div className="w-20 h-20 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-5">
+            <Upload size={36} className="text-indigo-400" />
+          </div>
+          <p className="text-xl font-semibold text-gray-300 mb-2">Upload Your Leads</p>
+          <p className="text-sm text-gray-500 max-w-xs text-center mb-6">
+            Import a CSV file or connect your lead source to get started. Your agent is ready to go!
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl text-sm transition-colors">
+              Upload CSV
+            </button>
+            <button className="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium rounded-xl text-sm transition-colors">
+              Connect Lead Source
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // Admin empty state (filters may be too restrictive)
     return (
       <div className="flex flex-col items-center justify-center py-20 text-gray-500">
         <span className="text-5xl mb-4">🔍</span>

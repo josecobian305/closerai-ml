@@ -5,6 +5,8 @@ import type { AgentChatMessage } from '../types';
 interface AgentChatProps {
   open: boolean;
   onClose: () => void;
+  agentName?: string;   // tenant's agent name
+  agentTitle?: string;  // tenant's agent title
 }
 
 type Channel = 'manager' | 'jacob' | 'angie' | 'brain';
@@ -199,25 +201,37 @@ function formatTs(d: Date): string {
   return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
 
-export function AgentChat({ open, onClose }: AgentChatProps) {
+export function AgentChat({ open, onClose, agentName, agentTitle }: AgentChatProps) {
+  // Build tenant-aware channels: replace jacob/angie with tenant agent if provided
+  const agentLabel = agentName ? agentName.toLowerCase().replace(/\s+/g, '-') : 'jacob';
+  const agentDisplay = agentName || 'jacob';
+  const agentDesc = agentTitle ? `Talk to ${agentName}` : 'Talk directly to Jacob';
+
+  const TENANT_CHANNELS = [
+    { id: 'brain' as Channel, label: 'brain', description: 'Configure your workspace with plain English', color: 'text-amber-400', online: true, special: true },
+    { id: 'manager' as Channel, label: 'agent-manager', description: 'General commands & status', color: 'text-blue-400', online: true },
+    { id: 'jacob' as Channel, label: agentLabel, description: agentDesc, color: 'text-green-400', online: true },
+    { id: 'angie' as Channel, label: 'angie', description: 'Talk directly to Angie', color: 'text-purple-400', online: false },
+  ];
+
   const [channel, setChannel] = useState<Channel>('brain');
   const [histories, setHistories] = useState<Record<Channel, AgentChatMessage[]>>({
     brain: [
       {
         id: '0', channel: 'brain', role: 'agent', ts: new Date(Date.now() - 30000),
-        text: '🧠 Brain channel online. Talk to me in plain English to configure your workspace.\n\nExamples:\n• "Move stats to the top"\n• "Change tone to casual"\n• "Show only hot leads"\n• "Turn off voice notes"\n\nType **help** to see all commands.',
+        text: `🧠 Brain channel online. Talk to me in plain English to configure your workspace.\n\nExamples:\n• "Move stats to the top"\n• "Change tone to casual"\n• "Show only hot leads"\n• "Turn off voice notes"\n\nType **help** to see all commands.`,
       },
     ],
     manager: [
       {
         id: '1', channel: 'manager', role: 'agent', ts: new Date(Date.now() - 60000),
-        text: '👋 Agent Manager online. Jacob is active, Angie is offline. Type "status" for a full report.',
+        text: `👋 Agent Manager online. ${agentDisplay} is active. Type "status" for a full report.`,
       },
     ],
     jacob: [
       {
         id: '2', channel: 'jacob', role: 'agent', ts: new Date(Date.now() - 120000),
-        text: '🤖 Jacob here. I\'m currently running outreach. Sent 23 messages today. What do you need?',
+        text: `🤖 ${agentDisplay} here. I'm currently running outreach. Sent 23 messages today. What do you need?`,
       },
     ],
     angie: [
@@ -281,7 +295,7 @@ export function AgentChat({ open, onClose }: AgentChatProps) {
     }
   };
 
-  const activeChannel = CHANNELS.find((c) => c.id === channel)!;
+  const activeChannel = TENANT_CHANNELS.find((c) => c.id === channel)!;
 
   return (
     <>
@@ -322,7 +336,7 @@ export function AgentChat({ open, onClose }: AgentChatProps) {
         {/* Channel list */}
         <div className="flex-shrink-0 border-b border-gray-800 px-2 py-2">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-2 mb-1">Channels</p>
-          {CHANNELS.map((ch) => (
+          {TENANT_CHANNELS.map((ch) => (
             <button
               key={ch.id}
               onClick={() => setChannel(ch.id)}

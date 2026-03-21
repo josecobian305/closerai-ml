@@ -3,6 +3,7 @@ import type { DashboardStats } from '../types';
 interface StatsRowProps {
   stats: DashboardStats | null;
   loading?: boolean;
+  isAdmin?: boolean;
 }
 
 function fmtNum(n?: number): string {
@@ -15,7 +16,7 @@ function fmtPct(n?: number): string {
   return `${(n * 100).toFixed(1)}%`;
 }
 
-export function StatsRow({ stats, loading }: StatsRowProps) {
+export function StatsRow({ stats, loading, isAdmin }: StatsRowProps) {
   if (loading || !stats) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
@@ -29,13 +30,20 @@ export function StatsRow({ stats, loading }: StatsRowProps) {
     );
   }
 
+  // For CHC admin: show real GHL stats (total contacts is hardcoded as fallback for known count)
+  // For tenants: show workspace stats (all zeros initially)
+  const totalContacts = isAdmin
+    ? fmtNum(stats.totalContacts ?? 46961)
+    : fmtNum(stats.totalContacts ?? 0);
+
   const cards = [
     {
       label: 'Total Contacts',
-      value: fmtNum(stats.totalContacts ?? 46961),
+      value: totalContacts,
       icon: '👥',
       color: 'text-indigo-400',
       bg: 'bg-indigo-500/10 border-indigo-500/20',
+      hint: !isAdmin && stats.totalContacts === 0 ? 'Upload leads to get started' : undefined,
     },
     {
       label: 'SMS Sent',
@@ -60,7 +68,9 @@ export function StatsRow({ stats, loading }: StatsRowProps) {
     },
     {
       label: 'Reply Rate',
-      value: fmtPct(stats.replyRate),
+      value: stats.replyRate != null && stats.smsSentTotal > 0
+        ? fmtPct(stats.replyRate)
+        : isAdmin ? fmtPct(stats.replyRate) : '—',
       icon: '📊',
       color: 'text-blue-400',
       bg: 'bg-blue-500/10 border-blue-500/20',
@@ -76,6 +86,9 @@ export function StatsRow({ stats, loading }: StatsRowProps) {
             <span className="font-medium">{card.label}</span>
           </div>
           <div className={`text-2xl font-bold ${card.color}`}>{card.value}</div>
+          {card.hint && (
+            <p className="text-xs text-gray-600 mt-1">{card.hint}</p>
+          )}
         </div>
       ))}
     </div>

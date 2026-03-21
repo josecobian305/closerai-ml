@@ -147,3 +147,15 @@ export interface Deal {
   stage: string;
   createdAt: string;
 }
+
+/** Authenticated user config returned from /me */
+export interface UserConfig {
+  userId: string;
+  businessName: string;
+  industry: string;
+  agent: { name: string; title: string; email: string };
+  tone: string;
+  layout: string; // 'overview_first' | 'contacts_first' | 'messages_first' | 'pipeline_first'
+  capabilities: Record<string, boolean>;
+  owner: { name: string; email: string; phone: string };
+}

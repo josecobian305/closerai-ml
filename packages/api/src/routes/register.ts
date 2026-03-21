@@ -156,7 +156,45 @@ ${tone || 'professional'}
 });
 
 /**
- * GET /api/v1/me — Returns current user's profile + config
+ * POST /api/v1/register/login — Authenticate with email + password
+ */
+registerRouter.post('/login', (req: Request, res: Response) => {
+  try {
+    ensureUsersTable();
+    const db = getDb();
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
+
+    const user = db.prepare(
+      'SELECT id, email, name, business_name FROM users WHERE email = ? AND password_hash = ?'
+    ).get(email, passwordHash) as { id: string; email: string; name: string; business_name: string } | undefined;
+
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const token = generateToken(user.id);
+    logger.info('User logged in', { userId: user.id, email });
+
+    return res.json({
+      success: true,
+      userId: user.id,
+      token,
+      message: `Welcome back, ${user.name}!`,
+    });
+  } catch (err: unknown) {
+    logger.error('Login error', { err });
+    return res.status(500).json({ error: 'Login failed', detail: String(err) });
+  }
+});
+
+/**
+ * GET /api/v1/register/me — Returns current user's profile + config
  * Requires Authorization: Bearer <token> header
  */
 registerRouter.get('/me', (req: Request, res: Response) => {
@@ -178,7 +216,8 @@ registerRouter.get('/me', (req: Request, res: Response) => {
     }
 
     // Load user's config
-    const configPath = path.join(__dirname, '..', '..', 'workspaces', userId, 'config.json');
+    const workspaceBase = process.env.WORKSPACES_DIR || path.join(process.cwd(), 'workspaces');
+    const configPath = path.join(workspaceBase, userId, 'config.json');
     if (!fs.existsSync(configPath)) {
       return res.status(404).json({ error: 'User workspace not found' });
     }
@@ -186,14 +225,14 @@ registerRouter.get('/me', (req: Request, res: Response) => {
     const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
     
     // Load SOUL.md
-    const soulPath = path.join(__dirname, '..', '..', 'workspaces', userId, 'agents', 'SOUL.md');
+    const soulPath = path.join(workspaceBase, userId, 'agents', 'SOUL.md');
     const soul = fs.existsSync(soulPath) ? fs.readFileSync(soulPath, 'utf-8') : '';
 
     res.json({
       userId,
       config,
       soul,
-      workspace: path.join(__dirname, '..', '..', 'workspaces', userId),
+      workspace: path.join(workspaceBase, userId),
     });
   } catch (err) {
     res.status(401).json({ error: 'Invalid token' });
