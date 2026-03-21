@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { PreferencesProvider, usePreferences } from './context/PreferencesContext';
 import { Layout } from './components/Layout';
 import { StatsRow } from './components/StatsRow';
 import { FilterBar } from './components/FilterBar';
@@ -20,6 +21,7 @@ import type { Contact, DashboardStats, NavSection } from './types';
 
 function AppInner() {
   const { user, loading: authLoading, login, isAdmin } = useAuth();
+  const { preferences, updatePreferences } = usePreferences();
   const { contacts, loading, error, total, hasMore, loadMore, setFilter, filter } = useContacts();
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -66,14 +68,12 @@ function AppInner() {
 
   useEffect(() => {
     if (!user || showRegister) return;
-    // Only load GHL stats for CHC admin; tenant stats come from workspace
     if (isAdmin) {
       fetchStats()
         .then(setStats)
         .catch(console.error)
         .finally(() => setStatsLoading(false));
     } else {
-      // For tenants, show zero-state stats initially
       setStats({
         totalContacts: 0,
         smsSentToday: 0,
@@ -89,6 +89,13 @@ function AppInner() {
     }
   }, [user, showRegister, isAdmin]);
 
+  // Apply defaultFilter preference on load
+  useEffect(() => {
+    if (preferences.defaultFilter && preferences.defaultFilter !== 'all') {
+      setFilter(preferences.defaultFilter);
+    }
+  }, [preferences.defaultFilter]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Show loading spinner while checking auth
   if (authLoading) {
     return (
@@ -103,12 +110,10 @@ function AppInner() {
     );
   }
 
-  // Show register page
   if (showRegister) {
     return <Register />;
   }
 
-  // Not authenticated → show login or register
   if (!user) {
     if (showLogin) {
       return (
@@ -121,7 +126,6 @@ function AppInner() {
         />
       );
     }
-    // Default to login; "Get started" goes to register
     return (
       <Login
         onShowRegister={() => {
@@ -136,39 +140,33 @@ function AppInner() {
     setSoftphone({ phone: contact.phone, name: contact.firstName || contact.name });
   };
 
-  // Build layout order based on user's preference
-  const layoutPref = user.layout || 'overview_first';
+  const renderContacts = () => (
+    <>
+      <StatsRow stats={stats} loading={statsLoading} isAdmin={isAdmin} />
+      <FilterBar filter={filter} onFilterChange={setFilter} total={total} loading={loading} />
+      {error && (
+        <div className="mb-4 p-4 bg-red-900/40 border border-red-800/60 rounded-xl text-red-300 text-sm">
+          Error loading contacts: {error}
+        </div>
+      )}
+      <ContactGrid
+        contacts={contacts}
+        loading={loading}
+        hasMore={hasMore}
+        onLoadMore={loadMore}
+        onSelectContact={setSelectedContact}
+        onCallContact={handleCall}
+        isAdmin={isAdmin}
+      />
+    </>
+  );
 
   const renderSection = () => {
     switch (activeSection) {
       case 'dashboard':
-        return (
-          <>
-            <StatsRow stats={stats} loading={statsLoading} isAdmin={isAdmin} />
-            <DashboardView />
-          </>
-        );
+        return renderDashboardLayout();
       case 'contacts':
-        return (
-          <>
-            <StatsRow stats={stats} loading={statsLoading} isAdmin={isAdmin} />
-            <FilterBar filter={filter} onFilterChange={setFilter} total={total} loading={loading} />
-            {error && (
-              <div className="mb-4 p-4 bg-red-900/40 border border-red-800/60 rounded-xl text-red-300 text-sm">
-                Error loading contacts: {error}
-              </div>
-            )}
-            <ContactGrid
-              contacts={contacts}
-              loading={loading}
-              hasMore={hasMore}
-              onLoadMore={loadMore}
-              onSelectContact={setSelectedContact}
-              onCallContact={handleCall}
-              isAdmin={isAdmin}
-            />
-          </>
-        );
+        return renderContactsLayout();
       case 'messages': return <MessagesView />;
       case 'sms-campaigns': return <SmsCampaignsView />;
       case 'email': return <EmailView />;
@@ -187,15 +185,95 @@ function AppInner() {
     }
   };
 
-  // Resolve initial section based on layout preference
-  const getDefaultSection = (): NavSection => {
-    switch (layoutPref) {
-      case 'contacts_first': return 'contacts';
-      case 'messages_first': return 'messages';
-      case 'pipeline_first': return 'pipeline';
+  /** Render dashboard section respecting layout preference */
+  const renderDashboardLayout = () => {
+    switch (preferences.layout) {
+      case 'contacts_first':
+        return (
+          <>
+            {/* Compact stats bar at top */}
+            <StatsRow stats={stats} loading={statsLoading} isAdmin={isAdmin} compact />
+            {/* Contacts grid takes full width */}
+            <FilterBar filter={filter} onFilterChange={setFilter} total={total} loading={loading} />
+            <ContactGrid
+              contacts={contacts}
+              loading={loading}
+              hasMore={hasMore}
+              onLoadMore={loadMore}
+              onSelectContact={setSelectedContact}
+              onCallContact={handleCall}
+              isAdmin={isAdmin}
+            />
+          </>
+        );
+      case 'messages_first':
+        return (
+          <>
+            <div className="flex flex-col lg:flex-row gap-4">
+              {/* Primary: messages/inbox */}
+              <div className="flex-1">
+                <MessagesView />
+              </div>
+              {/* Sidebar: compact contacts */}
+              <div className="lg:w-80">
+                <StatsRow stats={stats} loading={statsLoading} isAdmin={isAdmin} compact />
+                <FilterBar filter={filter} onFilterChange={setFilter} total={total} loading={loading} />
+                <ContactGrid
+                  contacts={contacts.slice(0, 10)}
+                  loading={loading}
+                  hasMore={false}
+                  onLoadMore={loadMore}
+                  onSelectContact={setSelectedContact}
+                  onCallContact={handleCall}
+                  isAdmin={isAdmin}
+                />
+              </div>
+            </div>
+          </>
+        );
+      case 'pipeline_first':
+        return (
+          <>
+            <StatsRow stats={stats} loading={statsLoading} isAdmin={isAdmin} compact />
+            <PipelineView />
+          </>
+        );
       case 'overview_first':
-      default: return 'contacts';
+      default:
+        return (
+          <>
+            <StatsRow stats={stats} loading={statsLoading} isAdmin={isAdmin} />
+            <DashboardView />
+          </>
+        );
     }
+  };
+
+  /** Render contacts section — layout affects how stats are displayed */
+  const renderContactsLayout = () => {
+    if (preferences.layout === 'contacts_first') {
+      return (
+        <>
+          <StatsRow stats={stats} loading={statsLoading} isAdmin={isAdmin} compact />
+          <FilterBar filter={filter} onFilterChange={setFilter} total={total} loading={loading} />
+          {error && (
+            <div className="mb-4 p-4 bg-red-900/40 border border-red-800/60 rounded-xl text-red-300 text-sm">
+              Error loading contacts: {error}
+            </div>
+          )}
+          <ContactGrid
+            contacts={contacts}
+            loading={loading}
+            hasMore={hasMore}
+            onLoadMore={loadMore}
+            onSelectContact={setSelectedContact}
+            onCallContact={handleCall}
+            isAdmin={isAdmin}
+          />
+        </>
+      );
+    }
+    return renderContacts();
   };
 
   return (
@@ -229,13 +307,13 @@ function AppInner() {
         agentName={user.agent.name}
         agentTitle={user.agent.title}
         onNavigate={(page, filter) => {
-          setActiveSection(page as any);
+          setActiveSection(page as NavSection);
           setAgentChatOpen(false);
         }}
         onRefreshStats={() => {
-          // Force re-render by toggling a key
           setActiveSection((prev) => prev);
         }}
+        onUpdatePreferences={updatePreferences}
       />
     </Layout>
   );
@@ -244,7 +322,9 @@ function AppInner() {
 function App() {
   return (
     <AuthProvider>
-      <AppInner />
+      <PreferencesProvider>
+        <AppInner />
+      </PreferencesProvider>
     </AuthProvider>
   );
 }

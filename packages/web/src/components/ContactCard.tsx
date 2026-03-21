@@ -5,6 +5,7 @@ interface ContactCardProps {
   contact: Contact;
   onClick: (contact: Contact) => void;
   onCall: (contact: Contact) => void;
+  compact?: boolean;
 }
 
 const GRADIENTS = [
@@ -45,7 +46,7 @@ function tagBadge(tags: string[]): { cls: string; label: string } | null {
   return null;
 }
 
-export function ContactCard({ contact, onClick, onCall }: ContactCardProps) {
+export function ContactCard({ contact, onClick, onCall, compact }: ContactCardProps) {
   const initials = [contact.firstName?.[0], contact.lastName?.[0]]
     .filter(Boolean)
     .join('')
@@ -68,18 +69,68 @@ export function ContactCard({ contact, onClick, onCall }: ContactCardProps) {
     onClick(contact);
   };
 
+  if (compact) {
+    return (
+      <div
+        className="flex items-center gap-2 p-2 rounded-xl cursor-pointer transition-colors duration-150"
+        style={{
+          backgroundColor: 'var(--color-surface, #111827)',
+          border: '1px solid var(--color-border, #1f2937)',
+        }}
+        onClick={() => onClick(contact)}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-accent, #6366f1)'; }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-border, #1f2937)'; }}
+      >
+        <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-xs shadow-md`}>
+          {initials}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="font-semibold text-xs truncate leading-tight" style={{ color: 'var(--color-text, #e2e8f0)' }}>
+            {contact.name || '—'}
+          </div>
+          {badge && (
+            <span className={`${badge.cls} text-xs`}>{badge.label}</span>
+          )}
+        </div>
+        <div className="flex gap-1 flex-shrink-0">
+          <button
+            onClick={handleCall}
+            className="p-1 rounded-lg bg-green-700 hover:bg-green-600 text-white transition-colors"
+          >
+            <Phone size={11} />
+          </button>
+          <button
+            onClick={handleText}
+            className="p-1 rounded-lg bg-indigo-700 hover:bg-indigo-600 text-white transition-colors"
+          >
+            <MessageSquare size={11} />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="card flex flex-col gap-3" onClick={() => onClick(contact)}>
+    <div
+      className="flex flex-col gap-3 p-4 rounded-2xl cursor-pointer transition-colors duration-150"
+      style={{
+        backgroundColor: 'var(--color-surface, #111827)',
+        border: '1px solid var(--color-border, #1f2937)',
+      }}
+      onClick={() => onClick(contact)}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-accent, #6366f1)'; }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-border, #1f2937)'; }}
+    >
       {/* Top row */}
       <div className="flex items-start gap-3">
         <div className={`flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-base shadow-md`}>
           {initials}
         </div>
         <div className="min-w-0 flex-1">
-          <div className="font-semibold text-white text-sm truncate leading-tight">
+          <div className="font-semibold text-sm truncate leading-tight" style={{ color: 'var(--color-text, #e2e8f0)' }}>
             {contact.name || '—'}
           </div>
-          <div className="text-xs text-gray-400 truncate mt-0.5">
+          <div className="text-xs truncate mt-0.5" style={{ color: 'var(--color-muted, #6b7280)' }}>
             {contact.companyName || contact.phone}
           </div>
         </div>
@@ -90,13 +141,13 @@ export function ContactCard({ contact, onClick, onCall }: ContactCardProps) {
 
       {/* Last message */}
       {contact.lastSmsPreview && (
-        <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
+        <p className="text-xs line-clamp-2 leading-relaxed" style={{ color: 'var(--color-muted, #6b7280)' }}>
           {contact.lastSmsPreview}
         </p>
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between text-xs text-gray-600">
+      <div className="flex items-center justify-between text-xs" style={{ color: 'var(--color-muted, #6b7280)' }}>
         <span>{contact.smsSentCount > 0 ? `${contact.smsSentCount} msgs` : 'No messages'}</span>
         {timeAgo && <span>{timeAgo}</span>}
       </div>

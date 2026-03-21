@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, Send, Hash, Circle, Brain } from 'lucide-react';
 import type { AgentChatMessage } from '../types';
+import { usePreferences } from '../context/PreferencesContext';
+import type { UserPreferences } from '../context/PreferencesContext';
 
 interface BrainAction {
   type: 'navigate' | 'update_preferences' | 'refresh_stats' | 'show_contact' | 'none';
@@ -10,10 +12,11 @@ interface BrainAction {
 interface AgentChatProps {
   open: boolean;
   onClose: () => void;
-  agentName?: string;   // tenant's agent name
-  agentTitle?: string;  // tenant's agent title
-  onNavigate?: (page: string, filter?: string) => void;  // parent handles navigation
-  onRefreshStats?: () => void;  // parent re-fetches stats
+  agentName?: string;
+  agentTitle?: string;
+  onNavigate?: (page: string, filter?: string) => void;
+  onRefreshStats?: () => void;
+  onUpdatePreferences?: (partial: Partial<UserPreferences>) => void;
 }
 
 type Channel = 'manager' | 'jacob' | 'angie' | 'brain';
@@ -34,9 +37,12 @@ function getPrefs(): Record<string, unknown> {
   }
 }
 
-/** Write preferences to localStorage */
+/** Write preferences to localStorage AND capture what was written */
+let _lastPrefsDelta: Record<string, unknown> | null = null;
+
 function setPrefs(update: Record<string, unknown>): void {
   try {
+    _lastPrefsDelta = update;
     const current = getPrefs();
     localStorage.setItem('user_preferences', JSON.stringify({ ...current, ...update }));
   } catch {}
@@ -47,27 +53,113 @@ function brainReply(message: string): string {
   const msg = message.toLowerCase();
   const prefs = getPrefs();
 
+  // Theme changes
+  if (msg.includes('light mode') || msg.includes('light theme') || msg.includes('white theme')) {
+    setPrefs({ theme: 'light' });
+    return '☀️ Switched to **light mode**! The dashboard is now bright and clean.';
+  }
+  if (msg.includes('dark mode') || msg.includes('dark theme')) {
+    setPrefs({ theme: 'dark' });
+    return '🌙 Switched to **dark mode**.';
+  }
+  if (msg.includes('midnight') && (msg.includes('theme') || msg.includes('mode'))) {
+    setPrefs({ theme: 'midnight' });
+    return '🌑 **Midnight theme** activated — deep black with purple accents.';
+  }
+  if (msg.includes('ocean') && (msg.includes('theme') || msg.includes('mode') || msg.includes('vibe'))) {
+    setPrefs({ theme: 'ocean' });
+    return '🌊 **Ocean theme** activated — deep teal with cyan accents.';
+  }
+  if (msg.includes('sunset') && (msg.includes('theme') || msg.includes('mode') || msg.includes('vibe'))) {
+    setPrefs({ theme: 'sunset' });
+    return '🌅 **Sunset vibes** activated — warm amber tones.';
+  }
+
+  // Invert colors
+  if ((msg.includes('invert') || msg.includes('flip')) && (msg.includes('color') || msg.includes('colour') || msg.includes('dashboard') || msg.includes('screen'))) {
+    const current = !prefs.invertColors;
+    setPrefs({ invertColors: current });
+    return current ? '🔄 Colors **inverted**! Things look interesting now.' : '🔄 Colors restored to normal.';
+  }
+
+  // Font size
+  if (msg.includes('bigger text') || msg.includes('larger text') || msg.includes('increase font') || msg.includes('font larger') || msg.includes('font bigger')) {
+    setPrefs({ fontSize: 'large' });
+    return '🔡 Font size set to **large**. Easier to read!';
+  }
+  if (msg.includes('smaller text') || msg.includes('decrease font') || msg.includes('font smaller')) {
+    setPrefs({ fontSize: 'small' });
+    return '🔡 Font size set to **small**.';
+  }
+  if (msg.includes('normal text') || msg.includes('reset font') || msg.includes('medium font')) {
+    setPrefs({ fontSize: 'medium' });
+    return '🔡 Font size reset to **medium**.';
+  }
+
+  // Compact mode
+  if (msg.includes('compact mode') || msg.includes('compact view') || msg.includes('condense')) {
+    setPrefs({ compactMode: true });
+    return '📦 **Compact mode** on — cards are smaller, more fits on screen.';
+  }
+  if ((msg.includes('turn off compact') || msg.includes('disable compact') || msg.includes('normal mode') || msg.includes('full size'))) {
+    setPrefs({ compactMode: false });
+    return '📦 Compact mode **off** — back to full card view.';
+  }
+
+  // Sidebar collapse
+  if (msg.includes('collapse sidebar') || msg.includes('hide sidebar') || msg.includes('minimize sidebar')) {
+    setPrefs({ sidebarCollapsed: true });
+    return '◀️ Sidebar **collapsed** — icon-only mode for more screen space.';
+  }
+  if (msg.includes('expand sidebar') || msg.includes('show sidebar') || msg.includes('open sidebar')) {
+    setPrefs({ sidebarCollapsed: false });
+    return '▶️ Sidebar **expanded**.';
+  }
+
+  // Accent color
+  const accentMatch = msg.match(/accent (?:to |color |colour )?(green|blue|purple|red|orange|pink|teal|yellow|cyan|indigo)/);
+  if (accentMatch || (msg.includes('change accent') || msg.includes('accent color') || msg.includes('accent colour'))) {
+    const colorMap: Record<string, string> = {
+      green: '#10b981', blue: '#3b82f6', purple: '#8b5cf6',
+      red: '#ef4444', orange: '#f97316', pink: '#ec4899',
+      teal: '#14b8a6', yellow: '#eab308', cyan: '#06b6d4', indigo: '#6366f1',
+    };
+    const colorName = accentMatch?.[1];
+    const hex = colorName ? colorMap[colorName] : null;
+    if (hex) {
+      setPrefs({ accentColor: hex });
+      return `🎨 Accent color changed to **${colorName}** (${hex}).`;
+    }
+    // Check for hex directly
+    const hexMatch = msg.match(/#[0-9a-f]{6}/i);
+    if (hexMatch) {
+      setPrefs({ accentColor: hexMatch[0] });
+      return `🎨 Accent color set to **${hexMatch[0]}**.`;
+    }
+    return '🎨 I can set the accent to: green, blue, purple, red, orange, pink, teal, yellow, cyan, or indigo. Which one?';
+  }
+
   // Layout changes
   if (msg.includes('stats') && (msg.includes('top') || msg.includes('first'))) {
     const widgetOrder = ['stats', ...(Array.isArray(prefs.widgetOrder) ? (prefs.widgetOrder as string[]).filter(w => w !== 'stats') : ['contacts', 'agents'])];
     setPrefs({ widgetOrder });
-    return '✅ Done! Stats moved to the top of your dashboard. Refresh to see the change.';
+    return '✅ Stats moved to the top of your dashboard.';
   }
   if (msg.includes('contacts') && (msg.includes('first') || msg.includes('top'))) {
     setPrefs({ layout: 'contacts_first' });
-    return '✅ Layout updated to Contacts First. Your dashboard will show the contact grid front and center.';
+    return '✅ Layout updated to **Contacts First**. Your dashboard shows the contact grid front and center.';
   }
   if (msg.includes('messages') && (msg.includes('first') || msg.includes('inbox'))) {
     setPrefs({ layout: 'messages_first' });
-    return '✅ Switched to Messages First layout. Your inbox is now the main view.';
+    return '✅ Switched to **Messages First** layout. Your inbox is now the main view.';
   }
   if (msg.includes('pipeline') && (msg.includes('first') || msg.includes('kanban'))) {
     setPrefs({ layout: 'pipeline_first' });
-    return '✅ Pipeline/Kanban view is now your default layout.';
+    return '✅ **Pipeline/Kanban** view is now your default layout.';
   }
   if (msg.includes('overview') && msg.includes('first')) {
     setPrefs({ layout: 'overview_first' });
-    return '✅ Overview First layout restored — stats, pipeline, and recent activity.';
+    return '✅ **Overview First** layout restored — stats, pipeline, and recent activity.';
   }
 
   // Tone changes
@@ -91,17 +183,17 @@ function brainReply(message: string): string {
   // Filter changes
   if (msg.includes('hot leads') || msg.includes('only hot') || msg.includes('show hot')) {
     const filters = (prefs.filters as Record<string, unknown>) || {};
-    setPrefs({ filters: { ...filters, default: 'hot' } });
-    return '✅ Default filter set to **Hot Leads**. Your dashboard will show hot leads by default.';
+    setPrefs({ filters: { ...filters, default: 'hot' }, defaultFilter: 'hot' });
+    return '✅ Default filter set to **Hot Leads**.';
   }
   if (msg.includes('all leads') || msg.includes('show all') || msg.includes('remove filter')) {
     const filters = (prefs.filters as Record<string, unknown>) || {};
-    setPrefs({ filters: { ...filters, default: 'all' } });
+    setPrefs({ filters: { ...filters, default: 'all' }, defaultFilter: 'all' });
     return '✅ Filter cleared. Showing all leads by default.';
   }
   if (msg.includes('new leads') || msg.includes('fresh leads')) {
     const filters = (prefs.filters as Record<string, unknown>) || {};
-    setPrefs({ filters: { ...filters, default: 'new' } });
+    setPrefs({ filters: { ...filters, default: 'new' }, defaultFilter: 'new' });
     return '✅ Default filter set to **New Leads**.';
   }
 
@@ -109,32 +201,32 @@ function brainReply(message: string): string {
   if (msg.includes('voice') && (msg.includes('off') || msg.includes('disable') || msg.includes('turn off'))) {
     const caps = (prefs.agentCapabilities as Record<string, unknown>) || {};
     setPrefs({ agentCapabilities: { ...caps, voiceNotes: false } });
-    return '✅ Voice notes disabled. Your agent will no longer send voice messages.';
+    return '✅ Voice notes disabled.';
   }
   if (msg.includes('voice') && (msg.includes('on') || msg.includes('enable') || msg.includes('turn on'))) {
     const caps = (prefs.agentCapabilities as Record<string, unknown>) || {};
     setPrefs({ agentCapabilities: { ...caps, voiceNotes: true } });
-    return '✅ Voice notes enabled! Your agent will now send voice messages when appropriate.';
+    return '✅ Voice notes enabled!';
   }
   if ((msg.includes('sms') || msg.includes('text')) && (msg.includes('off') || msg.includes('disable'))) {
     const caps = (prefs.agentCapabilities as Record<string, unknown>) || {};
     setPrefs({ agentCapabilities: { ...caps, sms: false } });
-    return '⚠️ SMS outreach disabled. Your agent will stop sending text messages.';
+    return '⚠️ SMS outreach disabled.';
   }
   if ((msg.includes('sms') || msg.includes('text')) && (msg.includes('on') || msg.includes('enable'))) {
     const caps = (prefs.agentCapabilities as Record<string, unknown>) || {};
     setPrefs({ agentCapabilities: { ...caps, sms: true } });
-    return '✅ SMS outreach re-enabled. Your agent will resume sending messages.';
+    return '✅ SMS outreach re-enabled.';
   }
   if (msg.includes('auto') && msg.includes('reply') && (msg.includes('off') || msg.includes('disable'))) {
     const caps = (prefs.agentCapabilities as Record<string, unknown>) || {};
     setPrefs({ agentCapabilities: { ...caps, autoReply: false } });
-    return '✅ Auto-reply disabled. Incoming messages will wait for manual response.';
+    return '✅ Auto-reply disabled.';
   }
   if (msg.includes('auto') && msg.includes('reply') && (msg.includes('on') || msg.includes('enable'))) {
     const caps = (prefs.agentCapabilities as Record<string, unknown>) || {};
     setPrefs({ agentCapabilities: { ...caps, autoReply: true } });
-    return '✅ Auto-reply enabled. Your agent will respond to leads automatically.';
+    return '✅ Auto-reply enabled.';
   }
   if (msg.includes('notifications') && (msg.includes('off') || msg.includes('disable'))) {
     setPrefs({ notificationPrefs: { smsReply: false, docReceived: false, dealUpdate: false } });
@@ -142,43 +234,53 @@ function brainReply(message: string): string {
   }
   if (msg.includes('notifications') && (msg.includes('on') || msg.includes('enable'))) {
     setPrefs({ notificationPrefs: { smsReply: true, docReceived: true, dealUpdate: true } });
-    return '✅ All notifications enabled. You\'ll be alerted for replies, documents, and deal updates.';
+    return '✅ All notifications enabled.';
+  }
+
+  // Reset all preferences
+  if (msg.includes('reset') && (msg.includes('preference') || msg.includes('setting') || msg.includes('theme') || msg.includes('everything'))) {
+    localStorage.removeItem('user_preferences');
+    return '🔄 All preferences **reset to defaults**. Reload the page to see the changes take effect.';
   }
 
   // Show current preferences
-  if (msg.includes('settings') || msg.includes('preferences') || msg.includes('config') || msg.includes('what') && msg.includes('set')) {
+  if (msg.includes('settings') || msg.includes('preferences') || msg.includes('config') || (msg.includes('what') && msg.includes('set'))) {
     const current = getPrefs();
     const caps = (current.agentCapabilities as Record<string, unknown>) || {};
     return `📋 **Current Settings:**\n` +
+      `• Theme: ${current.theme || 'dark'}\n` +
       `• Layout: ${current.layout || 'overview_first'}\n` +
+      `• Font size: ${current.fontSize || 'medium'}\n` +
+      `• Compact mode: ${current.compactMode ? '✅' : '❌'}\n` +
+      `• Sidebar: ${current.sidebarCollapsed ? 'collapsed' : 'expanded'}\n` +
+      `• Inverted: ${current.invertColors ? '✅' : '❌'}\n` +
+      `• Accent: ${current.accentColor || '#6366f1'}\n` +
       `• Tone: ${current.agentTone || 'professional'}\n` +
       `• Default filter: ${(current.filters as any)?.default || 'all'}\n` +
-      `• SMS: ${caps.sms !== false ? '✅' : '❌'} | Email: ${caps.email !== false ? '✅' : '❌'} | Auto-reply: ${caps.autoReply !== false ? '✅' : '❌'}\n` +
-      `• Voice notes: ${caps.voiceNotes ? '✅' : '❌'} | Call bridge: ${caps.callBridge ? '✅' : '❌'}`;
+      `• SMS: ${caps.sms !== false ? '✅' : '❌'} | Auto-reply: ${caps.autoReply !== false ? '✅' : '❌'}`;
   }
 
   // Help
   if (msg.includes('help') || msg.includes('what can') || msg.includes('commands')) {
     return `🧠 **Brain Channel — What I can do:**\n\n` +
+      `**Themes**\n` +
+      `• "Light mode" / "Dark mode" / "Ocean theme" / "Sunset vibes" / "Midnight"\n\n` +
+      `**Visuals**\n` +
+      `• "Invert colors" • "Bigger text" • "Compact mode" • "Collapse sidebar"\n` +
+      `• "Change accent to green/blue/purple/teal"\n\n` +
       `**Layout**\n` +
-      `• "Move stats to the top"\n` +
-      `• "Switch to contacts first"\n` +
-      `• "Show pipeline view"\n\n` +
+      `• "Contacts first" • "Messages first" • "Pipeline first" • "Overview first"\n\n` +
       `**Agent Tone**\n` +
-      `• "Change tone to casual"\n` +
-      `• "Make agent more professional"\n\n` +
+      `• "Change tone to casual/professional/urgent/empathetic"\n\n` +
       `**Filters**\n` +
-      `• "Show only hot leads"\n` +
-      `• "Show all leads"\n\n` +
+      `• "Show only hot leads" • "Show all leads"\n\n` +
       `**Capabilities**\n` +
-      `• "Turn off voice notes"\n` +
-      `• "Enable auto-reply"\n` +
-      `• "Disable notifications"\n\n` +
+      `• "Turn off voice notes" • "Enable auto-reply" • "Disable SMS"\n\n` +
       `**Info**\n` +
-      `• "Show my settings"`;
+      `• "Show my settings" • "Reset preferences"`;
   }
 
-  return `🧠 I didn't quite catch that. Try:\n• "Move stats to the top"\n• "Change tone to casual"\n• "Show only hot leads"\n• "Turn off voice notes"\n\nOr type **help** to see all commands.`;
+  return `🧠 I didn't quite catch that. Try:\n• "Ocean theme"\n• "Invert colors"\n• "Compact mode"\n• "Bigger text"\n• "Contacts first"\n\nOr type **help** to see all commands.`;
 }
 
 function agentReply(channel: Channel, message: string): string {
@@ -208,7 +310,7 @@ function formatTs(d: Date): string {
   return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
 
-export function AgentChat({ open, onClose, agentName, agentTitle, onNavigate, onRefreshStats }: AgentChatProps) {
+export function AgentChat({ open, onClose, agentName, agentTitle, onNavigate, onRefreshStats, onUpdatePreferences }: AgentChatProps) {
   // Build tenant-aware channels: replace jacob/angie with tenant agent if provided
   const agentLabel = agentName ? agentName.toLowerCase().replace(/\s+/g, '-') : 'jacob';
   const agentDisplay = agentName || 'jacob';
@@ -265,12 +367,15 @@ export function AgentChat({ open, onClose, agentName, agentTitle, onNavigate, on
           break;
         }
         case 'update_preferences': {
-          // Merge into localStorage and force UI refresh
-          const current = JSON.parse(localStorage.getItem('user_preferences') || '{}');
-          const updated = { ...current, ...action.payload };
-          localStorage.setItem('user_preferences', JSON.stringify(updated));
-          // Force re-render by reloading — preferences drive the entire layout
-          window.location.reload();
+          if (onUpdatePreferences && action.payload) {
+            // Instant update via context — no page reload needed!
+            onUpdatePreferences(action.payload as Partial<UserPreferences>);
+          } else {
+            // Fallback: merge into localStorage (context will pick up on next render)
+            const current = JSON.parse(localStorage.getItem('user_preferences') || '{}');
+            const updated = { ...current, ...action.payload };
+            localStorage.setItem('user_preferences', JSON.stringify(updated));
+          }
           break;
         }
         case 'refresh_stats': {
@@ -348,11 +453,19 @@ export function AgentChat({ open, onClose, agentName, agentTitle, onNavigate, on
           [channel]: [...prev[channel], agentMsg],
         }));
       } catch {
+        // API unavailable — fall back to local brain reply
+        _lastPrefsDelta = null;
+        const reply = brainReply(text);
+        // If brainReply wrote preferences, propagate to context
+        if (_lastPrefsDelta && onUpdatePreferences) {
+          onUpdatePreferences(_lastPrefsDelta as Partial<UserPreferences>);
+          _lastPrefsDelta = null;
+        }
         const agentMsg: AgentChatMessage = {
           id: (Date.now() + 1).toString(),
           channel,
           role: 'agent',
-          text: 'Connection issue — try again in a moment.',
+          text: reply,
           ts: new Date(),
         };
         setHistories((prev) => ({
