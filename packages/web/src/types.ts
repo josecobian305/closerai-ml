@@ -107,6 +107,7 @@ export interface ContactFilter {
 export type NavSection =
   | 'dashboard'
   | 'contacts'
+  | 'leads'
   | 'messages'
   | 'sms-campaigns'
   | 'email'

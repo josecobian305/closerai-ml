@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Users, MessageSquare, Mail, GitBranch,
   Briefcase, FileText, Bot, BarChart3, CreditCard,
   Database, Bell, Settings, Menu, X, ChevronRight,
-  Megaphone, Scale, MessageCircle, LogOut, Plug
+  Megaphone, Scale, MessageCircle, LogOut, Plug, TrendingUp
 } from 'lucide-react';
 import type { NavSection, UserConfig } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -34,6 +34,7 @@ const NAV_GROUPS: NavGroup[] = [
     title: 'CRM',
     items: [
       { id: 'contacts', label: 'Contacts', icon: <Users size={18} /> },
+      { id: 'leads', label: 'Lead Priority', icon: <TrendingUp size={18} /> },
       { id: 'messages', label: 'Messages', icon: <MessageSquare size={18} />, capability: 'sms' },
       { id: 'sms-campaigns', label: 'SMS Campaigns', icon: <Megaphone size={18} />, capability: 'sms' },
       { id: 'email', label: 'Email', icon: <Mail size={18} />, capability: 'email' },

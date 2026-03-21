@@ -12,7 +12,7 @@ import { Register } from './pages/Register';
 import { Login } from './pages/Login';
 import { AgentsView, DashboardView, MessagesView, SmsCampaignsView, EmailView,
   PipelineView, DealsView, DocumentsView, CourtSearchView, ReportsView,
-  PaymentsView, DatabaseView, NotificationsView, SettingsView,
+  PaymentsView, DatabaseView, NotificationsView, SettingsView, LeadsView,
 } from './components/Views';
 import { IntegrationsPage } from './components/IntegrationsPage';
 import { useContacts } from './hooks/useContacts';
@@ -168,6 +168,7 @@ function AppInner() {
       case 'contacts':
         return renderContactsLayout();
       case 'messages': return <MessagesView />;
+      case 'leads': return <LeadsView />;
       case 'sms-campaigns': return <SmsCampaignsView />;
       case 'email': return <EmailView />;
       case 'pipeline': return <PipelineView />;

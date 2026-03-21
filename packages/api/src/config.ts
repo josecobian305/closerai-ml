@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+dotenv.config({ path: '/home/ubuntu/.openclaw/.env.secrets' });
 dotenv.config();
 
 /**
