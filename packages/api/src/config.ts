@@ -16,7 +16,7 @@ export const config = {
     return {
       apiKey: process.env.GHL_API_KEY ?? '',
       locationId: 'dkqTGqWYd8HORwh5IVdq',
-      baseUrl: 'https://rest.gohighlevel.com/v1',
+      baseUrl: 'https://services.leadconnectorhq.com',
     };
   },
   get sms() {
