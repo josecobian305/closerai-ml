@@ -569,16 +569,32 @@ async function executeTool(name: string, input: any): Promise<any> { // eslint-d
         const bugPage = input.page || "unknown";
         const bugUser = input.businessName || input.userId || "anonymous";
         const ADMIN_EMAIL = "jcobian@chccapitalgroup.com";
+        const DISCORD_CHANNEL = "1484884898790768741"; // #closerai-dev
         const bugSubject = `[CloserAI Bug] ${bugPage} - ${bugUser}`;
         const bugBody = `From: ${bugUser}\nPage: ${bugPage}\nIssue: ${bugDesc}\nTime: ${new Date().toISOString()}`;
+        const results: string[] = [];
+        
+        // Send email
         try {
           const emailMml = `From: jclaude@chccapitalgroup.com\nTo: ${ADMIN_EMAIL}\nSubject: ${bugSubject}\n\n${bugBody}`;
-          execSync(`echo '${emailMml.replace(/'/g, "\'")}' | himalaya template send`, { timeout: 10000 });
-          return { sent: true, to: ADMIN_EMAIL, subject: bugSubject };
+          execSync(`echo '${emailMml.replace(/'/g, "\\'")}' | himalaya template send`, { timeout: 10000 });
+          results.push("email sent");
         } catch (e) {
           logger.error("Bug report email failed", { error: String(e) });
-          return { sent: false, error: String(e), fallback: "Bug logged internally" };
+          results.push("email failed");
         }
+        
+        // Post to Discord #closerai-dev via OpenClaw message tool
+        try {
+          const discordMsg = `**🐛 Bug Report**\n**From:** ${bugUser}\n**Page:** ${bugPage}\n**Issue:** ${bugDesc}\n**Time:** ${new Date().toISOString()}`;
+          execSync(`openclaw message send --channel discord --target ${DISCORD_CHANNEL} --message '${discordMsg.replace(/'/g, "\\'")}' 2>/dev/null || true`, { timeout: 10000 });
+          results.push("discord posted");
+        } catch (e) {
+          logger.error("Discord bug post failed", { error: String(e) });
+          results.push("discord failed");
+        }
+        
+        return { sent: true, to: ADMIN_EMAIL, discord: DISCORD_CHANNEL, results };
       }
       default:
         return { error: `Unknown tool: ${name}` };
