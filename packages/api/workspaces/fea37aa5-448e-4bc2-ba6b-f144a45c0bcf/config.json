@@ -1,0 +1,33 @@
+{
+  "userId": "fea37aa5-448e-4bc2-ba6b-f144a45c0bcf",
+  "businessName": "Test Auto Repair",
+  "industry": "construction",
+  "pitch": "We fix cars fast",
+  "owner": {
+    "name": "Jose Cobian",
+    "email": "test@closerai.com",
+    "phone": "+13055551234"
+  },
+  "agent": {
+    "name": "Alex",
+    "title": "Sales Rep",
+    "email": "alex@test.com"
+  },
+  "tone": "professional",
+  "leadSources": [],
+  "leadAge": "0-48h",
+  "documents": [],
+  "phone": {},
+  "layout": "contacts_first",
+  "capabilities": {
+    "sms": true,
+    "email": true,
+    "voiceNotes": false,
+    "callBridge": false,
+    "autoReply": true,
+    "docCollection": true,
+    "courtSearch": true,
+    "notifications": true
+  },
+  "createdAt": "2026-03-21T15:19:51.721Z"
+}

@@ -163,9 +163,12 @@ export function Register() {
           },
         }));
         window.location.href = json.redirectUrl || '/app/';
+      } else {
+        alert(json.error || 'Registration failed. Please try again.');
       }
     } catch (err) {
       console.error('Registration failed:', err);
+      alert('Connection error. Please try again.');
     } finally {
       setSubmitLoading(false);
     }
