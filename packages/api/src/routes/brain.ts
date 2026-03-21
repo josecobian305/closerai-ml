@@ -683,7 +683,7 @@ async function callBedrockWithTools(
 ): Promise<string> {
   const { BedrockRuntimeClient, ConverseCommand } = await import('@aws-sdk/client-bedrock-runtime');
   const client = new BedrockRuntimeClient({ region: 'us-east-1' });
-  const modelId = 'us.anthropic.claude-haiku-4-5-20251001-v1:0';
+  const modelId = 'us.anthropic.claude-opus-4-6-v1';
 
   // Working copy of messages (so we can append tool results without mutating the stored history)
   const workingMessages = [...messages];
