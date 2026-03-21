@@ -568,18 +568,15 @@ async function executeTool(name: string, input: any): Promise<any> { // eslint-d
         const bugDesc = input.description || "No description";
         const bugPage = input.page || "unknown";
         const bugUser = input.businessName || input.userId || "anonymous";
-        const ADMIN_PHONE = "+17862804399";
-        const TT_SID = process.env.TT_SID || "";
-        const TT_KEY = process.env.TT_KEY || "";
-        const bugMsg = `[CloserAI Bug Report]\nFrom: ${bugUser}\nPage: ${bugPage}\nIssue: ${bugDesc}\nTime: ${new Date().toISOString()}`;
+        const ADMIN_EMAIL = "jcobian@chccapitalgroup.com";
+        const bugSubject = `[CloserAI Bug] ${bugPage} - ${bugUser}`;
+        const bugBody = `From: ${bugUser}\nPage: ${bugPage}\nIssue: ${bugDesc}\nTime: ${new Date().toISOString()}`;
         try {
-          const ttRes = await fetch("https://api.texttorrent.com/api/v1/inbox/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "X-API-SID": TT_SID, "X-API-PUBLIC-KEY": TT_KEY },
-            body: JSON.stringify({ to_number: ADMIN_PHONE, from_number: "+12172108713", message: bugMsg })
-          });
-          return { sent: true, to: ADMIN_PHONE, message: bugMsg };
+          const emailMml = `From: jclaude@chccapitalgroup.com\nTo: ${ADMIN_EMAIL}\nSubject: ${bugSubject}\n\n${bugBody}`;
+          execSync(`echo '${emailMml.replace(/'/g, "\'")}' | himalaya template send`, { timeout: 10000 });
+          return { sent: true, to: ADMIN_EMAIL, subject: bugSubject };
         } catch (e) {
+          logger.error("Bug report email failed", { error: String(e) });
           return { sent: false, error: String(e), fallback: "Bug logged internally" };
         }
       }
