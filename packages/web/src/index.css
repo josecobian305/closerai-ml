@@ -55,3 +55,43 @@
     @apply text-gray-500 hover:text-gray-300 border-b-2 border-transparent;
   }
 }
+
+/* Dynamic theme overrides — forces all elements to respond to CSS vars */
+body, #root {
+  background-color: var(--color-bg, #0b0f1a) !important;
+  color: var(--color-text, #e2e8f0) !important;
+  font-size: var(--font-size-base, 15px) !important;
+  transition: background-color 0.3s ease, color 0.3s ease, filter 0.3s ease;
+}
+
+/* Override all surface-level backgrounds */
+[class*="bg-gray-"], [class*="bg-slate-"], [class*="bg-zinc-"] {
+  background-color: var(--color-surface, #111827) !important;
+  transition: background-color 0.3s ease;
+}
+
+/* Override border colors */
+[class*="border-gray-"], [class*="border-slate-"], [class*="border-zinc-"] {
+  border-color: var(--color-border, #1e293b) !important;
+  transition: border-color 0.3s ease;
+}
+
+/* Override muted text */
+[class*="text-gray-4"], [class*="text-gray-5"], [class*="text-slate-4"], [class*="text-slate-5"] {
+  color: var(--color-muted, #94a3b8) !important;
+  transition: color 0.3s ease;
+}
+
+/* Accent color overrides */
+[class*="bg-indigo-"], [class*="bg-purple-"], [class*="from-indigo-"], [class*="to-purple-"] {
+  --tw-gradient-from: var(--color-accent, #6366f1) !important;
+}
+
+[class*="text-indigo-"], [class*="text-purple-"] {
+  color: var(--color-accent, #6366f1) !important;
+}
+
+/* Smooth transitions on all theme changes */
+*, *::before, *::after {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
