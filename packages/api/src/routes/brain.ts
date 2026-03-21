@@ -273,14 +273,24 @@ const TOOL_SPECS = [
   {
     toolSpec: {
       name: 'update_preferences',
-      description: 'Update dashboard layout or preferences — move widgets, change default view, set filters, update theme. Use when user wants to change how their dashboard looks or behaves.',
+      description: `Update dashboard visual preferences. Available options:
+- layout: "overview_first" | "contacts_first" | "messages_first" | "pipeline_first"
+- theme: "dark" | "light" | "midnight" | "ocean" | "sunset"
+- invertColors: true/false (CSS inversion of all colors)
+- compactMode: true/false (tighter layout, smaller cards)
+- fontSize: "small" | "medium" | "large"
+- sidebarCollapsed: true/false (icon-only sidebar)
+- accentColor: hex color string like "#10b981" for green, "#ef4444" for red, "#f59e0b" for amber
+- defaultFilter: "all" | "hot" | "warm" | "cold" | "docs" | "funded"
+- widgetOrder: array like ["stats","contacts","agents","pipeline"]
+Use this when user wants to change how their dashboard looks. You can set multiple at once.`,
       inputSchema: {
         json: {
           type: 'object',
           properties: {
             preferences: {
               type: 'object',
-              description: 'Preferences object to merge into user preferences. E.g. { "layout": "contacts_first", "agentTone": "casual" }.',
+              description: 'Preferences to merge. Keys: layout, theme, invertColors, compactMode, fontSize, sidebarCollapsed, accentColor, defaultFilter, widgetOrder.',
             },
           },
           required: ['preferences'],
