@@ -136,7 +136,7 @@ If it requires code changes: type=code, set autoFixable=false.
 Respond ONLY with the JSON object, no other text.`;
 
   const command = new ConverseCommand({
-    modelId: 'us.anthropic.claude-sonnet-4-6',
+    modelId: 'us.anthropic.claude-haiku-4-5-20251001-v1:0',
     messages: [{ role: 'user', content: [{ text: prompt }] }],
     inferenceConfig: { maxTokens: 1024, temperature: 0.3 },
   });
