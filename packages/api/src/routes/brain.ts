@@ -24,6 +24,7 @@ import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
 import { logger } from '../logger';
+import { autoHealBug } from '../auto-healer';
 
 const router = Router();
 
@@ -594,7 +595,20 @@ async function executeTool(name: string, input: any): Promise<any> { // eslint-d
           results.push("discord failed");
         }
         
-        return { sent: true, to: ADMIN_EMAIL, discord: DISCORD_CHANNEL, results };
+        // Trigger auto-healer in background
+        autoHealBug({
+          description: bugDesc,
+          page: bugPage,
+          userId: input.userId || 'unknown',
+          businessName: bugUser,
+          timestamp: new Date().toISOString(),
+        }).then((healResult) => {
+          logger.info('Auto-healer result', { fixed: healResult.fixed, diagnosis: healResult.diagnosis.rootCause });
+        }).catch((e) => {
+          logger.error('Auto-healer failed', { error: String(e) });
+        });
+        
+        return { sent: true, to: ADMIN_EMAIL, discord: DISCORD_CHANNEL, results, autoHealTriggered: true };
       }
       default:
         return { error: `Unknown tool: ${name}` };
