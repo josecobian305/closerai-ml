@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { X, Send, Hash, Circle, Brain } from 'lucide-react';
 import type { AgentChatMessage } from '../types';
@@ -351,6 +352,43 @@ export function AgentChat({ open, onClose, agentName, agentTitle, onNavigate, on
     ],
   });
   const [input, setInput] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = React.useRef<any>(null);
+
+  const startVoice = () => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) return;
+    if (recognitionRef.current) return; // already recording
+    const recognition = new SR();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    let finalTranscript = '';
+    recognition.onresult = (event: any) => {
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript + ' ';
+        } else {
+          interim += event.results[i][0].transcript;
+        }
+      }
+      setInput(finalTranscript + interim);
+    };
+    recognition.onerror = () => { setIsRecording(false); recognitionRef.current = null; };
+    recognition.onend = () => { setIsRecording(false); recognitionRef.current = null; };
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsRecording(true);
+  };
+
+  const stopVoice = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+      setIsRecording(false);
+    }
+  };
   const [typing, setTyping] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -646,34 +684,16 @@ export function AgentChat({ open, onClose, agentName, agentTitle, onNavigate, on
         {/* Input */}
         <div className="flex items-end gap-2 px-4 py-3 border-t border-gray-800 flex-shrink-0">
           <button
-            onClick={() => {
-              // Web Speech API - voice input
-              const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-              if (!SpeechRecognition) { alert('Voice input not supported in this browser'); return; }
-              const recognition = new SpeechRecognition();
-              recognition.continuous = false;
-              recognition.interimResults = false;
-              recognition.lang = 'en-US';
-              const btn = document.getElementById('mic-btn');
-              if (btn) { btn.classList.add('animate-pulse', 'bg-red-600'); btn.classList.remove('bg-gray-700'); }
-              recognition.onresult = (event: any) => {
-                const transcript = event.results[0][0].transcript;
-                setInput(transcript);
-                if (btn) { btn.classList.remove('animate-pulse', 'bg-red-600'); btn.classList.add('bg-gray-700'); }
-              };
-              recognition.onerror = () => {
-                if (btn) { btn.classList.remove('animate-pulse', 'bg-red-600'); btn.classList.add('bg-gray-700'); }
-              };
-              recognition.onend = () => {
-                if (btn) { btn.classList.remove('animate-pulse', 'bg-red-600'); btn.classList.add('bg-gray-700'); }
-              };
-              recognition.start();
-            }}
+            onTouchStart={(e) => { e.preventDefault(); startVoice(); }}
+            onTouchEnd={(e) => { e.preventDefault(); stopVoice(); }}
+            onMouseDown={() => startVoice()}
+            onMouseUp={() => stopVoice()}
+            onMouseLeave={() => stopVoice()}
             id="mic-btn"
-            className="p-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-xl transition-all"
-            title="Voice input — tap to speak"
+            className={`p-2.5 rounded-xl transition-all select-none ${isRecording ? 'bg-red-600 animate-pulse scale-110' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
+            title="Hold to speak"
           >
-            🎤
+            {isRecording ? '🔴' : '🎤'}
           </button>
           <input
             type="text"
