@@ -263,3 +263,21 @@ agentsRouter.post('/:name/stop', (req: Request, res: Response) => {
 
 
 
+
+/**
+ * GET /api/v1/agents/system/health
+ * Returns self-healing status for all services
+ */
+agentsRouter.get('/system/health', (_req: Request, res: Response) => {
+  try {
+    const { getStatus } = require('../self-healing');
+    res.json(getStatus());
+  } catch {
+    res.json({
+      services: [],
+      recentEvents: [],
+      uptime: process.uptime(),
+      note: 'Self-healing manager not running as daemon'
+    });
+  }
+});
