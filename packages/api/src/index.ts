@@ -9,8 +9,6 @@ import { agentsRouter } from './routes/agents';
 import { registerRouter } from './routes/register';
 import { brainRouter } from './routes/brain';
 
- from './routes/register';
-
 const app = express();
 
 app.use(cors());
