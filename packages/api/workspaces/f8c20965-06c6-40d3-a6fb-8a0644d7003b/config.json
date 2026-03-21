@@ -1,0 +1,39 @@
+{
+  "userId": "f8c20965-06c6-40d3-a6fb-8a0644d7003b",
+  "businessName": "Miami Grill House",
+  "industry": "restaurant",
+  "pitch": "Fast casual restaurant with catering, looking for working capital to expand",
+  "owner": {
+    "name": "Maria Santos",
+    "email": "maria@miamigrillhouse.com",
+    "phone": "+13055559876"
+  },
+  "agent": {
+    "name": "Sofia",
+    "title": "Business Development",
+    "email": "sofia@miamigrillhouse.com"
+  },
+  "tone": "casual",
+  "leadSources": [
+    "Direct / Inbound",
+    "Referral",
+    "Social Media"
+  ],
+  "leadAge": "0-48 hours (Fresh)",
+  "documents": [],
+  "phone": {
+    "areaCode": "305"
+  },
+  "layout": "messages_first",
+  "capabilities": {
+    "sms": true,
+    "email": true,
+    "voiceNotes": false,
+    "callBridge": false,
+    "autoReply": true,
+    "docCollection": true,
+    "courtSearch": true,
+    "notifications": true
+  },
+  "createdAt": "2026-03-21T15:47:11.920Z"
+}

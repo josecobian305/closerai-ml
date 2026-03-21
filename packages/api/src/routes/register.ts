@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
-import fs from 'fs';
-import path from 'path';
+import path from "path";
+import fs from "fs";
 import crypto from 'crypto';
 import { getDb } from '../db';
 import { logger } from '../logger';
@@ -154,3 +154,49 @@ ${tone || 'professional'}
     res.status(500).json({ error: 'Registration failed', detail: String(err) });
   }
 });
+
+/**
+ * GET /api/v1/me — Returns current user's profile + config
+ * Requires Authorization: Bearer <token> header
+ */
+registerRouter.get('/me', (req: Request, res: Response) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  const token = authHeader.split(' ')[1];
+  
+  // Decode token (simple base64 JWT — not production secure, but functional)
+  try {
+    const [payloadB64] = token.split('.');
+    const payload = JSON.parse(Buffer.from(payloadB64, 'base64').toString());
+    const userId = payload.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    // Load user's config
+    const configPath = path.join(__dirname, '..', '..', 'workspaces', userId, 'config.json');
+    if (!fs.existsSync(configPath)) {
+      return res.status(404).json({ error: 'User workspace not found' });
+    }
+
+    const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    
+    // Load SOUL.md
+    const soulPath = path.join(__dirname, '..', '..', 'workspaces', userId, 'agents', 'SOUL.md');
+    const soul = fs.existsSync(soulPath) ? fs.readFileSync(soulPath, 'utf-8') : '';
+
+    res.json({
+      userId,
+      config,
+      soul,
+      workspace: path.join(__dirname, '..', '..', 'workspaces', userId),
+    });
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+});
+

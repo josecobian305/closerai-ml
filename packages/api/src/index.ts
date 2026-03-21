@@ -24,6 +24,7 @@ app.use('/api/v1/contacts/:phone/messages', messagesRouter);
 app.use('/api/v1/stats', statsRouter);
 app.use('/api/v1/agents', agentsRouter);
 app.use('/api/v1/register', registerRouter);
+app.use('/api/v1/me', registerRouter);
 
 // 404 handler
 app.use((_req, res) => {

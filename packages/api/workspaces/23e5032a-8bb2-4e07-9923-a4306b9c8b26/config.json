@@ -1,0 +1,42 @@
+{
+  "userId": "23e5032a-8bb2-4e07-9923-a4306b9c8b26",
+  "businessName": "Johns cleaning",
+  "industry": "other",
+  "pitch": "We are cleaning company that sells two residential and commercial contracts and we make around $50,000 a month in revenue. We're looking to expand.",
+  "owner": {
+    "name": "Jonny",
+    "email": "cobian.jose@icloud.com",
+    "phone": "7862804399"
+  },
+  "agent": {
+    "name": "Johnny b",
+    "title": "Head of Sales",
+    "email": "jonny@miamisales.com"
+  },
+  "tone": "bold",
+  "leadSources": [
+    "LendingTree"
+  ],
+  "leadAge": "0-48h",
+  "documents": [
+    "bank3",
+    "dl"
+  ],
+  "phone": {
+    "areaCode": "954",
+    "portExisting": false,
+    "existingNumber": ""
+  },
+  "layout": "pipeline_first",
+  "capabilities": {
+    "sms": true,
+    "email": true,
+    "voiceNotes": true,
+    "callBridge": true,
+    "autoReply": true,
+    "docCollection": true,
+    "courtSearch": true,
+    "notifications": true
+  },
+  "createdAt": "2026-03-21T16:06:37.708Z"
+}

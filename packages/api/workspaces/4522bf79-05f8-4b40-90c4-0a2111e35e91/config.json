@@ -1,0 +1,44 @@
+{
+  "userId": "4522bf79-05f8-4b40-90c4-0a2111e35e91",
+  "businessName": "Richards ac",
+  "industry": "hvac",
+  "pitch": "I run an HVAC installation company I install units on commercial and residential. I also provided me a maintenance monthly service at about $200 a month for my commercial clients and about $49 a month for my residential clients.",
+  "owner": {
+    "name": "Jason",
+    "email": "jason@gocredibly.com",
+    "phone": "7862804399"
+  },
+  "agent": {
+    "name": "Steph",
+    "title": "Head of Sales",
+    "email": "steph@gocredibly.com"
+  },
+  "tone": "bold",
+  "leadSources": [
+    "LendingTree"
+  ],
+  "leadAge": "90d+",
+  "documents": [
+    "bank3",
+    "dl",
+    "tax_returns",
+    "mtd"
+  ],
+  "phone": {
+    "areaCode": "212",
+    "portExisting": false,
+    "existingNumber": ""
+  },
+  "layout": "pipeline_first",
+  "capabilities": {
+    "sms": true,
+    "email": true,
+    "voiceNotes": true,
+    "callBridge": true,
+    "autoReply": true,
+    "docCollection": true,
+    "courtSearch": true,
+    "notifications": true
+  },
+  "createdAt": "2026-03-21T15:34:37.821Z"
+}
