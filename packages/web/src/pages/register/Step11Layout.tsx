@@ -81,7 +81,7 @@ export function Step11Layout({ data, onChange }: Props) {
       <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 text-center">
         How do you want to see your data?
       </h2>
-      <p className="text-gray-400 mb-8 text-center max-w-md">
+      <p className="text-[var(--text-muted)] mb-8 text-center max-w-md">
         Choose your default dashboard layout. You can always change it later.
       </p>
 
@@ -92,8 +92,8 @@ export function Step11Layout({ data, onChange }: Props) {
             onClick={() => onChange({ layout: layout.id })}
             className={`p-4 rounded-xl border-2 transition-all duration-150 text-left ${
               data.layout === layout.id
-                ? 'bg-indigo-600/20 border-indigo-500 text-indigo-300'
-                : 'bg-gray-800/40 border-gray-700/60 text-gray-400 hover:border-gray-600 hover:text-gray-200'
+                ? 'bg-[var(--accent)]/20 border-indigo-500 text-indigo-300'
+                : 'bg-[var(--bg-elevated)]/40 border-[var(--border)]/60 text-[var(--text-muted)] hover:border-[var(--border)] hover:text-gray-200'
             }`}
           >
             <div className="mb-3 text-current">
@@ -103,7 +103,7 @@ export function Step11Layout({ data, onChange }: Props) {
               <span className="text-lg">{layout.icon}</span>
               <span className="font-semibold text-white text-sm">{layout.label}</span>
             </div>
-            <p className={`text-xs ${data.layout === layout.id ? 'text-indigo-400' : 'text-gray-500'}`}>{layout.desc}</p>
+            <p className={`text-xs ${data.layout === layout.id ? 'text-[#a5b4fc]' : 'text-[var(--text-muted)]'}`}>{layout.desc}</p>
           </button>
         ))}
       </div>

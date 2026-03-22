@@ -61,8 +61,8 @@ function MerchantCard({ m, tier }: { m: LeadMerchant; tier: string }) {
   const tierColors: Record<string, string> = {
     urgent: 'border-red-700/40 bg-red-900/10',
     warm: 'border-yellow-700/40 bg-yellow-900/5',
-    cold: 'border-gray-700/40 bg-gray-900/10',
-    dead: 'border-gray-800 bg-gray-900/5 opacity-60',
+    cold: 'border-[var(--border)]/40 bg-[var(--bg-card)]/10',
+    dead: 'border-[var(--border)] bg-[var(--bg-card)]/5 opacity-60',
   };
 
   return (
@@ -78,31 +78,31 @@ function MerchantCard({ m, tier }: { m: LeadMerchant; tier: string }) {
               {m.business || m.name || m.phone}
             </span>
           </div>
-          {(m.business && m.name) && <div className="text-xs text-gray-500 mt-0.5">{m.name}</div>}
-          <div className="text-xs text-gray-500 mt-1">{m.phone}</div>
+          {(m.business && m.name) && <div className="text-xs text-[var(--text-muted)] mt-0.5">{m.name}</div>}
+          <div className="text-xs text-[var(--text-muted)] mt-1">{m.phone}</div>
         </div>
         <div className="text-right flex-shrink-0">
-          <div className="text-xs text-gray-500">{timeSince(m.last_reply || m.last_send)}</div>
-          <div className="text-xs text-gray-600 mt-1">{m.sends} sends · {m.replies.length} replies</div>
+          <div className="text-xs text-[var(--text-muted)]">{timeSince(m.last_reply || m.last_send)}</div>
+          <div className="text-xs text-[var(--text-subtle)] mt-1">{m.sends} sends · {m.replies.length} replies</div>
         </div>
       </div>
 
       {lastReply && (
-        <div className="mt-2 text-xs text-gray-300 bg-gray-800/50 rounded p-2 line-clamp-2">
+        <div className="mt-2 text-xs text-[var(--text-secondary)] bg-[var(--bg-elevated)]/50 rounded p-2 line-clamp-2">
           "{lastReply.text}"
         </div>
       )}
 
       {expanded && (
-        <div className="mt-3 pt-3 border-t border-gray-800 space-y-2">
+        <div className="mt-3 pt-3 border-t border-[var(--border)] space-y-2">
           {/* Full reply history */}
-          <div className="text-xs text-gray-500 font-semibold">Reply history ({m.replies.length})</div>
+          <div className="text-xs text-[var(--text-muted)] font-semibold">Reply history ({m.replies.length})</div>
           <div className="space-y-2 max-h-48 overflow-y-auto">
             {m.replies.map((r, i) => (
               <div key={i} className="text-xs">
-                <span className="text-gray-500">{timeSince(r.ts)}</span>
-                <span className={`ml-2 px-1 rounded ${r.cat === 'interested' || r.cat === 'INTERESTED' ? 'bg-green-900/40 text-green-300' : 'bg-gray-800 text-gray-400'}`}>{r.cat || '?'}</span>
-                <div className="text-gray-300 mt-0.5 ml-1">Merchant: "{r.text}"</div>
+                <span className="text-[var(--text-muted)]">{timeSince(r.ts)}</span>
+                <span className={`ml-2 px-1 rounded ${r.cat === 'interested' || r.cat === 'INTERESTED' ? 'bg-green-900/40 text-green-300' : 'bg-[var(--bg-elevated)] text-[var(--text-muted)]'}`}>{r.cat || '?'}</span>
+                <div className="text-[var(--text-secondary)] mt-0.5 ml-1">Merchant: "{r.text}"</div>
                 {r.agent_reply && <div className="text-blue-400 ml-1">Agent: "{r.agent_reply}"</div>}
               </div>
             ))}
@@ -110,9 +110,9 @@ function MerchantCard({ m, tier }: { m: LeadMerchant; tier: string }) {
           {/* States */}
           {m.states.length > 0 && (
             <div>
-              <div className="text-xs text-gray-500 font-semibold">States</div>
+              <div className="text-xs text-[var(--text-muted)] font-semibold">States</div>
               {m.states.map((s, i) => (
-                <div key={i} className="text-xs text-gray-400">{s.state} {s.notes ? `— ${s.notes.slice(0, 60)}` : ''}</div>
+                <div key={i} className="text-xs text-[var(--text-muted)]">{s.state} {s.notes ? `— ${s.notes.slice(0, 60)}` : ''}</div>
               ))}
             </div>
           )}
@@ -135,7 +135,7 @@ const SEGMENT_TABS = [
   { key: 'urgent', label: '🔥 Urgent', color: 'text-red-400 border-red-500' },
   { key: 'warm', label: '🟡 Warm', color: 'text-yellow-400 border-yellow-500' },
   { key: 'cold', label: '❄️ Cold', color: 'text-blue-400 border-blue-500' },
-  { key: 'dead', label: '💀 Dead', color: 'text-gray-500 border-gray-600' },
+  { key: 'dead', label: '💀 Dead', color: 'text-[var(--text-muted)] border-[var(--border)]' },
 ];
 
 export function LeadsView() {
@@ -182,14 +182,14 @@ export function LeadsView() {
         </h2>
         <div className="flex items-center gap-3">
           {lastRefresh && (
-            <span className="text-xs text-gray-500 flex items-center gap-1">
+            <span className="text-xs text-[var(--text-muted)] flex items-center gap-1">
               <Clock size={10} /> {timeSince(lastRefresh.toISOString())}
             </span>
           )}
           <button
             onClick={() => load(true)}
             disabled={refreshing}
-            className="flex items-center gap-1 text-xs bg-gray-800 text-gray-300 px-3 py-1.5 rounded hover:bg-gray-700 disabled:opacity-50"
+            className="flex items-center gap-1 text-xs bg-[var(--bg-elevated)] text-[var(--text-secondary)] px-3 py-1.5 rounded hover:bg-[var(--bg-elevated)] disabled:opacity-50"
           >
             <RefreshCw size={12} className={refreshing ? 'animate-spin' : ''} />
             {refreshing ? 'Refreshing...' : 'Refresh'}
@@ -210,19 +210,19 @@ export function LeadsView() {
             { key: 'urgent', label: 'Urgent', val: summary.urgent, color: 'text-red-300', bg: 'bg-red-900/20 border-red-800/30' },
             { key: 'warm', label: 'Warm', val: summary.warm, color: 'text-yellow-300', bg: 'bg-yellow-900/20 border-yellow-800/30' },
             { key: 'cold', label: 'Cold', val: summary.cold, color: 'text-blue-300', bg: 'bg-blue-900/20 border-blue-800/30' },
-            { key: 'no_reply', label: 'No Reply', val: summary.no_reply, color: 'text-gray-400', bg: 'bg-gray-900/20 border-gray-800' },
-            { key: 'dead', label: 'Dead', val: summary.dead, color: 'text-gray-600', bg: 'bg-gray-900/10 border-gray-800' },
+            { key: 'no_reply', label: 'No Reply', val: summary.no_reply, color: 'text-[var(--text-muted)]', bg: 'bg-[var(--bg-card)]/20 border-[var(--border)]' },
+            { key: 'dead', label: 'Dead', val: summary.dead, color: 'text-[var(--text-subtle)]', bg: 'bg-[var(--bg-card)]/10 border-[var(--border)]' },
           ].map((s) => (
             <div key={s.key} className={`border rounded-xl p-3 text-center ${s.bg}`}>
               <div className={`text-xl font-bold ${s.color}`}>{s.val.toLocaleString()}</div>
-              <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
+              <div className="text-xs text-[var(--text-muted)] mt-0.5">{s.label}</div>
             </div>
           ))}
         </div>
       )}
 
       {/* Segment tabs */}
-      <div className="flex gap-1 border-b border-gray-800 mb-4 overflow-x-auto">
+      <div className="flex gap-1 border-b border-[var(--border)] mb-4 overflow-x-auto">
         {SEGMENT_TABS.map((tab) => {
           const count = summary?.[tab.key as keyof LeadSummary] ?? 0;
           return (
@@ -230,11 +230,11 @@ export function LeadsView() {
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={`px-4 py-2.5 text-sm font-semibold border-b-2 whitespace-nowrap flex items-center gap-2 transition-colors ${
-                activeTab === tab.key ? tab.color : 'text-gray-500 border-transparent hover:text-gray-300'
+                activeTab === tab.key ? tab.color : 'text-[var(--text-muted)] border-transparent hover:text-[var(--text-secondary)]'
               }`}
             >
               {tab.label}
-              <span className="text-xs bg-gray-800 text-gray-400 px-1.5 py-0.5 rounded-full">{count}</span>
+              <span className="text-xs bg-[var(--bg-elevated)] text-[var(--text-muted)] px-1.5 py-0.5 rounded-full">{count}</span>
             </button>
           );
         })}
@@ -244,20 +244,20 @@ export function LeadsView() {
       {loading ? (
         <div className="space-y-3">
           {[0,1,2,3,4].map(i => (
-            <div key={i} className="bg-gray-900 border border-gray-800 rounded-xl p-4 animate-pulse">
-              <div className="h-4 bg-gray-800 rounded w-48 mb-2" />
-              <div className="h-3 bg-gray-800 rounded w-64" />
+            <div key={i} className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-4 animate-pulse">
+              <div className="h-4 bg-[var(--bg-elevated)] rounded w-48 mb-2" />
+              <div className="h-3 bg-[var(--bg-elevated)] rounded w-64" />
             </div>
           ))}
         </div>
       ) : currentLeads.length === 0 ? (
-        <div className="text-center py-16 text-gray-500">
+        <div className="text-center py-16 text-[var(--text-muted)]">
           <XCircle size={36} className="mx-auto mb-3 text-gray-700" />
           <p>No leads in this segment</p>
         </div>
       ) : (
         <div className="space-y-2">
-          <div className="text-xs text-gray-500 mb-3">
+          <div className="text-xs text-[var(--text-muted)] mb-3">
             Showing {currentLeads.length} leads · sorted by close probability score
           </div>
           {currentLeads.map((m) => (

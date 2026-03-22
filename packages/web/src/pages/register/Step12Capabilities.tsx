@@ -30,7 +30,7 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
     <button
       onClick={onToggle}
       className={`relative w-12 h-6 rounded-full transition-colors duration-200 flex-shrink-0 ${
-        on ? 'bg-indigo-600' : 'bg-gray-700'
+        on ? 'bg-[var(--accent)]' : 'bg-[var(--bg-elevated)]'
       }`}
     >
       <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
@@ -49,7 +49,7 @@ export function Step12Capabilities({ data, onChange }: Props) {
       <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 text-center">
         What should your agent do?
       </h2>
-      <p className="text-gray-400 mb-6 text-center max-w-md">
+      <p className="text-[var(--text-muted)] mb-6 text-center max-w-md">
         Enable or disable capabilities. You can change these anytime.
       </p>
 
@@ -63,7 +63,7 @@ export function Step12Capabilities({ data, onChange }: Props) {
               ) as Partial<Capabilities>;
               onChange(update);
             }}
-            className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+            className="text-xs text-[#a5b4fc] hover:text-indigo-300 transition-colors"
           >
             {allOn ? 'Disable all' : 'Enable all'}
           </button>
@@ -74,8 +74,8 @@ export function Step12Capabilities({ data, onChange }: Props) {
             key={id}
             className={`flex items-center gap-4 px-4 py-3.5 rounded-xl border transition-all ${
               data[id]
-                ? 'bg-gray-800/60 border-gray-700'
-                : 'bg-gray-800/20 border-gray-800 opacity-60'
+                ? 'bg-[var(--bg-elevated)]/60 border-[var(--border)]'
+                : 'bg-[var(--bg-elevated)]/20 border-[var(--border)] opacity-60'
             }`}
           >
             <span className="text-xl flex-shrink-0">{icon}</span>
@@ -83,10 +83,10 @@ export function Step12Capabilities({ data, onChange }: Props) {
               <div className="flex items-center gap-2">
                 <p className="text-sm font-medium text-white">{label}</p>
                 {recommended && (
-                  <span className="text-xs px-1.5 py-0.5 bg-indigo-600/30 text-indigo-400 rounded font-medium">Recommended</span>
+                  <span className="text-xs px-1.5 py-0.5 bg-[var(--accent)]/30 text-[#a5b4fc] rounded font-medium">Recommended</span>
                 )}
               </div>
-              <p className="text-xs text-gray-500 mt-0.5">{desc}</p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">{desc}</p>
             </div>
             <Toggle on={data[id]} onToggle={() => toggle(id)} />
           </div>

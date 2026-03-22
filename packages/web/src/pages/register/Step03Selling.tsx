@@ -9,7 +9,7 @@ export function Step03Selling({ data, onChange }: Props) {
       <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 text-center">
         What are you selling?
       </h2>
-      <p className="text-gray-400 mb-8 text-center max-w-md">
+      <p className="text-[var(--text-muted)] mb-8 text-center max-w-md">
         Describe what you offer in one sentence. This becomes your agent's pitch foundation.
       </p>
 
@@ -19,11 +19,11 @@ export function Step03Selling({ data, onChange }: Props) {
           onChange={(e) => onChange({ pitch: e.target.value })}
           placeholder='e.g. "Merchant cash advances up to $500K, same-day funding"'
           rows={4}
-          className="w-full bg-gray-800/60 border border-gray-700 focus:border-indigo-500 rounded-xl px-5 py-4 text-lg text-white placeholder-gray-500 outline-none transition-colors resize-none"
+          className="w-full bg-[var(--bg-elevated)]/60 border border-[var(--border)] focus:border-[var(--accent)] rounded-xl px-5 py-4 text-lg text-white placeholder-[var(--text-subtle)] outline-none transition-colors resize-none"
         />
         <div className="flex justify-between items-center mt-2">
-          <p className="text-xs text-gray-600">Keep it short and punchy — under 20 words is ideal.</p>
-          <span className={`text-xs ${data.pitch.length > 200 ? 'text-red-400' : 'text-gray-600'}`}>
+          <p className="text-xs text-[var(--text-subtle)]">Keep it short and punchy — under 20 words is ideal.</p>
+          <span className={`text-xs ${data.pitch.length > 200 ? 'text-red-400' : 'text-[var(--text-subtle)]'}`}>
             {data.pitch.length}/200
           </span>
         </div>
@@ -31,7 +31,7 @@ export function Step03Selling({ data, onChange }: Props) {
 
       {/* Example chips */}
       <div className="mt-8 w-full max-w-lg">
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Quick examples</p>
+        <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3">Quick examples</p>
         <div className="flex flex-wrap gap-2">
           {[
             'Business funding up to $500K',
@@ -41,7 +41,7 @@ export function Step03Selling({ data, onChange }: Props) {
             <button
               key={ex}
               onClick={() => onChange({ pitch: ex })}
-              className="text-xs bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 px-3 py-1.5 rounded-lg transition-colors"
+              className="text-xs bg-[var(--bg-elevated)] hover:bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] px-3 py-1.5 rounded-lg transition-colors"
             >
               {ex}
             </button>

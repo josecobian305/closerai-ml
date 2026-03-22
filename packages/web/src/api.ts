@@ -5,7 +5,9 @@ import type {
   AgentStatus,
 } from './types';
 
-const BASE = '/app/api/v1';
+const BASE = typeof window !== 'undefined' && window.location.hostname === 'closerai.apipay.cash'
+  ? '/api/v1'
+  : '/app/api/v1';
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
@@ -188,6 +190,30 @@ export function submitOffer(data: {
 
 export function fetchDeals(): Promise<any> {
   return apiFetch<any>('/deals');
+}
+
+export function fetchDeal(dealId: string): Promise<any> {
+  return apiFetch<any>(`/deals/${dealId}`);
+}
+
+export function createDeal(data: { contact_id?: string; phone?: string; business?: string; notes?: string }): Promise<any> {
+  return apiFetch<any>('/deals', { method: 'POST', body: JSON.stringify(data) });
+}
+
+export function addOffer(dealId: string, offer: Record<string, any>): Promise<any> {
+  return apiFetch<any>(`/deals/${dealId}/offer`, { method: 'PUT', body: JSON.stringify(offer) });
+}
+
+export function compilePitch(dealId: string, offerIds: string[]): Promise<any> {
+  return apiFetch<any>(`/deals/${dealId}/compile-pitch`, { method: 'POST', body: JSON.stringify({ offer_ids: offerIds }) });
+}
+
+export function sendPitch(dealId: string): Promise<any> {
+  return apiFetch<any>(`/deals/${dealId}/send-pitch`, { method: 'POST' });
+}
+
+export function sendOfferSms(dealId: string, data: { offer_id: string; merchant_phone: string; merchant_name: string; business_name: string }): Promise<any> {
+  return apiFetch<any>(`/deals/${dealId}/send-offer-sms`, { method: 'POST', body: JSON.stringify(data) });
 }
 
 export function fetchDocuments(): Promise<any> {

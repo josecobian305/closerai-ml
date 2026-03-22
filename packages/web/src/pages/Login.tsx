@@ -36,64 +36,128 @@ export function Login({ onShowRegister }: LoginProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: 'var(--bg-base)' }}>
+      <div style={{ width: '100%', maxWidth: '400px' }}>
         {/* Logo */}
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-indigo-900/50">
+        <div className="flex items-center justify-center gap-3" style={{ marginBottom: '32px' }}>
+          <div style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '8px',
+            background: 'linear-gradient(135deg, #635bff, #4f46e5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontWeight: 700,
+            fontSize: '18px',
+          }}>
             C
           </div>
-          <span className="text-3xl font-bold text-white tracking-tight">CloserAI</span>
+          <span style={{
+            fontSize: '24px',
+            fontWeight: 700,
+            letterSpacing: '-0.03em',
+            background: 'linear-gradient(135deg, #ffffff 30%, #635bff)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}>
+            CloserAI
+          </span>
         </div>
 
-        <div className="bg-gray-900 border border-gray-800 rounded-3xl p-8">
-          <h1 className="text-xl font-bold text-white mb-1">Welcome back</h1>
-          <p className="text-gray-500 text-sm mb-6">Sign in to your workspace</p>
+        {/* Card */}
+        <div className="stripe-card" style={{ padding: '32px' }}>
+          <h1 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
+            Welcome back
+          </h1>
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '24px' }}>
+            The AI-powered funding operation
+          </p>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-900/40 border border-red-800/60 rounded-xl text-red-300 text-sm">
+            <div style={{
+              marginBottom: '16px',
+              padding: '10px 14px',
+              background: 'rgba(239,68,68,0.08)',
+              border: '1px solid rgba(239,68,68,0.2)',
+              borderRadius: '8px',
+              color: '#f87171',
+              fontSize: '13px',
+            }}>
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1.5">Email</label>
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '6px' }}>
+                Email
+              </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@business.com"
                 required
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 transition"
+                style={{
+                  width: '100%',
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '6px',
+                  padding: '10px 12px',
+                  fontSize: '13px',
+                  color: 'var(--text-primary)',
+                  outline: 'none',
+                }}
               />
             </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1.5">Password</label>
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '6px' }}>
+                Password
+              </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 transition"
+                style={{
+                  width: '100%',
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '6px',
+                  padding: '10px 12px',
+                  fontSize: '13px',
+                  color: 'var(--text-primary)',
+                  outline: 'none',
+                }}
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors text-sm"
+              className="stripe-btn-primary"
+              style={{ width: '100%', padding: '10px 16px', fontSize: '14px' }}
             >
               {loading ? 'Signing in…' : 'Sign In'}
             </button>
           </form>
 
           {onShowRegister && (
-            <p className="mt-5 text-center text-sm text-gray-500">
+            <p style={{ marginTop: '20px', textAlign: 'center', fontSize: '13px', color: 'var(--text-subtle)' }}>
               Don't have an account?{' '}
               <button
                 onClick={onShowRegister}
-                className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
+                style={{
+                  color: '#635bff',
+                  fontWeight: 600,
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = '#4f46e5'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = '#635bff'; }}
               >
                 Get started free
               </button>

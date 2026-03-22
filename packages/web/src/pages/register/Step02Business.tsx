@@ -25,7 +25,7 @@ export function Step02Business({ data, onChange }: Props) {
       <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 text-center">
         Tell us about your business
       </h2>
-      <p className="text-gray-400 mb-8 text-center">We'll personalize everything to your industry.</p>
+      <p className="text-[var(--text-muted)] mb-8 text-center">We'll personalize everything to your industry.</p>
 
       <div className="w-full max-w-lg space-y-6">
         <input
@@ -33,11 +33,11 @@ export function Step02Business({ data, onChange }: Props) {
           value={data.businessName}
           onChange={(e) => onChange({ businessName: e.target.value })}
           placeholder="Business name"
-          className="w-full bg-gray-800/60 border border-gray-700 focus:border-indigo-500 rounded-xl px-5 py-4 text-xl text-white placeholder-gray-500 outline-none transition-colors"
+          className="w-full bg-[var(--bg-elevated)]/60 border border-[var(--border)] focus:border-[var(--accent)] rounded-xl px-5 py-4 text-xl text-white placeholder-[var(--text-subtle)] outline-none transition-colors"
         />
 
         <div>
-          <p className="text-sm font-medium text-gray-400 mb-3">Industry</p>
+          <p className="text-sm font-medium text-[var(--text-muted)] mb-3">Industry</p>
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
             {INDUSTRIES.map(({ id, label, icon: Icon }) => (
               <button
@@ -45,8 +45,8 @@ export function Step02Business({ data, onChange }: Props) {
                 onClick={() => onChange({ industry: id })}
                 className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all duration-150 ${
                   data.industry === id
-                    ? 'bg-indigo-600/20 border-indigo-500 text-indigo-300'
-                    : 'bg-gray-800/40 border-gray-700/60 text-gray-400 hover:border-gray-600 hover:text-gray-200'
+                    ? 'bg-[var(--accent)]/20 border-indigo-500 text-indigo-300'
+                    : 'bg-[var(--bg-elevated)]/40 border-[var(--border)]/60 text-[var(--text-muted)] hover:border-[var(--border)] hover:text-gray-200'
                 }`}
               >
                 <Icon size={22} />

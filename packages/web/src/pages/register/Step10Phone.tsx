@@ -11,17 +11,17 @@ export function Step10Phone({ data, onChange }: Props) {
       <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 text-center">
         Choose your agent's phone number
       </h2>
-      <p className="text-gray-400 mb-8 text-center max-w-md">
+      <p className="text-[var(--text-muted)] mb-8 text-center max-w-md">
         We'll auto-provision a dedicated number for your agent.
       </p>
 
       <div className="w-full max-w-md space-y-6">
         {/* Mode toggle */}
-        <div className="flex rounded-xl bg-gray-800 p-1">
+        <div className="flex rounded-xl bg-[var(--bg-elevated)] p-1">
           <button
             onClick={() => onChange({ portExisting: false })}
             className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              !data.portExisting ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-gray-200'
+              !data.portExisting ? 'bg-[var(--accent)] text-white' : 'text-[var(--text-muted)] hover:text-gray-200'
             }`}
           >
             Get New Number
@@ -29,7 +29,7 @@ export function Step10Phone({ data, onChange }: Props) {
           <button
             onClick={() => onChange({ portExisting: true })}
             className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              data.portExisting ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-gray-200'
+              data.portExisting ? 'bg-[var(--accent)] text-white' : 'text-[var(--text-muted)] hover:text-gray-200'
             }`}
           >
             Port Existing
@@ -38,14 +38,14 @@ export function Step10Phone({ data, onChange }: Props) {
 
         {!data.portExisting ? (
           <div>
-            <label className="text-sm font-medium text-gray-400 mb-3 block">Area code preference</label>
+            <label className="text-sm font-medium text-[var(--text-muted)] mb-3 block">Area code preference</label>
             <input
               type="text"
               value={data.areaCode}
               onChange={(e) => onChange({ areaCode: e.target.value.replace(/\D/g, '').slice(0, 3) })}
               placeholder="e.g. 305"
               maxLength={3}
-              className="w-full bg-gray-800/60 border border-gray-700 focus:border-indigo-500 rounded-xl px-5 py-4 text-2xl text-white placeholder-gray-500 outline-none transition-colors tracking-widest font-mono"
+              className="w-full bg-[var(--bg-elevated)]/60 border border-[var(--border)] focus:border-[var(--accent)] rounded-xl px-5 py-4 text-2xl text-white placeholder-[var(--text-subtle)] outline-none transition-colors tracking-widest font-mono"
             />
             <div className="flex flex-wrap gap-2 mt-3">
               {POPULAR_AREA_CODES.map((code) => (
@@ -54,25 +54,25 @@ export function Step10Phone({ data, onChange }: Props) {
                   onClick={() => onChange({ areaCode: code })}
                   className={`text-xs font-mono px-3 py-1.5 rounded-lg border transition-colors ${
                     data.areaCode === code
-                      ? 'bg-indigo-600/20 border-indigo-500 text-indigo-300'
-                      : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-600 hover:text-white'
+                      ? 'bg-[var(--accent)]/20 border-indigo-500 text-indigo-300'
+                      : 'bg-[var(--bg-elevated)] border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--border)] hover:text-white'
                   }`}
                 >
                   {code}
                 </button>
               ))}
             </div>
-            <p className="text-xs text-gray-600 mt-3">We'll provision the closest available number to your preferred area code.</p>
+            <p className="text-xs text-[var(--text-subtle)] mt-3">We'll provision the closest available number to your preferred area code.</p>
           </div>
         ) : (
           <div>
-            <label className="text-sm font-medium text-gray-400 mb-3 block">Existing number to port</label>
+            <label className="text-sm font-medium text-[var(--text-muted)] mb-3 block">Existing number to port</label>
             <input
               type="tel"
               value={data.existingNumber}
               onChange={(e) => onChange({ existingNumber: e.target.value })}
               placeholder="+1 (305) 000-0000"
-              className="w-full bg-gray-800/60 border border-gray-700 focus:border-indigo-500 rounded-xl px-5 py-4 text-base text-white placeholder-gray-500 outline-none transition-colors"
+              className="w-full bg-[var(--bg-elevated)]/60 border border-[var(--border)] focus:border-[var(--accent)] rounded-xl px-5 py-4 text-base text-white placeholder-[var(--text-subtle)] outline-none transition-colors"
             />
             <p className="text-xs text-amber-400 mt-3">⚠️ Number porting requires LOA and takes 3–10 business days.</p>
           </div>

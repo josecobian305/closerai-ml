@@ -61,13 +61,13 @@ function NotesTab({ contact }: { contact: Contact }) {
   return (
     <div className="p-4 flex flex-col gap-4">
       <div className="space-y-2">
-        <label className="text-xs text-gray-500 uppercase tracking-wide font-medium">Add Note</label>
+        <label className="text-xs text-[var(--text-muted)] uppercase tracking-wide font-medium">Add Note</label>
         <textarea
           value={note}
           onChange={(e) => setNote(e.target.value)}
           rows={3}
           placeholder="Enter a note about this contact…"
-          className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 resize-none"
+          className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2 text-sm text-white placeholder-[var(--text-subtle)] focus:outline-none focus:border-[var(--accent)] resize-none"
         />
         <button
           onClick={handleSave}
@@ -79,11 +79,11 @@ function NotesTab({ contact }: { contact: Contact }) {
       </div>
       {notes.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Notes</p>
+          <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide font-medium">Notes</p>
           {notes.map((n) => (
-            <div key={n.id} className="bg-gray-800 rounded-xl p-3 text-sm text-gray-200">
+            <div key={n.id} className="bg-[var(--bg-elevated)] rounded-xl p-3 text-sm text-gray-200">
               <p>{n.body}</p>
-              <p className="text-xs text-gray-600 mt-1">{new Date(n.ts).toLocaleString()}</p>
+              <p className="text-xs text-[var(--text-subtle)] mt-1">{new Date(n.ts).toLocaleString()}</p>
             </div>
           ))}
         </div>
@@ -98,17 +98,17 @@ function DocumentsTab({ contact }: { contact: Contact }) {
     <div className="p-4">
       {hasDocs ? (
         <div className="space-y-2">
-          <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-3">Received Documents</p>
-          <div className="bg-gray-800 rounded-xl p-3 flex items-center gap-3">
+          <p className="text-xs text-[var(--text-muted)] uppercase tracking-wide font-medium mb-3">Received Documents</p>
+          <div className="bg-[var(--bg-elevated)] rounded-xl p-3 flex items-center gap-3">
             <FileText size={18} className="text-purple-400" />
             <div>
               <p className="text-sm text-white font-medium">Bank Statements</p>
-              <p className="text-xs text-gray-500">Received via portal</p>
+              <p className="text-xs text-[var(--text-muted)]">Received via portal</p>
             </div>
           </div>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+        <div className="flex flex-col items-center justify-center py-12 text-[var(--text-muted)]">
           <FileText size={36} className="mb-3 opacity-40" />
           <p className="text-sm">No documents received yet</p>
         </div>
@@ -126,11 +126,11 @@ function DealsTab({ contact }: { contact: Contact }) {
           <div className="flex items-center gap-2 mb-1">
             <span className="badge-funded">💰 Funded</span>
           </div>
-          <p className="text-sm text-gray-300 mt-2">Deal marked as funded</p>
-          <p className="text-xs text-gray-500 mt-1">Source: {contact.source || 'Unknown'}</p>
+          <p className="text-sm text-[var(--text-secondary)] mt-2">Deal marked as funded</p>
+          <p className="text-xs text-[var(--text-muted)] mt-1">Source: {contact.source || 'Unknown'}</p>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+        <div className="flex flex-col items-center justify-center py-12 text-[var(--text-muted)]">
           <Briefcase size={36} className="mb-3 opacity-40" />
           <p className="text-sm">No deals yet</p>
         </div>
@@ -174,7 +174,7 @@ export function ContactDetail({ contact, onClose, onCall }: ContactDetailProps) 
       {/* Panel */}
       <div
         className={`
-          fixed inset-y-0 right-0 z-50 w-full sm:max-w-lg bg-gray-950 border-l border-gray-800
+          fixed inset-y-0 right-0 z-50 w-full sm:max-w-lg bg-[var(--bg-base)] border-l border-[var(--border)]
           transform transition-transform duration-300 ease-in-out flex flex-col
           ${contact ? 'translate-x-0' : 'translate-x-full'}
         `}
@@ -182,22 +182,22 @@ export function ContactDetail({ contact, onClose, onCall }: ContactDetailProps) 
         {!contact ? null : (
           <>
             {/* Header */}
-            <div className="flex items-start gap-3 px-5 py-4 border-b border-gray-800 flex-shrink-0">
+            <div className="flex items-start gap-3 px-5 py-4 border-b border-[var(--border)] flex-shrink-0">
               <div className={`flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-xl shadow-lg`}>
                 {initials}
               </div>
               <div className="flex-1 min-w-0">
                 <h2 className="text-lg font-bold text-white truncate leading-tight">{contact.name || '—'}</h2>
-                <p className="text-sm text-gray-400 truncate">{contact.companyName || 'No company'}</p>
+                <p className="text-sm text-[var(--text-muted)] truncate">{contact.companyName || 'No company'}</p>
                 {badge && <span className={`${badge.cls} mt-1 inline-block`}>{badge.label}</span>}
               </div>
-              <button onClick={onClose} className="p-2 rounded-lg text-gray-500 hover:bg-gray-800 hover:text-white flex-shrink-0">
+              <button onClick={onClose} className="p-2 rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-white flex-shrink-0">
                 <X size={18} />
               </button>
             </div>
 
             {/* Quick actions */}
-            <div className="flex gap-2 px-5 py-3 border-b border-gray-800 flex-shrink-0">
+            <div className="flex gap-2 px-5 py-3 border-b border-[var(--border)] flex-shrink-0">
               <button
                 onClick={() => onCall(contact)}
                 className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-green-700 hover:bg-green-600 text-white text-sm font-semibold transition-colors"
@@ -206,26 +206,26 @@ export function ContactDetail({ contact, onClose, onCall }: ContactDetailProps) 
               </button>
               <button
                 onClick={() => setTab('chat')}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-indigo-700 hover:bg-indigo-600 text-white text-sm font-semibold transition-colors"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-indigo-700 hover:bg-[var(--accent)] text-white text-sm font-semibold transition-colors"
               >
                 <MessageSquare size={14} /> Text
               </button>
               <a
                 href={`mailto:${contact.email}`}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-white text-sm font-semibold transition-colors"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[var(--bg-elevated)] hover:bg-[var(--bg-elevated)] text-white text-sm font-semibold transition-colors"
               >
                 <Mail size={14} /> Email
               </a>
               <button
                 onClick={() => setTab('notes')}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-white text-sm font-semibold transition-colors"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[var(--bg-elevated)] hover:bg-[var(--bg-elevated)] text-white text-sm font-semibold transition-colors"
               >
                 <StickyNote size={14} /> Note
               </button>
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-gray-800 flex-shrink-0">
+            <div className="flex border-b border-[var(--border)] flex-shrink-0">
               {TABS.map((t) => (
                 <button
                   key={t.id}
@@ -271,7 +271,7 @@ export function ContactDetail({ contact, onClose, onCall }: ContactDetailProps) 
                     { label: 'SMS Sent', value: String(contact.smsSentCount), icon: null },
                   ].map(({ label, value, icon }) => (
                     <div key={label} className="flex flex-col gap-0.5">
-                      <span className="text-xs text-gray-500 uppercase tracking-wide flex items-center gap-1">
+                      <span className="text-xs text-[var(--text-muted)] uppercase tracking-wide flex items-center gap-1">
                         {icon}{label}
                       </span>
                       <span className="text-sm text-white">{value}</span>

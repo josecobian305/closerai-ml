@@ -19,3 +19,8 @@ export { NotificationsView } from './views/NotificationsView';
 export { SettingsView } from './views/SettingsView';
 export { DatabaseView } from './views/DatabaseView';
 export { PaymentsView } from './views/PaymentsView';
+export { ReviewQueueView } from './views/ReviewQueueView';
+export { UnderwritingView } from './views/UnderwritingView';
+export { SemiAutoView } from './views/SemiAutoView';
+export { OffersView } from './views/OffersView';
+export { PitchReviewView } from './views/PitchReviewView';

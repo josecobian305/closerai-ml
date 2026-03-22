@@ -28,7 +28,7 @@ export function Step09Documents({ data, onChange }: Props) {
       <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 text-center">
         What docs do you need?
       </h2>
-      <p className="text-gray-400 mb-8 text-center max-w-md">
+      <p className="text-[var(--text-muted)] mb-8 text-center max-w-md">
         Your agent will automatically request these from leads.
       </p>
 
@@ -41,14 +41,14 @@ export function Step09Documents({ data, onChange }: Props) {
               onClick={() => toggle(id)}
               className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 transition-all duration-150 text-left ${
                 selected
-                  ? 'bg-indigo-600/20 border-indigo-500 text-white'
-                  : 'bg-gray-800/40 border-gray-700/60 text-gray-300 hover:border-gray-600 hover:bg-gray-800/60'
+                  ? 'bg-[var(--accent)]/20 border-indigo-500 text-white'
+                  : 'bg-[var(--bg-elevated)]/40 border-[var(--border)]/60 text-[var(--text-secondary)] hover:border-[var(--border)] hover:bg-[var(--bg-elevated)]/60'
               }`}
             >
               <span className="text-xl flex-shrink-0">{icon}</span>
               <span className="text-sm font-medium flex-1">{label}</span>
               {selected && (
-                <div className="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
+                <div className="w-5 h-5 rounded-full bg-[var(--accent)] flex items-center justify-center flex-shrink-0">
                   <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
                     <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
@@ -60,7 +60,7 @@ export function Step09Documents({ data, onChange }: Props) {
       </div>
 
       {data.documents.length > 0 && (
-        <p className="mt-4 text-sm text-gray-500">
+        <p className="mt-4 text-sm text-[var(--text-muted)]">
           {data.documents.length} document type{data.documents.length !== 1 ? 's' : ''} selected
         </p>
       )}

@@ -555,7 +555,7 @@ export function AgentChat({ open, onClose, agentName, agentTitle, onNavigate, on
       {/* Panel — slides in from right on desktop, bottom on mobile */}
       <div
         className={`
-          fixed z-50 bg-gray-900 border-gray-800 flex flex-col transition-all duration-300 ease-in-out
+          fixed z-50 bg-[var(--bg-card)] border-[var(--border)] flex flex-col transition-all duration-300 ease-in-out
           md:inset-y-0 md:right-0 md:w-96 md:border-l
           inset-x-0 bottom-0 rounded-t-2xl border-t
           ${open
@@ -565,56 +565,56 @@ export function AgentChat({ open, onClose, agentName, agentTitle, onNavigate, on
         style={{ maxHeight: open ? '100vh' : undefined }}
       >
         {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-gray-800 flex-shrink-0">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600/80 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[var(--border)] flex-shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-[var(--accent)]/80 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
             AI
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-white">Agent Chat</p>
-            <p className="text-xs text-gray-500">Discord-style agent interface</p>
+            <p className="text-xs text-[var(--text-muted)]">Discord-style agent interface</p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-gray-800">
+          <button onClick={onClose} className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-white hover:bg-[var(--bg-elevated)]">
             <X size={16} />
           </button>
         </div>
 
         {/* Channel list */}
-        <div className="flex-shrink-0 border-b border-gray-800 px-2 py-2">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-2 mb-1">Channels</p>
+        <div className="flex-shrink-0 border-b border-[var(--border)] px-2 py-2">
+          <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider px-2 mb-1">Channels</p>
           {TENANT_CHANNELS.map((ch) => (
             <button
               key={ch.id}
               onClick={() => setChannel(ch.id)}
               className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
                 channel === ch.id
-                  ? ch.special ? 'bg-amber-600/20 text-amber-300' : 'bg-indigo-600/20 text-indigo-300'
-                  : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                  ? ch.special ? 'bg-amber-600/20 text-amber-300' : 'bg-[var(--accent)]/20 text-indigo-300'
+                  : 'text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-white'
               }`}
             >
               {ch.special ? (
                 <Brain size={14} className="flex-shrink-0 text-amber-500" />
               ) : (
-                <Hash size={14} className="flex-shrink-0 text-gray-600" />
+                <Hash size={14} className="flex-shrink-0 text-[var(--text-subtle)]" />
               )}
               <span className="flex-1 text-left font-medium">{ch.label}</span>
               {ch.special && <span className="text-xs text-amber-600 font-medium">AI</span>}
               <Circle
                 size={8}
-                className={ch.online ? 'text-green-400 fill-green-400' : 'text-gray-600 fill-gray-600'}
+                className={ch.online ? 'text-green-400 fill-green-400' : 'text-[var(--text-subtle)] fill-gray-600'}
               />
             </button>
           ))}
         </div>
 
         {/* Channel header */}
-        <div className="flex items-center gap-2 px-4 py-2 border-b border-gray-800 flex-shrink-0 bg-gray-900/50">
+        <div className="flex items-center gap-2 px-4 py-2 border-b border-[var(--border)] flex-shrink-0 bg-[var(--bg-card)]/50">
           {activeChannel.special ? (
             <Brain size={14} className="text-amber-500" />
           ) : (
-            <Hash size={14} className="text-gray-500" />
+            <Hash size={14} className="text-[var(--text-muted)]" />
           )}
           <span className={`text-sm font-semibold ${activeChannel.color}`}>{activeChannel.label}</span>
-          <span className="text-xs text-gray-600">— {activeChannel.description}</span>
+          <span className="text-xs text-[var(--text-subtle)]">— {activeChannel.description}</span>
         </div>
 
         {/* Messages */}
@@ -643,12 +643,12 @@ export function AgentChat({ open, onClose, agentName, agentTitle, onNavigate, on
                     <span className={`text-xs font-medium ${isUser ? 'text-purple-400' : activeChannel.color}`}>
                       {isUser ? 'You' : activeChannel.label}
                     </span>
-                    <span className="text-xs text-gray-600">{formatTs(msg.ts)}</span>
+                    <span className="text-xs text-[var(--text-subtle)]">{formatTs(msg.ts)}</span>
                   </div>
-                  <div className={`px-3.5 py-2 rounded-2xl text-sm leading-relaxed ${
+                  <div className={`px-3.5 py-2 rounded-[10px] text-sm leading-relaxed ${
                     isUser
-                      ? 'bg-indigo-600 text-white rounded-tr-sm'
-                      : 'bg-gray-800 text-gray-100 rounded-tl-sm'
+                      ? 'bg-[var(--accent)] text-white rounded-tr-sm'
+                      : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] rounded-tl-sm'
                   }`}>
                     {msg.text}
                   </div>
@@ -670,7 +670,7 @@ export function AgentChat({ open, onClose, agentName, agentTitle, onNavigate, on
               }`}>
                 {channel === 'brain' ? '🧠' : channel === 'jacob' ? 'JA' : channel === 'angie' ? 'AN' : 'AM'}
               </div>
-              <div className="bg-gray-800 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1">
+              <div className="bg-[var(--bg-elevated)] rounded-[10px] rounded-tl-sm px-4 py-3 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                 <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                 <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
@@ -683,16 +683,16 @@ export function AgentChat({ open, onClose, agentName, agentTitle, onNavigate, on
 
         {/* Quick Actions — show when chat is empty or after channel switch */}
         {histories[channel].length < 2 && (
-          <div className="px-4 py-2 border-t border-gray-800/50 overflow-x-auto">
+          <div className="px-4 py-2 border-t border-[var(--border)]/50 overflow-x-auto">
             <div className="flex gap-2 text-xs">
               {channel === 'brain' ? (
                 <>
-                  <button onClick={() => { setInput('Show me my stats'); }} className="shrink-0 px-3 py-1.5 bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 rounded-full hover:bg-indigo-600/30">📊 My Stats</button>
+                  <button onClick={() => { setInput('Show me my stats'); }} className="shrink-0 px-3 py-1.5 bg-[var(--accent)]/20 border border-indigo-500/30 text-indigo-300 rounded-full hover:bg-[var(--accent)]/30">📊 My Stats</button>
                   <button onClick={() => { setInput('Show me my hot leads'); }} className="shrink-0 px-3 py-1.5 bg-green-600/20 border border-green-500/30 text-green-300 rounded-full hover:bg-green-600/30">🔥 Hot Leads</button>
                   <button onClick={() => { setInput('What are my agents doing right now?'); }} className="shrink-0 px-3 py-1.5 bg-purple-600/20 border border-purple-500/30 text-purple-300 rounded-full hover:bg-purple-600/30">🤖 Agent Status</button>
                   <button onClick={() => { setInput('Change theme to ocean'); }} className="shrink-0 px-3 py-1.5 bg-cyan-600/20 border border-cyan-500/30 text-cyan-300 rounded-full hover:bg-cyan-600/30">🎨 Change Theme</button>
                   <button onClick={() => { setInput('I have new leads I want to work'); }} className="shrink-0 px-3 py-1.5 bg-amber-600/20 border border-amber-500/30 text-amber-300 rounded-full hover:bg-amber-600/30">📋 New Campaign</button>
-                  <button onClick={() => { setInput('Take me to integrations'); }} className="shrink-0 px-3 py-1.5 bg-gray-600/20 border border-gray-500/30 text-gray-300 rounded-full hover:bg-gray-600/30">🔗 Integrations</button>
+                  <button onClick={() => { setInput('Take me to integrations'); }} className="shrink-0 px-3 py-1.5 bg-gray-600/20 border border-gray-500/30 text-[var(--text-secondary)] rounded-full hover:bg-gray-600/30">🔗 Integrations</button>
                   <button onClick={() => { setInput('Report a bug'); }} className="shrink-0 px-3 py-1.5 bg-red-600/20 border border-red-500/30 text-red-300 rounded-full hover:bg-red-600/30">🐛 Report Bug</button>
                 </>
               ) : channel === 'jacob' || channel === 'angie' ? (
@@ -714,7 +714,7 @@ export function AgentChat({ open, onClose, agentName, agentTitle, onNavigate, on
         )}
 
         {/* Input */}
-        <div className="flex items-end gap-2 px-4 py-3 border-t border-gray-800 flex-shrink-0">
+        <div className="flex items-end gap-2 px-4 py-3 border-t border-[var(--border)] flex-shrink-0">
           <button
             onTouchStart={(e) => { e.preventDefault(); startVoice(); }}
             onTouchEnd={(e) => { e.preventDefault(); stopVoice(); }}
@@ -722,7 +722,7 @@ export function AgentChat({ open, onClose, agentName, agentTitle, onNavigate, on
             onMouseUp={() => stopVoice()}
             onMouseLeave={() => stopVoice()}
             id="mic-btn"
-            className={`p-2.5 rounded-xl transition-all select-none ${isRecording ? 'bg-red-600 animate-pulse scale-110' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
+            className={`p-2.5 rounded-xl transition-all select-none ${isRecording ? 'bg-red-600 animate-pulse scale-110' : 'bg-[var(--bg-elevated)] hover:bg-gray-600'} text-white`}
             title="Hold to speak"
           >
             {isRecording ? '🔴' : '🎤'}
@@ -733,12 +733,12 @@ export function AgentChat({ open, onClose, agentName, agentTitle, onNavigate, on
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={`Message #${activeChannel.label}…`}
-            className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+            className="flex-1 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2.5 text-sm text-white placeholder-[var(--text-subtle)] focus:outline-none focus:border-[var(--accent)]"
           />
           <button
             onClick={handleSend}
             disabled={!input.trim()}
-            className="p-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
+            className="p-2.5 bg-[var(--accent)] hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
           >
             <Send size={16} />
           </button>

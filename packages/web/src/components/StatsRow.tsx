@@ -5,7 +5,7 @@ interface StatsRowProps {
   stats: DashboardStats | null;
   loading?: boolean;
   isAdmin?: boolean;
-  compact?: boolean; // force compact regardless of preference
+  compact?: boolean;
 }
 
 function fmtNum(n?: number): string {
@@ -27,7 +27,12 @@ export function StatsRow({ stats, loading, isAdmin, compact: compactProp }: Stat
       return (
         <div className="flex gap-3 mb-4 overflow-x-auto pb-1">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="flex-shrink-0 h-8 w-28 bg-gray-800 rounded-lg animate-pulse" />
+            <div key={i} className="flex-shrink-0 animate-pulse" style={{
+              height: '32px',
+              width: '112px',
+              background: 'var(--bg-card)',
+              borderRadius: '8px',
+            }} />
           ))}
         </div>
       );
@@ -35,9 +40,9 @@ export function StatsRow({ stats, loading, isAdmin, compact: compactProp }: Stat
     return (
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="rounded-2xl p-4 animate-pulse" style={{ backgroundColor: 'var(--color-surface, #111827)', border: '1px solid var(--color-border, #1f2937)' }}>
-            <div className="h-3 w-20 rounded mb-3" style={{ backgroundColor: 'var(--color-border, #1f2937)' }} />
-            <div className="h-8 w-24 rounded" style={{ backgroundColor: 'var(--color-border, #1f2937)' }} />
+          <div key={i} className="stripe-card animate-pulse">
+            <div style={{ height: '10px', width: '80px', background: 'var(--bg-elevated)', borderRadius: '4px', marginBottom: '12px' }} />
+            <div style={{ height: '32px', width: '96px', background: 'var(--bg-elevated)', borderRadius: '4px' }} />
           </div>
         ))}
       </div>
@@ -50,64 +55,49 @@ export function StatsRow({ stats, loading, isAdmin, compact: compactProp }: Stat
 
   const cards = [
     {
-      label: 'Total Contacts',
+      label: 'TOTAL CONTACTS',
       value: totalContacts,
-      icon: '👥',
-      color: 'text-indigo-400',
-      bg: 'bg-indigo-500/10',
-      border: 'border-indigo-500/20',
+      color: '#635bff',
+      bgTint: 'rgba(99,91,255,0.06)',
       hint: !isAdmin && stats.totalContacts === 0 ? 'Upload leads to get started' : undefined,
     },
     {
-      label: 'SMS Sent',
+      label: 'SMS SENT',
       value: fmtNum(stats.smsSentTotal),
-      icon: '📤',
-      color: 'text-green-400',
-      bg: 'bg-green-500/10',
-      border: 'border-green-500/20',
+      color: '#22c55e',
+      bgTint: 'rgba(34,197,94,0.06)',
     },
     {
-      label: 'Total Replies',
+      label: 'TOTAL REPLIES',
       value: fmtNum(stats.repliesTotal),
-      icon: '💬',
-      color: 'text-yellow-400',
-      bg: 'bg-yellow-500/10',
-      border: 'border-yellow-500/20',
+      color: '#f59e0b',
+      bgTint: 'rgba(245,158,11,0.06)',
     },
     {
-      label: 'Docs Received',
+      label: 'DOCS RECEIVED',
       value: fmtNum(stats.docsReceived ?? 0),
-      icon: '📄',
-      color: 'text-purple-400',
-      bg: 'bg-purple-500/10',
-      border: 'border-purple-500/20',
+      color: '#a855f7',
+      bgTint: 'rgba(168,85,247,0.06)',
     },
     {
-      label: 'Reply Rate',
+      label: 'REPLY RATE',
       value: stats.replyRate != null && stats.smsSentTotal > 0
         ? fmtPct(stats.replyRate)
         : isAdmin ? fmtPct(stats.replyRate) : '—',
-      icon: '📊',
-      color: 'text-blue-400',
-      bg: 'bg-blue-500/10',
-      border: 'border-blue-500/20',
+      color: '#06b6d4',
+      bgTint: 'rgba(6,182,212,0.06)',
     },
   ];
 
-  // Compact mode: single horizontal bar
   if (isCompact) {
     return (
-      <div className="flex flex-wrap gap-2 mb-4 p-3 rounded-xl border" style={{
-        backgroundColor: 'var(--color-surface, #111827)',
-        borderColor: 'var(--color-border, #1f2937)',
-      }}>
-        {cards.map((card) => (
-          <div key={card.label} className="flex items-center gap-1.5 text-xs">
-            <span>{card.icon}</span>
-            <span style={{ color: 'var(--color-muted, #6b7280)' }}>{card.label}:</span>
-            <span className={`font-bold ${card.color}`}>{card.value}</span>
-            {card !== cards[cards.length - 1] && (
-              <span style={{ color: 'var(--color-border, #1f2937)' }} className="ml-1">·</span>
+      <div className="flex flex-wrap gap-2 mb-4 stripe-card" style={{ padding: '12px 16px' }}>
+        {cards.map((card, idx) => (
+          <div key={card.label} className="flex items-center gap-1.5" style={{ fontSize: '12px' }}>
+            <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>{card.label}:</span>
+            <span style={{ color: card.color, fontWeight: 700 }}>{card.value}</span>
+            {idx !== cards.length - 1 && (
+              <span style={{ color: 'var(--text-subtle)', margin: '0 4px' }}>·</span>
             )}
           </div>
         ))}
@@ -115,21 +105,14 @@ export function StatsRow({ stats, loading, isAdmin, compact: compactProp }: Stat
     );
   }
 
-  // Full card mode
   return (
     <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
       {cards.map((card) => (
-        <div
-          key={card.label}
-          className={`rounded-2xl p-4 border ${card.bg} ${card.border}`}
-        >
-          <div className="flex items-center gap-2 text-xs mb-2" style={{ color: 'var(--color-muted, #6b7280)' }}>
-            <span>{card.icon}</span>
-            <span className="font-medium">{card.label}</span>
-          </div>
-          <div className={`text-2xl font-bold ${card.color}`}>{card.value}</div>
+        <div key={card.label} className="stripe-card" style={{ background: card.bgTint }}>
+          <p className="metric-label" style={{ marginBottom: '8px' }}>{card.label}</p>
+          <p className="metric-value" style={{ color: card.color }}>{card.value}</p>
           {card.hint && (
-            <p className="text-xs mt-1" style={{ color: 'var(--color-muted, #6b7280)' }}>{card.hint}</p>
+            <p style={{ fontSize: '11px', color: 'var(--text-subtle)', marginTop: '4px' }}>{card.hint}</p>
           )}
         </div>
       ))}

@@ -10,9 +10,11 @@ import { FloatingSoftphone } from './components/Softphone';
 import { AgentChat } from './components/AgentChat';
 import { Register } from './pages/Register';
 import { Login } from './pages/Login';
+import { RecordProcess } from './pages/RecordProcess';
 import { AgentsView, DashboardView, MessagesView, SmsCampaignsView, EmailView,
   PipelineView, DealsView, DocumentsView, CourtSearchView, ReportsView,
   PaymentsView, DatabaseView, NotificationsView, SettingsView, LeadsView,
+  ReviewQueueView, UnderwritingView, SemiAutoView, OffersView, PitchReviewView,
 } from './components/Views';
 import { IntegrationsPage } from './components/IntegrationsPage';
 import { useContacts } from './hooks/useContacts';
@@ -32,8 +34,28 @@ function AppInner() {
   const [showRegister, setShowRegister] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
 
+  // Listen for custom navigation events (e.g. from PitchReviewView)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const section = (e as CustomEvent).detail as NavSection;
+      if (section) setActiveSection(section);
+    };
+    window.addEventListener('navigate', handler);
+    return () => window.removeEventListener('navigate', handler);
+  }, []);
+
   useEffect(() => {
     const checkRoute = () => {
+      // Check for deal param (?deal=ID) from Maria email link
+      const searchParams = new URLSearchParams(window.location.search);
+      const dealId = searchParams.get('deal');
+      if (dealId) {
+        setActiveSection('deals');
+        // Store deal ID for DealsView to auto-open
+        sessionStorage.setItem('openDealId', dealId);
+        return;
+      }
+
       const hash = window.location.hash;
       const search = new URLSearchParams(window.location.search);
       const isReg =
@@ -42,6 +64,9 @@ function AppInner() {
         search.get('page') === 'register' ||
         window.location.pathname.endsWith('/register');
       setShowRegister(isReg);
+      if (hash === '#record-your-process') {
+        setActiveSection('record-process');
+      }
     };
     checkRoute();
     window.addEventListener('hashchange', checkRoute);
@@ -99,12 +124,12 @@ function AppInner() {
   // Show loading spinner while checking auth
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4 animate-pulse">
+          <div className="w-12 h-12 rounded-[10px] bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4 animate-pulse">
             C
           </div>
-          <p className="text-gray-500 text-sm">Loading…</p>
+          <p className="text-[var(--text-muted)] text-sm">Loading…</p>
         </div>
       </div>
     );
@@ -171,8 +196,9 @@ function AppInner() {
       case 'leads': return <LeadsView />;
       case 'sms-campaigns': return <SmsCampaignsView />;
       case 'email': return <EmailView />;
-      case 'pipeline': return <PipelineView />;
+      case 'pipeline': return <PipelineView onNavigate={setActiveSection} />;
       case 'deals': return <DealsView />;
+      case 'offers': return <OffersView />;
       case 'documents': return <DocumentsView />;
       case 'court-search': return <CourtSearchView />;
       case 'ai-agents': return <AgentsView />;
@@ -182,6 +208,11 @@ function AppInner() {
       case 'notifications': return <NotificationsView />;
       case 'settings': return <SettingsView />;
       case 'integrations': return <IntegrationsPage />;
+      case 'review-queue': return <ReviewQueueView />;
+      case 'underwriting': return <UnderwritingView />;
+      case 'semi-auto': return <SemiAutoView />;
+      case 'pitch-review': return <PitchReviewView />;
+      case 'record-process': return <RecordProcess />;
       default: return null;
     }
   };
@@ -236,7 +267,7 @@ function AppInner() {
         return (
           <>
             <StatsRow stats={stats} loading={statsLoading} isAdmin={isAdmin} compact />
-            <PipelineView />
+            <PipelineView onNavigate={setActiveSection} />
           </>
         );
       case 'overview_first':

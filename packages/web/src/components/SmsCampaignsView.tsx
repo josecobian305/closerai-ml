@@ -52,7 +52,7 @@ export function SmsCampaignsView() {
             <Zap size={22} className="animate-pulse" />
             HYPER MODE — Active Merchants
           </h3>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-[var(--text-muted)] mt-1">
             Merchants who sent bank statements. Agent is reviewing + requesting missing docs.
             Normal sequence is paused until file is complete.
           </p>
@@ -61,10 +61,10 @@ export function SmsCampaignsView() {
       </div>
 
       {hyperMerchants.length === 0 ? (
-        <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-12 text-center">
-          <Zap size={40} className="text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-400 text-lg font-semibold">No active HYPER merchants</p>
-          <p className="text-gray-500 text-sm mt-2">
+        <div className="bg-[var(--bg-card)]/60 border border-[var(--border)] rounded-[10px] p-12 text-center">
+          <Zap size={40} className="text-[var(--text-subtle)] mx-auto mb-3" />
+          <p className="text-[var(--text-muted)] text-lg font-semibold">No active HYPER merchants</p>
+          <p className="text-[var(--text-muted)] text-sm mt-2">
             When a merchant emails bank statements to jclaude@chccapitalgroup.com,<br />
             they'll appear here within 3 minutes.
           </p>
@@ -99,11 +99,11 @@ export function SmsCampaignsView() {
                       </h4>
                     </div>
                     {m.name && m.business && (
-                      <p className="text-sm text-gray-400 mt-1">{m.name} · {m.phone}</p>
+                      <p className="text-sm text-[var(--text-muted)] mt-1">{m.name} · {m.phone}</p>
                     )}
                   </div>
                   <div className="text-right">
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-[var(--text-muted)]">
                       {m.last_trigger ? new Date(m.last_trigger).toLocaleString('en-US', {
                         month: 'short', day: 'numeric',
                         hour: 'numeric', minute: '2-digit'
@@ -124,14 +124,14 @@ export function SmsCampaignsView() {
 
                 {/* Email subject */}
                 {m.email_subject && (
-                  <div className="text-xs text-gray-400 mb-2">
-                    📧 <span className="text-gray-300">"{m.email_subject}"</span>
+                  <div className="text-xs text-[var(--text-muted)] mb-2">
+                    📧 <span className="text-[var(--text-secondary)]">"{m.email_subject}"</span>
                   </div>
                 )}
 
                 {/* Notes */}
                 {m.notes && (
-                  <div className="text-xs text-gray-300 bg-gray-800/50 rounded p-2 mb-2">
+                  <div className="text-xs text-[var(--text-secondary)] bg-[var(--bg-elevated)]/50 rounded p-2 mb-2">
                     {m.notes}
                   </div>
                 )}
@@ -176,20 +176,20 @@ export function SmsCampaignsView() {
       )}
 
       {/* How it works */}
-      <div className="bg-gray-900/40 border border-gray-800 rounded-xl p-4 mt-6">
-        <h4 className="font-semibold text-gray-300 mb-2 text-sm">⚡ How HYPER MODE Works</h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-gray-400">
-          <div className="bg-gray-800/50 rounded p-3">
+      <div className="bg-[var(--bg-card)]/40 border border-[var(--border)] rounded-xl p-4 mt-6">
+        <h4 className="font-semibold text-[var(--text-secondary)] mb-2 text-sm">⚡ How HYPER MODE Works</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-[var(--text-muted)]">
+          <div className="bg-[var(--bg-elevated)]/50 rounded p-3">
             <div className="font-semibold text-white mb-1">1. Email Arrives</div>
             Bank statements hit jclaude@chccapitalgroup.com from a known merchant.
             Watcher detects within 3 minutes.
           </div>
-          <div className="bg-gray-800/50 rounded p-3">
+          <div className="bg-[var(--bg-elevated)]/50 rounded p-3">
             <div className="font-semibold text-white mb-1">2. Claude Reviews</div>
             Textract extracts text → Claude checks NSFs, existing advances, revenue trends,
             missing months, red flags.
           </div>
-          <div className="bg-gray-800/50 rounded p-3">
+          <div className="bg-[var(--bg-elevated)]/50 rounded p-3">
             <div className="font-semibold text-white mb-1">3. Agent Acts</div>
             Targeted SMS + voice note + email sent. Normal sequence paused.
             Clones absorb the slack. File gets pushed to completion.
@@ -229,35 +229,35 @@ export function SmsCampaignsView() {
 
       {/* Agent Breakdown */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-4">
+        <div className="bg-[var(--bg-card)]/60 border border-[var(--border)] rounded-[10px] p-4">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-8 rounded-full bg-green-900/40 flex items-center justify-center text-green-300 font-bold">J</div>
             <span className="font-semibold text-white">Jacob Squad</span>
           </div>
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-400">Active</span>
+              <span className="text-sm text-[var(--text-muted)]">Active</span>
               <span className="font-bold text-green-300">{liveStats?.agents?.jacob?.active ?? 0}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-400">Funded</span>
+              <span className="text-sm text-[var(--text-muted)]">Funded</span>
               <span className="font-bold text-purple-300">{liveStats?.agents?.jacob?.funded ?? 0}</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-4">
+        <div className="bg-[var(--bg-card)]/60 border border-[var(--border)] rounded-[10px] p-4">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-8 rounded-full bg-pink-900/40 flex items-center justify-center text-pink-300 font-bold">A</div>
             <span className="font-semibold text-white">Angie Squad</span>
           </div>
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-400">Active</span>
+              <span className="text-sm text-[var(--text-muted)]">Active</span>
               <span className="font-bold text-green-300">{liveStats?.agents?.angie?.active ?? 0}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-400">Funded</span>
+              <span className="text-sm text-[var(--text-muted)]">Funded</span>
               <span className="font-bold text-purple-300">{liveStats?.agents?.angie?.funded ?? 0}</span>
             </div>
           </div>
@@ -269,23 +269,23 @@ export function SmsCampaignsView() {
         <h3 className="text-lg font-bold text-white">Active Campaigns</h3>
         <div className="space-y-3">
           {campaigns.map((c) => (
-            <div key={c.id} className="bg-gray-900/60 border border-gray-800 rounded-xl p-4 hover:border-gray-700 transition">
+            <div key={c.id} className="bg-[var(--bg-card)]/60 border border-[var(--border)] rounded-xl p-4 hover:border-[var(--border)] transition">
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <h4 className="font-semibold text-white">{c.name}</h4>
-                  <p className="text-sm text-gray-400 mt-1">{c.description}</p>
+                  <p className="text-sm text-[var(--text-muted)] mt-1">{c.description}</p>
                 </div>
                 <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                  c.status === 'active' ? 'bg-green-900/40 text-green-300' : 'bg-gray-800 text-gray-400'
+                  c.status === 'active' ? 'bg-green-900/40 text-green-300' : 'bg-[var(--bg-elevated)] text-[var(--text-muted)]'
                 }`}>
                   {c.status === 'active' ? '● LIVE' : '● PAUSED'}
                 </span>
               </div>
-              <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-400">
-                <div><span className="text-gray-500">Persona:</span> {c.persona}</div>
-                <div><span className="text-gray-500">Goal:</span> {c.goal}</div>
-                <div><span className="text-gray-500">Sequence:</span> {c.sequence_days} days</div>
-                <div><span className="text-gray-500">Channels:</span> {c.channels.join(' + ')}</div>
+              <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-[var(--text-muted)]">
+                <div><span className="text-[var(--text-muted)]">Persona:</span> {c.persona}</div>
+                <div><span className="text-[var(--text-muted)]">Goal:</span> {c.goal}</div>
+                <div><span className="text-[var(--text-muted)]">Sequence:</span> {c.sequence_days} days</div>
+                <div><span className="text-[var(--text-muted)]">Channels:</span> {c.channels.join(' + ')}</div>
               </div>
               <div className="mt-3 flex flex-wrap gap-1">
                 {c.angles_rotation.map((a) => (
@@ -315,9 +315,9 @@ export function SmsCampaignsView() {
 
             return (
               <div key={row.day} className="flex items-center gap-3">
-                <div className="w-16 text-right text-sm font-semibold text-gray-400">Day {row.day}</div>
+                <div className="w-16 text-right text-sm font-semibold text-[var(--text-muted)]">Day {row.day}</div>
                 <div className="flex-1">
-                  <div className="h-8 bg-gray-800 rounded overflow-hidden flex items-center">
+                  <div className="h-8 bg-[var(--bg-elevated)] rounded overflow-hidden flex items-center">
                     <div
                       style={{ width: `${pct}%`, backgroundColor: dayColor }}
                       className="h-full flex items-center justify-center text-white font-bold text-sm transition-all duration-300"
@@ -326,7 +326,7 @@ export function SmsCampaignsView() {
                     </div>
                   </div>
                 </div>
-                <div className="w-24 text-right text-xs text-gray-400">
+                <div className="w-24 text-right text-xs text-[var(--text-muted)]">
                   🔵 {row.agents.jacob} 🩷 {row.agents.angie}
                 </div>
               </div>
@@ -339,7 +339,7 @@ export function SmsCampaignsView() {
         <h3 className="text-lg font-bold text-white mb-4">Escalation Ladder</h3>
         <div className="space-y-2">
           {escalation.map((step, i) => (
-            <div key={i} className="bg-gray-900/60 border border-gray-800 rounded-xl p-3">
+            <div key={i} className="bg-[var(--bg-card)]/60 border border-[var(--border)] rounded-xl p-3">
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-white">Days {step.days}</span>
                 <div className="flex flex-wrap gap-1 justify-end">
@@ -350,7 +350,7 @@ export function SmsCampaignsView() {
                   ))}
                 </div>
               </div>
-              <div className="text-sm text-gray-400 mt-2">{step.tone}</div>
+              <div className="text-sm text-[var(--text-muted)] mt-2">{step.tone}</div>
             </div>
           ))}
         </div>
@@ -360,7 +360,7 @@ export function SmsCampaignsView() {
 
   const renderAngles = () => (
     <div className="max-w-5xl space-y-3">
-      <p className="text-sm text-gray-400 mb-4">10 message angles, rotated across the 20-day sequence. Click to expand.</p>
+      <p className="text-sm text-[var(--text-muted)] mb-4">10 message angles, rotated across the 20-day sequence. Click to expand.</p>
       {angles.map((angle) => {
         const isExpanded = expandedAngle === angle.id;
         const toneColors: Record<string, string> = {
@@ -379,7 +379,7 @@ export function SmsCampaignsView() {
           <div
             key={angle.id}
             onClick={() => setExpandedAngle(isExpanded ? null : angle.id)}
-            className="bg-gray-900/60 border border-gray-800 rounded-xl p-4 cursor-pointer hover:border-gray-700 transition"
+            className="bg-[var(--bg-card)]/60 border border-[var(--border)] rounded-xl p-4 cursor-pointer hover:border-[var(--border)] transition"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -389,34 +389,34 @@ export function SmsCampaignsView() {
                 <div>
                   <h4 className="font-semibold text-white">{angle.name}</h4>
                   <div className="flex gap-2 mt-1">
-                    <span className="text-xs px-2 py-0.5 bg-gray-800 text-gray-300 rounded">
+                    <span className="text-xs px-2 py-0.5 bg-[var(--bg-elevated)] text-[var(--text-secondary)] rounded">
                       Days {angle.best_day_range}
                     </span>
-                    <span className={`text-xs px-2 py-0.5 bg-gray-800 ${toneColors[angle.tone] || 'text-gray-400'} rounded`}>
+                    <span className={`text-xs px-2 py-0.5 bg-[var(--bg-elevated)] ${toneColors[angle.tone] || 'text-[var(--text-muted)]'} rounded`}>
                       {angle.tone}
                     </span>
-                    <span className="text-xs px-2 py-0.5 bg-gray-800 text-gray-300 rounded">
+                    <span className="text-xs px-2 py-0.5 bg-[var(--bg-elevated)] text-[var(--text-secondary)] rounded">
                       {angle.agent === 'both' ? '🔵🩷' : angle.agent === 'jacob' ? '🔵' : '🩷'}
                     </span>
                   </div>
                 </div>
               </div>
-              <span className="text-gray-500">{isExpanded ? '▼' : '▶'}</span>
+              <span className="text-[var(--text-muted)]">{isExpanded ? '▼' : '▶'}</span>
             </div>
 
             {isExpanded && (
-              <div className="mt-4 pt-4 border-t border-gray-800 space-y-3">
-                <div className="bg-gray-800/50 rounded-lg p-3 font-mono text-sm text-gray-300">
+              <div className="mt-4 pt-4 border-t border-[var(--border)] space-y-3">
+                <div className="bg-[var(--bg-elevated)]/50 rounded-lg p-3 font-mono text-sm text-[var(--text-secondary)]">
                   "{angle.template}"
                 </div>
                 {angle.industry_variants && (
                   <div>
-                    <p className="text-xs text-gray-500 mb-2 font-semibold">Industry Variants:</p>
+                    <p className="text-xs text-[var(--text-muted)] mb-2 font-semibold">Industry Variants:</p>
                     <div className="grid grid-cols-2 gap-2">
                       {Object.entries(angle.industry_variants).map(([ind, desc]) => (
-                        <div key={ind} className="bg-gray-800/50 rounded p-2 text-xs">
+                        <div key={ind} className="bg-[var(--bg-elevated)]/50 rounded p-2 text-xs">
                           <span className="text-blue-400 font-semibold">{ind}:</span>{' '}
-                          <span className="text-gray-300">{desc}</span>
+                          <span className="text-[var(--text-secondary)]">{desc}</span>
                         </div>
                       ))}
                     </div>
@@ -437,7 +437,7 @@ export function SmsCampaignsView() {
           <Calendar size={20} /> Daily Cadence by Phase
         </h3>
         {cadencePhases.map((phase) => (
-          <div key={phase.label} className="bg-gray-900/60 border border-gray-800 rounded-xl p-4">
+          <div key={phase.label} className="bg-[var(--bg-card)]/60 border border-[var(--border)] rounded-xl p-4">
             <div className="flex items-start gap-4">
               <div
                 style={{ backgroundColor: phase.color }}
@@ -447,10 +447,10 @@ export function SmsCampaignsView() {
               </div>
               <div className="flex-1">
                 <h4 className="font-semibold text-white">{phase.label}</h4>
-                <p className="text-sm text-gray-400 mt-1">
+                <p className="text-sm text-[var(--text-muted)] mt-1">
                   {phase.touches} touches/day · 9 AM – 6 PM ET · 30min min gap
                 </p>
-                <p className="text-sm text-gray-500 mt-2">{phase.desc}</p>
+                <p className="text-sm text-[var(--text-muted)] mt-2">{phase.desc}</p>
               </div>
             </div>
           </div>
@@ -501,23 +501,23 @@ export function SmsCampaignsView() {
       {loading ? (
         <div className="space-y-4">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="bg-gray-900 border border-gray-800 rounded-2xl p-5 animate-pulse">
-              <div className="h-5 bg-gray-800 rounded w-32 mb-3" />
-              <div className="h-3 bg-gray-800 rounded w-48" />
+            <div key={i} className="bg-[var(--bg-card)] border border-[var(--border)] rounded-[10px] p-5 animate-pulse">
+              <div className="h-5 bg-[var(--bg-elevated)] rounded w-32 mb-3" />
+              <div className="h-3 bg-[var(--bg-elevated)] rounded w-48" />
             </div>
           ))}
         </div>
       ) : (
         <>
           {/* Tab Bar */}
-          <div className="flex gap-1 mb-6 border-b border-gray-800 overflow-x-auto">
+          <div className="flex gap-1 mb-6 border-b border-[var(--border)] overflow-x-auto">
             {/* HYPER tab — always first, highlighted */}
             <button
               onClick={() => setActiveTab('hyper')}
               className={`px-4 py-3 font-bold transition-colors border-b-2 whitespace-nowrap flex items-center gap-2 ${
                 activeTab === 'hyper'
                   ? 'text-yellow-300 border-yellow-400'
-                  : 'text-gray-400 border-transparent hover:text-yellow-400'
+                  : 'text-[var(--text-muted)] border-transparent hover:text-yellow-400'
               }`}
             >
               ⚡ HYPER
@@ -534,7 +534,7 @@ export function SmsCampaignsView() {
                 className={`px-4 py-3 font-semibold transition-colors border-b-2 whitespace-nowrap ${
                   activeTab === tab
                     ? 'text-white border-blue-500'
-                    : 'text-gray-400 border-transparent hover:text-gray-300'
+                    : 'text-[var(--text-muted)] border-transparent hover:text-[var(--text-secondary)]'
                 }`}
               >
                 {tab === 'overview'

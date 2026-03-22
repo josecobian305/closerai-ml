@@ -50,26 +50,26 @@ export function DatabaseView() {
         <h2 className="text-2xl font-bold text-white">Database</h2>
         <div className="flex items-center gap-3">
           <div className="relative">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
             <input value={query} onChange={e => { setQuery(e.target.value); setPage(0); }}
               placeholder="Search contacts..."
-              className="bg-gray-900 border border-gray-700 rounded-lg pl-9 pr-3 py-2 text-white text-sm placeholder-gray-600 focus:border-indigo-500 focus:outline-none w-60" />
+              className="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg pl-9 pr-3 py-2 text-white text-sm placeholder-[var(--text-subtle)] focus:border-[var(--accent)] focus:outline-none w-60" />
           </div>
-          <button onClick={exportCsv} className="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg text-sm flex items-center gap-1.5">
+          <button onClick={exportCsv} className="px-3 py-2 bg-[var(--bg-elevated)] hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] rounded-lg text-sm flex items-center gap-1.5">
             <Download size={14} /> CSV
           </button>
         </div>
       </div>
 
-      <span className="text-sm text-gray-500">{filtered.length} contacts</span>
+      <span className="text-sm text-[var(--text-muted)]">{filtered.length} contacts</span>
 
       {loading ? (
-        <div className="animate-pulse space-y-1">{[...Array(10)].map((_, i) => <div key={i} className="h-10 bg-gray-900 rounded" />)}</div>
+        <div className="animate-pulse space-y-1">{[...Array(10)].map((_, i) => <div key={i} className="h-10 bg-[var(--bg-card)] rounded" />)}</div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-gray-500 text-xs border-b border-gray-800">
+              <tr className="text-left text-[var(--text-muted)] text-xs border-b border-[var(--border)]">
                 <th className="pb-2 pr-4">Name</th>
                 <th className="pb-2 pr-4">Business</th>
                 <th className="pb-2 pr-4">Phone</th>
@@ -80,19 +80,19 @@ export function DatabaseView() {
             </thead>
             <tbody>
               {paged.map((c) => (
-                <tr key={c.id} className="border-b border-gray-800/50 hover:bg-gray-900/50">
+                <tr key={c.id} className="border-b border-[var(--border)]/50 hover:bg-[var(--bg-card)]/50">
                   <td className="py-2 pr-4 text-white">{c.name || '—'}</td>
-                  <td className="py-2 pr-4 text-gray-400 truncate max-w-[200px]">{c.companyName || '—'}</td>
-                  <td className="py-2 pr-4 text-gray-400 font-mono text-xs">{c.phone}</td>
+                  <td className="py-2 pr-4 text-[var(--text-muted)] truncate max-w-[200px]">{c.companyName || '—'}</td>
+                  <td className="py-2 pr-4 text-[var(--text-muted)] font-mono text-xs">{c.phone}</td>
                   <td className="py-2 pr-4">
                     <span className={`text-xs px-2 py-0.5 rounded-full ${
                       c.tier === 'hot' ? 'bg-red-900/50 text-red-300' :
                       c.tier === 'warm' ? 'bg-yellow-900/50 text-yellow-300' :
-                      'bg-gray-800 text-gray-400'
+                      'bg-[var(--bg-elevated)] text-[var(--text-muted)]'
                     }`}>{c.tier || 'cold'}</span>
                   </td>
-                  <td className="py-2 pr-4 text-gray-400">{c.smsSentCount || 0}</td>
-                  <td className="py-2 text-gray-500 text-xs">{c.lastActivity ? new Date(c.lastActivity).toLocaleDateString() : '—'}</td>
+                  <td className="py-2 pr-4 text-[var(--text-muted)]">{c.smsSentCount || 0}</td>
+                  <td className="py-2 text-[var(--text-muted)] text-xs">{c.lastActivity ? new Date(c.lastActivity).toLocaleDateString() : '—'}</td>
                 </tr>
               ))}
             </tbody>
@@ -103,10 +103,10 @@ export function DatabaseView() {
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-3 mt-4">
           <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
-            className="p-2 bg-gray-800 rounded-lg disabled:opacity-30"><ChevronLeft size={16} className="text-gray-400" /></button>
-          <span className="text-sm text-gray-500">Page {page + 1} of {totalPages}</span>
+            className="p-2 bg-[var(--bg-elevated)] rounded-lg disabled:opacity-30"><ChevronLeft size={16} className="text-[var(--text-muted)]" /></button>
+          <span className="text-sm text-[var(--text-muted)]">Page {page + 1} of {totalPages}</span>
           <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}
-            className="p-2 bg-gray-800 rounded-lg disabled:opacity-30"><ChevronRight size={16} className="text-gray-400" /></button>
+            className="p-2 bg-[var(--bg-elevated)] rounded-lg disabled:opacity-30"><ChevronRight size={16} className="text-[var(--text-muted)]" /></button>
         </div>
       )}
     </div>

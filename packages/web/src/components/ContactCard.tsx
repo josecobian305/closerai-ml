@@ -72,36 +72,43 @@ export function ContactCard({ contact, onClick, onCall, compact }: ContactCardPr
   if (compact) {
     return (
       <div
-        className="flex items-center gap-2 p-2 rounded-xl cursor-pointer transition-colors duration-150"
-        style={{
-          backgroundColor: 'var(--color-surface, #111827)',
-          border: '1px solid var(--color-border, #1f2937)',
-        }}
+        className="stripe-card flex items-center gap-2 cursor-pointer"
+        style={{ padding: '8px 12px' }}
         onClick={() => onClick(contact)}
-        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-accent, #6366f1)'; }}
-        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-border, #1f2937)'; }}
       >
-        <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-xs shadow-md`}>
+        <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-xs`}>
           {initials}
         </div>
         <div className="min-w-0 flex-1">
-          <div className="font-semibold text-xs truncate leading-tight" style={{ color: 'var(--color-text, #e2e8f0)' }}>
+          <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }} className="truncate">
             {contact.name || '—'}
           </div>
-          {badge && (
-            <span className={`${badge.cls} text-xs`}>{badge.label}</span>
-          )}
+          {badge && <span className={`${badge.cls}`} style={{ fontSize: '10px' }}>{badge.label}</span>}
         </div>
         <div className="flex gap-1 flex-shrink-0">
           <button
             onClick={handleCall}
-            className="p-1 rounded-lg bg-green-700 hover:bg-green-600 text-white transition-colors"
+            style={{
+              padding: '4px',
+              borderRadius: '4px',
+              background: 'rgba(34,197,94,0.12)',
+              color: '#22c55e',
+              border: 'none',
+              cursor: 'pointer',
+            }}
           >
             <Phone size={11} />
           </button>
           <button
             onClick={handleText}
-            className="p-1 rounded-lg bg-indigo-700 hover:bg-indigo-600 text-white transition-colors"
+            style={{
+              padding: '4px',
+              borderRadius: '4px',
+              background: 'rgba(99,91,255,0.12)',
+              color: '#635bff',
+              border: 'none',
+              cursor: 'pointer',
+            }}
           >
             <MessageSquare size={11} />
           </button>
@@ -112,61 +119,71 @@ export function ContactCard({ contact, onClick, onCall, compact }: ContactCardPr
 
   return (
     <div
-      className="flex flex-col gap-3 p-4 rounded-2xl cursor-pointer transition-colors duration-150"
-      style={{
-        backgroundColor: 'var(--color-surface, #111827)',
-        border: '1px solid var(--color-border, #1f2937)',
-      }}
+      className="stripe-card flex flex-col gap-3 cursor-pointer"
       onClick={() => onClick(contact)}
-      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-accent, #6366f1)'; }}
-      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-border, #1f2937)'; }}
     >
       {/* Top row */}
       <div className="flex items-start gap-3">
-        <div className={`flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-base shadow-md`}>
+        <div className={`flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-sm`}>
           {initials}
         </div>
         <div className="min-w-0 flex-1">
-          <div className="font-semibold text-sm truncate leading-tight" style={{ color: 'var(--color-text, #e2e8f0)' }}>
+          <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }} className="truncate">
             {contact.name || '—'}
           </div>
-          <div className="text-xs truncate mt-0.5" style={{ color: 'var(--color-muted, #6b7280)' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-subtle)', marginTop: '2px' }} className="truncate">
             {contact.companyName || contact.phone}
           </div>
         </div>
-        {badge && (
-          <span className={`${badge.cls} flex-shrink-0 text-xs`}>{badge.label}</span>
-        )}
+        {badge && <span className={`${badge.cls} flex-shrink-0`}>{badge.label}</span>}
       </div>
 
       {/* Last message */}
       {contact.lastSmsPreview && (
-        <p className="text-xs line-clamp-2 leading-relaxed" style={{ color: 'var(--color-muted, #6b7280)' }}>
+        <p style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.5' }} className="line-clamp-2">
           {contact.lastSmsPreview}
         </p>
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between text-xs" style={{ color: 'var(--color-muted, #6b7280)' }}>
+      <div className="flex items-center justify-between" style={{ fontSize: '11px', color: 'var(--text-subtle)' }}>
         <span>{contact.smsSentCount > 0 ? `${contact.smsSentCount} msgs` : 'No messages'}</span>
         {timeAgo && <span>{timeAgo}</span>}
       </div>
 
       {/* Action buttons */}
-      <div className="flex gap-2 mt-1">
+      <div className="flex gap-2">
         <button
           onClick={handleCall}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-green-700 hover:bg-green-600 text-white text-sm font-semibold transition-colors duration-150"
+          className="flex-1 flex items-center justify-center gap-1.5"
+          style={{
+            padding: '8px',
+            borderRadius: '6px',
+            background: 'rgba(34,197,94,0.1)',
+            border: '1px solid rgba(34,197,94,0.2)',
+            color: '#22c55e',
+            fontSize: '12px',
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
         >
-          <Phone size={15} />
-          Call
+          <Phone size={13} /> Call
         </button>
         <button
           onClick={handleText}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-indigo-700 hover:bg-indigo-600 text-white text-sm font-semibold transition-colors duration-150"
+          className="flex-1 flex items-center justify-center gap-1.5"
+          style={{
+            padding: '8px',
+            borderRadius: '6px',
+            background: 'rgba(99,91,255,0.1)',
+            border: '1px solid rgba(99,91,255,0.2)',
+            color: '#635bff',
+            fontSize: '12px',
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
         >
-          <MessageSquare size={15} />
-          Text
+          <MessageSquare size={13} /> Text
         </button>
       </div>
     </div>

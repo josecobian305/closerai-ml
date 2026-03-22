@@ -33,10 +33,10 @@ export function Step13Complete({ agentName, onLaunch, loading }: Props) {
         <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
           Your AI sales team is ready.
         </h2>
-        <p className="text-lg text-gray-400 mb-3 max-w-md mx-auto">
+        <p className="text-lg text-[var(--text-muted)] mb-3 max-w-md mx-auto">
           <span className="text-indigo-300 font-semibold">{agentName || 'Your agent'}</span> is configured and ready to start working leads.
         </p>
-        <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-500 mb-10">
+        <div className="flex flex-wrap justify-center gap-4 text-sm text-[var(--text-muted)] mb-10">
           <span>✅ Agent configured</span>
           <span>✅ Rules generated</span>
           <span>✅ Dashboard personalized</span>
@@ -47,7 +47,7 @@ export function Step13Complete({ agentName, onLaunch, loading }: Props) {
         <button
           onClick={onLaunch}
           disabled={loading}
-          className="group flex items-center gap-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-60 text-white text-lg font-semibold px-10 py-4 rounded-2xl transition-all duration-200 shadow-lg shadow-indigo-600/30 hover:shadow-indigo-500/40 hover:scale-105"
+          className="group flex items-center gap-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-60 text-white text-lg font-semibold px-10 py-4 rounded-[10px] transition-all duration-200 shadow-lg shadow-indigo-600/30 hover:shadow-indigo-500/40 hover:scale-105"
         >
           {loading ? (
             <>

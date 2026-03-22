@@ -270,10 +270,10 @@ export function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col">
+    <div className="min-h-screen bg-[var(--bg-base)] flex flex-col">
       {/* Progress bar */}
       {step > 1 && step < TOTAL_STEPS && (
-        <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-gray-800">
+        <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-[var(--bg-elevated)]">
           <div
             className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500 ease-out"
             style={{ width: `${progressPercent}%` }}
@@ -283,7 +283,7 @@ export function Register() {
 
       {/* Step counter */}
       {step > 1 && step < TOTAL_STEPS && (
-        <div className="fixed top-4 right-4 z-50 text-xs font-medium text-gray-500 bg-gray-900/80 px-3 py-1.5 rounded-full backdrop-blur">
+        <div className="fixed top-4 right-4 z-50 text-xs font-medium text-[var(--text-muted)] bg-[var(--bg-card)]/80 px-3 py-1.5 rounded-full backdrop-blur">
           {step - 1} / {PROGRESS_STEPS}
         </div>
       )}
@@ -292,7 +292,7 @@ export function Register() {
       {step > 1 && step < TOTAL_STEPS && (
         <button
           onClick={back}
-          className="fixed top-3 left-4 z-50 flex items-center gap-1 text-sm text-gray-500 hover:text-gray-300 transition-colors px-2 py-1.5 rounded-lg hover:bg-gray-800"
+          className="fixed top-3 left-4 z-50 flex items-center gap-1 text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors px-2 py-1.5 rounded-lg hover:bg-[var(--bg-elevated)]"
         >
           <ChevronLeft size={18} />
           Back
@@ -314,7 +314,7 @@ export function Register() {
           <button
             onClick={next}
             disabled={!canGoNext()}
-            className="w-full max-w-lg mx-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold text-base py-4 rounded-xl transition-all duration-200 block"
+            className="w-full max-w-lg mx-auto flex items-center justify-center gap-2 bg-[var(--accent)] hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold text-base py-4 rounded-xl transition-all duration-200 block"
           >
             {step === 12 ? 'Finish Setup' : 'Continue →'}
           </button>

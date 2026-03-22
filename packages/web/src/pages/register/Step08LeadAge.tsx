@@ -18,7 +18,7 @@ export function Step08LeadAge({ data, onChange }: Props) {
       <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 text-center">
         How old are your typical leads?
       </h2>
-      <p className="text-gray-400 mb-8 text-center max-w-md">
+      <p className="text-[var(--text-muted)] mb-8 text-center max-w-md">
         Lead age determines messaging urgency and follow-up cadence.
       </p>
 
@@ -29,18 +29,18 @@ export function Step08LeadAge({ data, onChange }: Props) {
             onClick={() => onChange({ leadAge: id })}
             className={`w-full flex items-center justify-between px-5 py-4 rounded-xl border-2 transition-all duration-150 text-left ${
               data.leadAge === id
-                ? 'bg-indigo-600/20 border-indigo-500 text-white'
-                : 'bg-gray-800/40 border-gray-700/60 text-gray-300 hover:border-gray-600 hover:bg-gray-800/60'
+                ? 'bg-[var(--accent)]/20 border-indigo-500 text-white'
+                : 'bg-[var(--bg-elevated)]/40 border-[var(--border)]/60 text-[var(--text-secondary)] hover:border-[var(--border)] hover:bg-[var(--bg-elevated)]/60'
             }`}
           >
             <div>
               <p className="font-semibold">{label}</p>
-              <p className={`text-sm mt-0.5 ${data.leadAge === id ? 'text-indigo-300' : 'text-gray-500'}`}>{desc}</p>
+              <p className={`text-sm mt-0.5 ${data.leadAge === id ? 'text-indigo-300' : 'text-[var(--text-muted)]'}`}>{desc}</p>
             </div>
             <span className={`text-xs font-medium px-3 py-1.5 rounded-full flex-shrink-0 ml-4 ${
               data.leadAge === id
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-700 text-gray-400'
+                ? 'bg-[var(--accent)] text-white'
+                : 'bg-[var(--bg-elevated)] text-[var(--text-muted)]'
             }`}>
               {badge}
             </span>

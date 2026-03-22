@@ -20,7 +20,7 @@ export function Step07LeadSource({ data, onChange }: Props) {
       <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 text-center">
         Where do your leads come from?
       </h2>
-      <p className="text-gray-400 mb-8 text-center max-w-md">
+      <p className="text-[var(--text-muted)] mb-8 text-center max-w-md">
         Select all that apply. We'll optimize messaging for each source.
       </p>
 
@@ -33,8 +33,8 @@ export function Step07LeadSource({ data, onChange }: Props) {
               onClick={() => toggle(source)}
               className={`px-5 py-3 rounded-full border-2 text-sm font-medium transition-all duration-150 ${
                 selected
-                  ? 'bg-indigo-600/20 border-indigo-500 text-indigo-200'
-                  : 'bg-gray-800/40 border-gray-700 text-gray-400 hover:border-gray-600 hover:text-gray-200'
+                  ? 'bg-[var(--accent)]/20 border-indigo-500 text-indigo-200'
+                  : 'bg-[var(--bg-elevated)]/40 border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--border)] hover:text-gray-200'
               }`}
             >
               {selected && <span className="mr-1.5">✓</span>}
@@ -45,7 +45,7 @@ export function Step07LeadSource({ data, onChange }: Props) {
       </div>
 
       {data.leadSources.length > 0 && (
-        <p className="mt-6 text-sm text-gray-500">
+        <p className="mt-6 text-sm text-[var(--text-muted)]">
           {data.leadSources.length} source{data.leadSources.length !== 1 ? 's' : ''} selected
         </p>
       )}

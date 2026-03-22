@@ -57,7 +57,7 @@ export function Step06Tone({ data, onChange }: Props) {
       <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 text-center">
         How should your agent talk?
       </h2>
-      <p className="text-gray-400 mb-8 text-center max-w-md">
+      <p className="text-[var(--text-muted)] mb-8 text-center max-w-md">
         Choose the conversation style that matches your brand.
       </p>
 
@@ -69,13 +69,13 @@ export function Step06Tone({ data, onChange }: Props) {
             className={`flex items-center gap-4 p-5 rounded-xl border-2 transition-all duration-150 text-left ${
               data.tone === tone.id
                 ? `bg-gradient-to-br ${tone.gradient} ${tone.border} ${tone.text}`
-                : 'bg-gray-800/40 border-gray-700/60 text-gray-300 hover:border-gray-600 hover:bg-gray-800/60'
+                : 'bg-[var(--bg-elevated)]/40 border-[var(--border)]/60 text-[var(--text-secondary)] hover:border-[var(--border)] hover:bg-[var(--bg-elevated)]/60'
             }`}
           >
             <span className="text-3xl flex-shrink-0">{tone.emoji}</span>
             <div>
               <p className="font-semibold text-base">{tone.label}</p>
-              <p className={`text-sm mt-0.5 ${data.tone === tone.id ? 'opacity-80' : 'text-gray-500'}`}>{tone.desc}</p>
+              <p className={`text-sm mt-0.5 ${data.tone === tone.id ? 'opacity-80' : 'text-[var(--text-muted)]'}`}>{tone.desc}</p>
             </div>
           </button>
         ))}

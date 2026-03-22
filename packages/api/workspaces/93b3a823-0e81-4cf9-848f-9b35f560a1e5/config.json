@@ -1,0 +1,49 @@
+{
+  "userId": "93b3a823-0e81-4cf9-848f-9b35f560a1e5",
+  "businessName": "1 source realty",
+  "industry": "real_estate",
+  "pitch": "Houses and rental propertyies ",
+  "owner": {
+    "name": "Jason jackson",
+    "email": "cobian.jise@icloud.com",
+    "phone": "7862804399"
+  },
+  "agent": {
+    "name": "Jacob",
+    "title": "Head of Salesjacob@yourbusiness.com",
+    "email": ""
+  },
+  "tone": "bold",
+  "leadSources": [
+    "LendingTree"
+  ],
+  "leadAge": "0-48h",
+  "documents": [
+    "bank3",
+    "dl",
+    "bank4",
+    "mtd",
+    "voided_check",
+    "payoff_letter",
+    "tax_returns",
+    "pnl",
+    "articles"
+  ],
+  "phone": {
+    "areaCode": "786",
+    "portExisting": false,
+    "existingNumber": ""
+  },
+  "layout": "messages_first",
+  "capabilities": {
+    "sms": true,
+    "email": true,
+    "voiceNotes": true,
+    "callBridge": true,
+    "autoReply": true,
+    "docCollection": true,
+    "courtSearch": true,
+    "notifications": true
+  },
+  "createdAt": "2026-03-22T15:02:50.971Z"
+}

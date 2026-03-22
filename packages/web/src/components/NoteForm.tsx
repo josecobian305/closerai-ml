@@ -36,7 +36,7 @@ export function NoteForm({ contactId: _contactId, onSubmit }: NoteFormProps) {
         onChange={(e) => setNote(e.target.value)}
         rows={4}
         placeholder="Enter a note…"
-        className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 resize-none"
+        className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2 text-sm text-white placeholder-[var(--text-subtle)] focus:outline-none focus:border-[var(--accent)] resize-none"
       />
       {error && <p className="text-red-400 text-xs">{error}</p>}
       <button

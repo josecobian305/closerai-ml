@@ -24,10 +24,10 @@ function categoryClass(category?: string): string {
   switch (category) {
     case 'hot': case 'interested': return 'bg-green-900/70 text-green-300 border border-green-700/50';
     case 'warm': return 'bg-yellow-900/70 text-yellow-300 border border-yellow-700/50';
-    case 'cold': case 'not_interested': return 'bg-gray-700 text-gray-400';
+    case 'cold': case 'not_interested': return 'bg-[var(--bg-elevated)] text-[var(--text-muted)]';
     case 'already_funded': return 'bg-blue-900/70 text-blue-300';
     case 'wrong_number': return 'bg-red-900/70 text-red-300';
-    default: return 'bg-gray-800 text-gray-500';
+    default: return 'bg-[var(--bg-elevated)] text-[var(--text-muted)]';
   }
 }
 
@@ -35,7 +35,7 @@ function ChannelBadge({ channel }: { channel?: string }) {
   if (!channel) return null;
   return (
     <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
-      channel === 'email' ? 'bg-blue-900/60 text-blue-300' : 'bg-gray-800 text-gray-400'
+      channel === 'email' ? 'bg-blue-900/60 text-blue-300' : 'bg-[var(--bg-elevated)] text-[var(--text-muted)]'
     }`}>
       {channel === 'email' ? '📧 Email' : '💬 SMS'}
     </span>
@@ -78,7 +78,7 @@ export function ChatLog({ messages, loading, error, onSend }: ChatLogProps) {
         <div className="flex-1 space-y-3 p-4 overflow-y-auto">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
-              <div className="w-48 h-12 bg-gray-800 rounded-2xl animate-pulse" />
+              <div className="w-48 h-12 bg-[var(--bg-elevated)] rounded-[10px] animate-pulse" />
             </div>
           ))}
         </div>
@@ -99,7 +99,7 @@ export function ChatLog({ messages, loading, error, onSend }: ChatLogProps) {
   if (messages.length === 0) {
     return (
       <div className="flex flex-col h-full">
-        <div className="flex-1 p-8 flex flex-col items-center justify-center text-gray-500">
+        <div className="flex-1 p-8 flex flex-col items-center justify-center text-[var(--text-muted)]">
           <span className="text-4xl block mb-2">💬</span>
           <p>No messages yet</p>
         </div>
@@ -118,18 +118,18 @@ export function ChatLog({ messages, loading, error, onSend }: ChatLogProps) {
           return (
             <div key={i} className={`flex flex-col ${isOutbound ? 'items-end' : 'items-start'}`}>
               <div className={`
-                max-w-[85%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed
+                max-w-[85%] px-4 py-2.5 rounded-[10px] text-sm leading-relaxed
                 ${isOutbound
-                  ? 'bg-indigo-600 text-white rounded-br-sm'
-                  : 'bg-gray-800 text-gray-100 rounded-bl-sm'}
+                  ? 'bg-[var(--accent)] text-white rounded-br-sm'
+                  : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] rounded-bl-sm'}
               `}>
                 {msg.text}
               </div>
-              <div className="flex items-center gap-2 mt-1 text-xs text-gray-600">
+              <div className="flex items-center gap-2 mt-1 text-xs text-[var(--text-subtle)]">
                 <span>{formatTime(msg.ts)}</span>
                 <ChannelBadge channel={msg.channel || msg.type} />
                 {isOutbound && msg.agent && (
-                  <span className="text-gray-600">· {msg.agent}</span>
+                  <span className="text-[var(--text-subtle)]">· {msg.agent}</span>
                 )}
                 {!isOutbound && msg.category && (
                   <span className={`inline-flex px-1.5 py-0.5 rounded text-xs ${categoryClass(msg.category)}`}>
@@ -159,20 +159,20 @@ function ComposeBar({
   onKeyDown: (e: React.KeyboardEvent) => void;
 }) {
   return (
-    <div className="flex items-end gap-2 px-4 py-3 border-t border-gray-800 bg-gray-900/50">
+    <div className="flex items-end gap-2 px-4 py-3 border-t border-[var(--border)] bg-[var(--bg-card)]/50">
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={onKeyDown}
         placeholder="Type a message… (Enter to send)"
         rows={1}
-        className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 resize-none max-h-32"
+        className="flex-1 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2 text-sm text-white placeholder-[var(--text-subtle)] focus:outline-none focus:border-[var(--accent)] resize-none max-h-32"
         style={{ minHeight: '40px' }}
       />
       <button
         onClick={onSend}
         disabled={!text.trim() || sending}
-        className="p-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
+        className="p-2.5 bg-[var(--accent)] hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
       >
         <Send size={18} />
       </button>

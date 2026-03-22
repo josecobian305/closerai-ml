@@ -113,6 +113,7 @@ export type NavSection =
   | 'email'
   | 'pipeline'
   | 'deals'
+  | 'offers'
   | 'documents'
   | 'court-search'
   | 'ai-agents'
@@ -121,7 +122,12 @@ export type NavSection =
   | 'database'
   | 'notifications'
   | 'settings'
-  | 'integrations';
+  | 'integrations'
+  | 'review-queue'
+  | 'underwriting'
+  | 'semi-auto'
+  | 'pitch-review'
+  | 'record-process';
 
 /** Agent chat message */
 export interface AgentChatMessage {

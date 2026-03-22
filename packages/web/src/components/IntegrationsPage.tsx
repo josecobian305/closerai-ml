@@ -160,7 +160,7 @@ function MaskedInput({
 
   return (
     <div className="mb-3">
-      <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">
+      <label className="block text-xs font-semibold text-[var(--text-muted)] mb-1 uppercase tracking-wide">
         {label}
         {storedMasked && (
           <span className="ml-2 text-green-500 font-normal normal-case tracking-normal">
@@ -175,12 +175,12 @@ function MaskedInput({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={displayPlaceholder || 'Paste OAuth access token…'}
-            className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-indigo-500"
+            className="flex-1 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-white placeholder-[var(--text-subtle)] focus:outline-none focus:border-[var(--accent)]"
           />
           <button
             type="button"
             onClick={() => alert('OAuth flow coming soon — paste your access token above for now.')}
-            className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-xs text-white font-semibold whitespace-nowrap"
+            className="px-3 py-2 bg-[var(--accent)] hover:bg-indigo-700 rounded-lg text-xs text-white font-semibold whitespace-nowrap"
           >
             Connect OAuth
           </button>
@@ -193,13 +193,13 @@ function MaskedInput({
             onChange={(e) => onChange(e.target.value)}
             placeholder={displayPlaceholder || placeholder}
             readOnly={readOnly}
-            className={`w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 pr-10 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-indigo-500 ${readOnly ? 'opacity-60 cursor-not-allowed' : ''}`}
+            className={`w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg px-3 py-2 pr-10 text-sm text-white placeholder-[var(--text-subtle)] focus:outline-none focus:border-[var(--accent)] ${readOnly ? 'opacity-60 cursor-not-allowed' : ''}`}
           />
           {isSecret && (
             <button
               type="button"
               onClick={() => setRevealed((r) => !r)}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
               tabIndex={-1}
             >
               {revealed ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -297,12 +297,12 @@ function IntegrationCard({ meta, integration, onRefresh }: IntegrationCardProps)
 
   return (
     <div
-      className={`rounded-2xl border transition-all duration-200 ${
+      className={`rounded-[10px] border transition-all duration-200 ${
         isConnected
-          ? 'bg-gray-900 border-green-800/50'
+          ? 'bg-[var(--bg-card)] border-green-800/50'
           : isError
-          ? 'bg-gray-900 border-red-800/40'
-          : 'bg-gray-900 border-gray-800'
+          ? 'bg-[var(--bg-card)] border-red-800/40'
+          : 'bg-[var(--bg-card)] border-[var(--border)]'
       }`}
     >
       {/* Card header */}
@@ -325,24 +325,24 @@ function IntegrationCard({ meta, integration, onRefresh }: IntegrationCardProps)
               </span>
             )}
             {!isConnected && !isError && (
-              <span className="flex items-center gap-1 text-xs text-gray-600">
+              <span className="flex items-center gap-1 text-xs text-[var(--text-subtle)]">
                 <span className="w-1.5 h-1.5 rounded-full bg-gray-600 inline-block" /> Not connected
               </span>
             )}
           </div>
-          <p className="text-xs text-gray-500 mt-0.5">{meta.description}</p>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">{meta.description}</p>
           {integration.last_tested && (
-            <p className="text-xs text-gray-600 mt-0.5">
+            <p className="text-xs text-[var(--text-subtle)] mt-0.5">
               Tested {new Date(integration.last_tested).toLocaleString()}
             </p>
           )}
         </div>
-        {state.expanded ? <ChevronUp size={16} className="text-gray-600 flex-shrink-0" /> : <ChevronDown size={16} className="text-gray-600 flex-shrink-0" />}
+        {state.expanded ? <ChevronUp size={16} className="text-[var(--text-subtle)] flex-shrink-0" /> : <ChevronDown size={16} className="text-[var(--text-subtle)] flex-shrink-0" />}
       </button>
 
       {/* Expanded body */}
       {state.expanded && (
-        <div className="px-4 pb-4 border-t border-gray-800/60">
+        <div className="px-4 pb-4 border-t border-[var(--border)]/60">
           <div className="pt-4">
             {meta.fields.map((f) => {
               const stored = integration.credentials.find((c) => c.key === f.key);
@@ -391,7 +391,7 @@ function IntegrationCard({ meta, integration, onRefresh }: IntegrationCardProps)
               <button
                 onClick={handleSave}
                 disabled={state.saving}
-                className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 rounded-lg text-xs font-semibold text-white transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 bg-[var(--accent)] hover:bg-indigo-700 disabled:opacity-50 rounded-lg text-xs font-semibold text-white transition-colors"
               >
                 {state.saving ? <Loader2 size={13} className="animate-spin" /> : <Plug size={13} />}
                 Save
@@ -401,7 +401,7 @@ function IntegrationCard({ meta, integration, onRefresh }: IntegrationCardProps)
                 <button
                   onClick={handleTest}
                   disabled={state.testing}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 rounded-lg text-xs font-semibold text-gray-200 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-2 bg-[var(--bg-elevated)] hover:bg-gray-600 disabled:opacity-50 rounded-lg text-xs font-semibold text-gray-200 transition-colors"
                 >
                   {state.testing ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
                   Test Connection
@@ -505,7 +505,7 @@ function DataUploadSection(): React.ReactElement {
   return (
     <div className="mt-10">
       <h2 className="text-lg font-bold text-white mb-1">Data Import</h2>
-      <p className="text-sm text-gray-500 mb-5">Upload a CSV file or paste tab-delimited data to import contacts, deals, or other records.</p>
+      <p className="text-sm text-[var(--text-muted)] mb-5">Upload a CSV file or paste tab-delimited data to import contacts, deals, or other records.</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Drop zone */}
@@ -514,10 +514,10 @@ function DataUploadSection(): React.ReactElement {
           onDragLeave={() => setDragging(false)}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`relative flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-8 cursor-pointer transition-all duration-200 ${
+          className={`relative flex flex-col items-center justify-center gap-3 rounded-[10px] border-2 border-dashed p-8 cursor-pointer transition-all duration-200 ${
             dragging
               ? 'border-indigo-500 bg-indigo-900/20'
-              : 'border-gray-700 bg-gray-900 hover:border-gray-600 hover:bg-gray-800/60'
+              : 'border-[var(--border)] bg-[var(--bg-card)] hover:border-[var(--border)] hover:bg-[var(--bg-elevated)]/60'
           }`}
         >
           <input
@@ -528,35 +528,35 @@ function DataUploadSection(): React.ReactElement {
             onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
           />
           {uploading ? (
-            <Loader2 size={28} className="text-indigo-400 animate-spin" />
+            <Loader2 size={28} className="text-[#a5b4fc] animate-spin" />
           ) : (
-            <Upload size={28} className={dragging ? 'text-indigo-400' : 'text-gray-600'} />
+            <Upload size={28} className={dragging ? 'text-[#a5b4fc]' : 'text-[var(--text-subtle)]'} />
           )}
           <div className="text-center">
-            <p className="text-sm font-semibold text-gray-300">
+            <p className="text-sm font-semibold text-[var(--text-secondary)]">
               {dragging ? 'Drop to upload' : 'Drag & drop CSV / TSV'}
             </p>
-            <p className="text-xs text-gray-600 mt-1">or click to browse</p>
+            <p className="text-xs text-[var(--text-subtle)] mt-1">or click to browse</p>
           </div>
         </div>
 
         {/* Manual paste */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
-            <ClipboardList size={16} className="text-gray-500" />
-            <span className="text-sm font-semibold text-gray-300">Paste tab-delimited data</span>
+            <ClipboardList size={16} className="text-[var(--text-muted)]" />
+            <span className="text-sm font-semibold text-[var(--text-secondary)]">Paste tab-delimited data</span>
           </div>
           <textarea
             value={pasteText}
             onChange={(e) => setPasteText(e.target.value)}
             placeholder={`First Name\tLast Name\tPhone\tEmail\nJohn\tDoe\t+13051234567\tjohn@example.com`}
             rows={6}
-            className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-700 font-mono focus:outline-none focus:border-indigo-500 resize-none"
+            className="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs text-white placeholder-gray-700 font-mono focus:outline-none focus:border-[var(--accent)] resize-none"
           />
           <button
             onClick={handlePaste}
             disabled={!pasteText.trim()}
-            className="self-start px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 rounded-lg text-xs font-semibold text-white transition-colors"
+            className="self-start px-4 py-2 bg-[var(--accent)] hover:bg-indigo-700 disabled:opacity-40 rounded-lg text-xs font-semibold text-white transition-colors"
           >
             Parse Data
           </button>
@@ -565,14 +565,14 @@ function DataUploadSection(): React.ReactElement {
 
       {/* Preview table */}
       {uploadedData && uploadedData.headers.length > 0 && (
-        <div className="mt-5 rounded-2xl border border-gray-800 bg-gray-900 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+        <div className="mt-5 rounded-[10px] border border-[var(--border)] bg-[var(--bg-card)] overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
             <div>
               <span className="text-sm font-semibold text-white">{uploadedData.fileName}</span>
-              <span className="ml-2 text-xs text-gray-500">{uploadedData.rowCount} rows · {uploadedData.headers.length} columns</span>
+              <span className="ml-2 text-xs text-[var(--text-muted)]">{uploadedData.rowCount} rows · {uploadedData.headers.length} columns</span>
             </div>
             <button
-              className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold"
+              className="text-xs text-[#a5b4fc] hover:text-indigo-300 font-semibold"
               onClick={() => alert('Import to contacts coming soon!')}
             >
               Import to Contacts →
@@ -580,25 +580,25 @@ function DataUploadSection(): React.ReactElement {
           </div>
           <div className="overflow-x-auto max-h-64">
             <table className="w-full text-xs">
-              <thead className="bg-gray-800/60 sticky top-0">
+              <thead className="bg-[var(--bg-elevated)]/60 sticky top-0">
                 <tr>
                   {uploadedData.headers.map((h, i) => (
-                    <th key={i} className="px-3 py-2 text-left text-gray-400 font-semibold whitespace-nowrap">{h || `Column ${i + 1}`}</th>
+                    <th key={i} className="px-3 py-2 text-left text-[var(--text-muted)] font-semibold whitespace-nowrap">{h || `Column ${i + 1}`}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {uploadedData.rows.slice(0, 20).map((row, ri) => (
-                  <tr key={ri} className="border-t border-gray-800/40 hover:bg-gray-800/30">
+                  <tr key={ri} className="border-t border-[var(--border)]/40 hover:bg-[var(--bg-elevated)]/30">
                     {row.map((cell, ci) => (
-                      <td key={ci} className="px-3 py-2 text-gray-300 whitespace-nowrap max-w-[180px] truncate">{cell}</td>
+                      <td key={ci} className="px-3 py-2 text-[var(--text-secondary)] whitespace-nowrap max-w-[180px] truncate">{cell}</td>
                     ))}
                   </tr>
                 ))}
               </tbody>
             </table>
             {uploadedData.rowCount > 20 && (
-              <p className="px-4 py-2 text-xs text-gray-600 border-t border-gray-800">
+              <p className="px-4 py-2 text-xs text-[var(--text-subtle)] border-t border-[var(--border)]">
                 Showing 20 of {uploadedData.rowCount} rows
               </p>
             )}
@@ -650,10 +650,10 @@ export function IntegrationsPage(): React.ReactElement {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto">
-        <div className="h-8 bg-gray-800 rounded-xl w-48 mb-6 animate-pulse" />
+        <div className="h-8 bg-[var(--bg-elevated)] rounded-xl w-48 mb-6 animate-pulse" />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-20 bg-gray-900 rounded-2xl border border-gray-800 animate-pulse" />
+            <div key={i} className="h-20 bg-[var(--bg-card)] rounded-[10px] border border-[var(--border)] animate-pulse" />
           ))}
         </div>
       </div>
@@ -666,13 +666,13 @@ export function IntegrationsPage(): React.ReactElement {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white">Integrations</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-[var(--text-muted)] mt-1">
             {connectedCount} of {integrations.length} integrations connected
           </p>
         </div>
         <button
           onClick={() => { setLoading(true); load(); }}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-gray-400 hover:text-white transition-colors"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--bg-elevated)] hover:bg-[var(--bg-elevated)] text-xs text-[var(--text-muted)] hover:text-white transition-colors"
         >
           <RefreshCw size={13} />
           Refresh
@@ -693,7 +693,7 @@ export function IntegrationsPage(): React.ReactElement {
             <div className="flex items-center gap-2 mb-3">
               <span className="text-lg">{CATEGORY_ICONS[category]}</span>
               <h2 className="text-base font-bold text-white">{category}</h2>
-              <span className="text-xs text-gray-600 font-medium">
+              <span className="text-xs text-[var(--text-subtle)] font-medium">
                 {providers.filter(({ provider }) => integrationMap.get(provider)?.status === 'connected').length}/{providers.length} connected
               </span>
             </div>

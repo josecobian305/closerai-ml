@@ -43,47 +43,80 @@ export function FilterBar({ filter, onFilterChange, total, loading }: FilterBarP
   const clearSearch = () => onFilterChange({ query: '' });
 
   return (
-    <div className="mb-5 space-y-3">
+    <div style={{ marginBottom: '20px' }} className="space-y-3">
       {/* Search input */}
       <div className="relative">
-        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-          <Search size={17} className="text-gray-500" />
+        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <Search size={15} style={{ color: 'var(--text-subtle)' }} />
         </div>
         <input
           type="search"
           value={filter.query}
           onChange={(e) => onFilterChange({ query: e.target.value })}
           placeholder="Search by name, phone, business…"
-          className="w-full pl-11 pr-10 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white placeholder-gray-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+          style={{
+            width: '100%',
+            paddingLeft: '36px',
+            paddingRight: '36px',
+            paddingTop: '9px',
+            paddingBottom: '9px',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: '6px',
+            color: 'var(--text-primary)',
+            fontSize: '13px',
+            outline: 'none',
+          }}
         />
         {filter.query && (
           <button
             onClick={clearSearch}
-            className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500 hover:text-gray-300"
+            className="absolute inset-y-0 right-0 flex items-center pr-3"
+            style={{ color: 'var(--text-subtle)', background: 'none', border: 'none', cursor: 'pointer' }}
           >
-            <X size={16} />
+            <X size={14} />
           </button>
         )}
       </div>
 
       {/* Filter chips + count */}
       <div className="flex flex-wrap items-center gap-2">
-        {CHIPS.map((chip, i) => (
-          <button
-            key={chip.label}
-            onClick={() => handleChipClick(chip)}
-            className={`
-              px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-150 whitespace-nowrap
-              ${i === activeChipIndex
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-900/40'
-                : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-700'}
-            `}
-          >
-            {chip.label}
-          </button>
-        ))}
+        {CHIPS.map((chip, i) => {
+          const isActive = i === activeChipIndex;
+          return (
+            <button
+              key={chip.label}
+              onClick={() => handleChipClick(chip)}
+              style={{
+                padding: '5px 12px',
+                borderRadius: '100px',
+                fontSize: '11px',
+                fontWeight: 600,
+                whiteSpace: 'nowrap',
+                cursor: 'pointer',
+                border: isActive ? '1px solid rgba(99,91,255,0.3)' : '1px solid var(--border)',
+                background: isActive ? 'rgba(99,91,255,0.12)' : 'transparent',
+                color: isActive ? '#a5b4fc' : 'var(--text-muted)',
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)';
+                  (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  (e.currentTarget as HTMLElement).style.background = 'transparent';
+                  (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)';
+                }
+              }}
+            >
+              {chip.label}
+            </button>
+          );
+        })}
 
-        <span className="ml-auto text-xs text-gray-500 pl-2">
+        <span className="ml-auto" style={{ fontSize: '11px', color: 'var(--text-subtle)', paddingLeft: '8px' }}>
           {loading ? (
             <span className="animate-pulse">Loading…</span>
           ) : (

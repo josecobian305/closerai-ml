@@ -3,11 +3,11 @@ import { fetchDashboard } from '../../api';
 import { BarChart3, MessageSquare, Zap, TrendingUp, Activity } from 'lucide-react';
 
 const KPI_CARDS = [
-  { key: 'totalContacts', label: 'Total Sends', icon: BarChart3, color: 'text-blue-400' },
-  { key: 'smsToday', label: 'SMS Today', icon: MessageSquare, color: 'text-green-400' },
-  { key: 'replyRate', label: 'Reply Rate %', icon: TrendingUp, color: 'text-yellow-400' },
-  { key: 'activeSequences', label: 'Active Sequences', icon: Activity, color: 'text-purple-400' },
-  { key: 'hyperCount', label: 'HYPER Triggers', icon: Zap, color: 'text-red-400' },
+  { key: 'totalContacts', label: 'TOTAL SENDS', icon: BarChart3, color: '#635bff' },
+  { key: 'smsToday', label: 'SMS TODAY', icon: MessageSquare, color: '#22c55e' },
+  { key: 'replyRate', label: 'REPLY RATE %', icon: TrendingUp, color: '#f59e0b' },
+  { key: 'activeSequences', label: 'ACTIVE SEQUENCES', icon: Activity, color: '#a855f7' },
+  { key: 'hyperCount', label: 'HYPER TRIGGERS', icon: Zap, color: '#ef4444' },
 ];
 
 const EVENT_ICONS: Record<string, string> = {
@@ -32,38 +32,45 @@ export function DashboardView() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-white">Dashboard</h2>
+      <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+        Dashboard
+      </h2>
+
       {/* KPI Row */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {KPI_CARDS.map(({ key, label, icon: Icon, color }) => (
-          <div key={key} className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Icon size={16} className={color} />
-              <span className="text-xs text-gray-500">{label}</span>
+          <div key={key} className="stripe-card">
+            <div className="flex items-center gap-2" style={{ marginBottom: '10px' }}>
+              <Icon size={14} style={{ color }} />
+              <span className="metric-label">{label}</span>
             </div>
-            <p className="text-2xl font-bold text-white">
+            <p className="metric-value" style={{ color }}>
               {key === 'replyRate' ? `${kpis[key] || 0}%` : (kpis[key] ?? 0).toLocaleString()}
             </p>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Activity Feed */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-          <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
+        <div className="stripe-card">
+          <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>
+            Recent Activity
+          </h3>
+          <div className="space-y-2 max-h-96 overflow-y-auto">
             {feed.length === 0 ? (
-              <p className="text-gray-500 text-sm">No recent activity</p>
+              <p style={{ fontSize: '13px', color: 'var(--text-subtle)' }}>No recent activity</p>
             ) : feed.map((ev: any, i: number) => (
-              <div key={i} className="flex items-start gap-3 text-sm">
-                <span className="text-lg">{EVENT_ICONS[ev.type] || '📌'}</span>
+              <div key={i} className="flex items-start gap-3 stripe-table-row" style={{ padding: '8px', borderRadius: '6px' }}>
+                <span style={{ fontSize: '16px' }}>{EVENT_ICONS[ev.type] || '📌'}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-gray-300 truncate">
-                    <span className="text-gray-500">[{ev.agent}]</span>{' '}
+                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }} className="truncate">
+                    <span style={{ color: 'var(--text-subtle)' }}>[{ev.agent}]</span>{' '}
                     {ev.type?.replace(/_/g, ' ')}{ev.phone ? ` — ${ev.phone}` : ''}
                   </p>
-                  <p className="text-xs text-gray-600">{ev.ts ? new Date(ev.ts).toLocaleString() : ''}</p>
+                  <p style={{ fontSize: '11px', color: 'var(--text-subtle)' }}>
+                    {ev.ts ? new Date(ev.ts).toLocaleString() : ''}
+                  </p>
                 </div>
               </div>
             ))}
@@ -71,22 +78,37 @@ export function DashboardView() {
         </div>
 
         {/* Top Angles */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-          <h3 className="text-lg font-semibold text-white mb-4">Top Performing Angles</h3>
+        <div className="stripe-card">
+          <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>
+            Top Performing Angles
+          </h3>
           {angles?.ranking ? (
-            <div className="space-y-2">
+            <div className="space-y-1">
               {angles.ranking.slice(0, 8).map((name: string, i: number) => {
                 const w = angles.weights?.[name];
                 return (
-                  <div key={name} className="flex items-center justify-between text-sm">
+                  <div key={name} className="flex items-center justify-between stripe-table-row" style={{ padding: '8px', borderRadius: '6px', fontSize: '13px' }}>
                     <div className="flex items-center gap-2">
-                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                        i < 3 ? 'bg-yellow-900/60 text-yellow-300' : 'bg-gray-800 text-gray-400'
-                      }`}>{i + 1}</span>
-                      <span className="text-gray-300">{name.replace(/_/g, ' ')}</span>
+                      <span style={{
+                        width: '22px',
+                        height: '22px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        background: i < 3 ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.04)',
+                        color: i < 3 ? '#fbbf24' : 'var(--text-subtle)',
+                      }}>{i + 1}</span>
+                      <span style={{ color: 'var(--text-secondary)' }}>{name.replace(/_/g, ' ')}</span>
                     </div>
-                    <div className="text-right">
-                      <span className={`text-xs font-mono ${(w?.weight || 0) > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    <div>
+                      <span style={{
+                        fontSize: '12px',
+                        fontFamily: 'monospace',
+                        color: (w?.weight || 0) > 0 ? 'var(--success)' : 'var(--danger)',
+                      }}>
                         {w?.reply_rate ? `${(w.reply_rate * 100).toFixed(1)}%` : '—'}
                       </span>
                     </div>
@@ -95,7 +117,7 @@ export function DashboardView() {
               })}
             </div>
           ) : (
-            <p className="text-gray-500 text-sm">No angle data available</p>
+            <p style={{ fontSize: '13px', color: 'var(--text-subtle)' }}>No angle data available</p>
           )}
         </div>
       </div>
@@ -106,18 +128,18 @@ export function DashboardView() {
 function DashboardSkeleton() {
   return (
     <div className="space-y-6">
-      <div className="h-8 bg-gray-800 rounded w-40 animate-pulse" />
+      <div className="animate-pulse" style={{ height: '24px', width: '160px', background: 'var(--bg-card)', borderRadius: '6px' }} />
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="bg-gray-900 border border-gray-800 rounded-2xl p-4 animate-pulse">
-            <div className="h-3 bg-gray-800 rounded w-20 mb-3" />
-            <div className="h-7 bg-gray-800 rounded w-16" />
+          <div key={i} className="stripe-card animate-pulse">
+            <div style={{ height: '10px', width: '80px', background: 'var(--bg-elevated)', borderRadius: '4px', marginBottom: '12px' }} />
+            <div style={{ height: '28px', width: '64px', background: 'var(--bg-elevated)', borderRadius: '4px' }} />
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {[0, 1].map(i => (
-          <div key={i} className="bg-gray-900 border border-gray-800 rounded-2xl p-5 animate-pulse h-64" />
+          <div key={i} className="stripe-card animate-pulse" style={{ height: '256px' }} />
         ))}
       </div>
     </div>
