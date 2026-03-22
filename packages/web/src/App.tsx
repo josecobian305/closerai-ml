@@ -11,6 +11,7 @@ import { AgentChat } from './components/AgentChat';
 import { Register } from './pages/Register';
 import { Login } from './pages/Login';
 import { RecordProcess } from './pages/RecordProcess';
+import { OnboardingRouter } from './pages/onboarding/OnboardingRouter';
 import { AgentsView, DashboardView, MessagesView, SmsCampaignsView, EmailView,
   PipelineView, DealsView, DocumentsView, CourtSearchView, ReportsView,
   PaymentsView, DatabaseView, NotificationsView, SettingsView, LeadsView,
@@ -33,6 +34,7 @@ function AppInner() {
   const [softphone, setSoftphone] = useState<{ phone: string; name: string } | null>(null);
   const [showRegister, setShowRegister] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Listen for custom navigation events (e.g. from PitchReviewView)
   useEffect(() => {
@@ -64,6 +66,12 @@ function AppInner() {
         search.get('page') === 'register' ||
         window.location.pathname.endsWith('/register');
       setShowRegister(isReg);
+      const isOnboard =
+        hash === '#/onboarding' ||
+        hash === '#onboarding' ||
+        search.get('page') === 'onboarding' ||
+        window.location.pathname.endsWith('/onboarding');
+      setShowOnboarding(isOnboard);
       if (hash === '#record-your-process') {
         setActiveSection('record-process');
       }
@@ -132,6 +140,17 @@ function AppInner() {
           <p className="text-[var(--text-muted)] text-sm">Loading…</p>
         </div>
       </div>
+    );
+  }
+
+  if (showOnboarding) {
+    return (
+      <OnboardingRouter
+        onComplete={() => {
+          setShowOnboarding(false);
+          window.location.hash = '';
+        }}
+      />
     );
   }
 

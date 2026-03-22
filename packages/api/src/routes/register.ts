@@ -142,6 +142,40 @@ ${tone || 'professional'}
 
     logger.info('New user registered', { userId, email, businessName });
 
+    // ── Auto-create Discord channel for new user ──────────────────────────
+    try {
+      const discordWebhookUrl = process.env.OPENCLAW_GATEWAY_URL || 'http://localhost:18789';
+      const categoryId = '1485343785482321930'; // CloserAI Users category
+      const guildId = '1482781065549447250';
+      const channelName = (businessName || 'user').toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').slice(0, 80);
+      const industryEmoji: Record<string, string> = {
+        restaurant: '🍽️', hvac: '❄️', construction: '🏗️', healthcare: '💊',
+        real_estate: '🏠', insurance: '🛡️', other: '📁', cleaning: '🧹',
+      };
+      const emoji = industryEmoji[industry?.toLowerCase()] || '🏢';
+      const topic = `${emoji} ${businessName} — ${yourName} | Agent: ${agentName} | Industry: ${industry} | Registered: ${now.slice(0, 10)}`;
+
+      // Build prompt override
+      const promptOverride = `You are ${agentName || 'Agent'}, ${agentTitle || 'Sales Agent'} at ${businessName}.\nIndustry: ${industry}\nOwner: ${yourName} (${email}, ${phone})\nPitch: ${pitch}\nTone: ${tone || 'professional'}\nLead Sources: ${(leadSources || []).join(', ') || 'None'}\nLead Age: ${leadAge || '0-48h'}\nCapabilities: ${Object.entries(capabilities || {}).filter(([_, v]) => v).map(([k]) => k).join(', ')}`;
+
+      // Save channel mapping
+      const channelMapPath = path.join(process.cwd(), 'data', 'discord_channels.json');
+      let channelMap: any = {};
+      try { channelMap = JSON.parse(fs.readFileSync(channelMapPath, 'utf-8')); } catch {}
+      channelMap.categoryId = categoryId;
+      channelMap.guildId = guildId;
+      if (!channelMap.users) channelMap.users = {};
+      channelMap.pending = channelMap.pending || [];
+      channelMap.pending.push({
+        userId, channelName, topic, businessName, email, promptOverride, createdAt: now,
+      });
+      fs.writeFileSync(channelMapPath, JSON.stringify(channelMap, null, 2));
+
+      logger.info('Discord channel creation queued', { userId, channelName });
+    } catch (discordErr) {
+      logger.warn('Discord channel creation failed (non-fatal)', { err: String(discordErr) });
+    }
+
     res.status(201).json({
       success: true,
       userId,

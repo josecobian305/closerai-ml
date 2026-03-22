@@ -31,6 +31,47 @@ const router = Router();
 // In-memory conversation history per user (swap for Redis in prod)
 const conversations = new Map<string, Array<{ role: string; content: any }>>(); // eslint-disable-line @typescript-eslint/no-explicit-any
 
+// ── Brain chat persistence (SQLite) ──────────────────────────────────────
+import { getDb } from '../db';
+
+function ensureBrainTable(): void {
+  try {
+    const db = getDb();
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS brain_chat (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
+        role TEXT NOT NULL,
+        content TEXT NOT NULL,
+        ts TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_brain_user ON brain_chat(user_id);
+    `);
+  } catch (e) { logger.warn('brain table init failed', { err: String(e) }); }
+}
+ensureBrainTable();
+
+function saveBrainMsg(userId: string, role: string, content: string): void {
+  try {
+    const db = getDb();
+    db.prepare('INSERT INTO brain_chat (user_id, role, content, ts) VALUES (?,?,?,?)')
+      .run(userId, role, content, new Date().toISOString());
+  } catch (e) { logger.warn('brain save failed', { err: String(e) }); }
+}
+
+function loadBrainHistory(userId: string, limit = 40): Array<{ role: string; content: any }> {
+  try {
+    const db = getDb();
+    const rows = db.prepare(
+      'SELECT role, content FROM brain_chat WHERE user_id = ? ORDER BY id DESC LIMIT ?'
+    ).all(userId, limit) as Array<{ role: string; content: string }>;
+    return rows.reverse().map(r => ({ role: r.role, content: [{ text: r.content }] }));
+  } catch (e) {
+    logger.warn('brain load failed', { err: String(e) });
+    return [];
+  }
+}
+
 // ── Tool definitions ───────────────────────────────────────────────────────
 
 const TOOL_SPECS = [
@@ -826,12 +867,15 @@ router.post('/chat', async (req: Request, res: Response) => {
   try {
     const convKey = userId || 'anonymous';
     if (!conversations.has(convKey)) {
-      conversations.set(convKey, []);
+      // Load persisted history on first access
+      const persisted = loadBrainHistory(convKey);
+      conversations.set(convKey, persisted);
     }
     const history = conversations.get(convKey)!;
 
     // Add user message (text only for history storage)
     history.push({ role: 'user', content: [{ text: message }] });
+    saveBrainMsg(convKey, 'user', message);
 
     // Keep last 20 exchanges for context
     if (history.length > 40) {
@@ -851,6 +895,7 @@ router.post('/chat', async (req: Request, res: Response) => {
 
     // Add assistant reply to history
     history.push({ role: 'assistant', content: [{ text: reply }] });
+    saveBrainMsg(convKey, 'assistant', reply);
 
     // Build response — include any frontend action
     const responseBody: Record<string, unknown> = {
@@ -877,6 +922,30 @@ router.delete('/history/:userId', (req: Request, res: Response) => {
   const { userId } = req.params;
   conversations.delete(userId);
   res.json({ success: true, userId });
+});
+
+// GET /api/v1/brain/history — dump all live conversations  
+router.get('/history', (_req: Request, res: Response) => {
+    const all: Record<string, Array<{role: string; content: string}>> = {};
+    conversations.forEach((msgs, userId) => {
+        all[userId] = msgs.map((m: any) => {
+            let content = '';
+            if (Array.isArray(m.content)) {
+                content = m.content.map((c: any) => {
+                    if (c.text) return c.text;
+                    if (c.toolUse) return '[tool_use: ' + c.toolUse.name + ']';
+                    if (c.toolResult) return '[tool_result]';
+                    return JSON.stringify(c).slice(0,200);
+                }).join(' | ');
+            } else if (typeof m.content === 'string') {
+                content = m.content;
+            } else {
+                content = JSON.stringify(m.content).slice(0,500);
+            }
+            return { role: m.role, content: content.slice(0, 2000) };
+        });
+    });
+    res.json({ conversations: all, count: Object.keys(all).length });
 });
 
 export const brainRouter = router;

@@ -24,6 +24,7 @@ import { settingsRouter } from './routes/settings';
 import { paymentsRouter } from './routes/payments';
 import { underwritingRouter } from './routes/underwriting';
 import { phoneRouter } from './routes/phone';
+import { onboardingRouter } from './routes/onboarding';
 
 const app = express();
 
@@ -58,6 +59,7 @@ app.use('/api/v1/settings', settingsRouter);
 app.use('/api/v1/payments', paymentsRouter);
 app.use('/api/v1/underwriting', underwritingRouter);
 app.use('/api/v1/phone', phoneRouter);
+app.use('/api/v1/onboarding', onboardingRouter);
 app.use('/api/v1/me', registerRouter);
 
 // 404 handler

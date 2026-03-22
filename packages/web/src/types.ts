@@ -127,7 +127,8 @@ export type NavSection =
   | 'underwriting'
   | 'semi-auto'
   | 'pitch-review'
-  | 'record-process';
+  | 'record-process'
+  | 'onboarding';
 
 /** Agent chat message */
 export interface AgentChatMessage {
