@@ -525,7 +525,11 @@ async function executeTool(name: string, input: any): Promise<any> { // eslint-d
         try {
           const htmlBody = body.replace(/\n/g, '<br>');
           const mml = `From: ${sender}\nTo: ${to}\nSubject: ${subject}\n\n<#multipart type=alternative>\n${body}\n<#part type=text/html>\n<html><body style="font-family:Arial,sans-serif;padding:20px;background:#0b0f1a;color:#e2e8f0;">${htmlBody}</body></html>\n<#/multipart>`;
-          execSync(`echo '${mml.replace(/'/g, "\\'")}' | himalaya template send`, { timeout: 15000 });
+          // Write to temp file to avoid shell escaping issues
+          const tmpPath = `/tmp/brain_email_${Date.now()}.mml`;
+          require('fs').writeFileSync(tmpPath, mml);
+          execSync(`cat ${tmpPath} | himalaya template send`, { timeout: 15000 });
+          try { require('fs').unlinkSync(tmpPath); } catch {}
           logger.info('Brain sent email', { to, subject, from: sender });
           return { success: true, to, subject, from: sender, method: 'SES/WorkMail' };
         } catch (e: any) {
