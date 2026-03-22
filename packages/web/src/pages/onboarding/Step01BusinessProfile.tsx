@@ -16,30 +16,22 @@ const US_STATES = [
 ];
 
 interface Field {
-  key: keyof FieldMap;
+  key: string;
   label: string;
   sublabel?: string;
-  type: 'text' | 'email' | 'password' | 'tel' | 'select' | 'number';
+  type: 'text' | 'email' | 'password' | 'tel' | 'select';
   placeholder?: string;
   options?: string[];
   required?: boolean;
 }
 
-type FieldMap = {
-  businessName: string; industry: string; state: string; phone: string;
-  email: string; password: string; monthlyRevenue: string; dealSize: string; agentCount: number;
-};
-
 const FIELDS: Field[] = [
   { key: 'businessName', label: 'What\'s your business name?', sublabel: 'The name your customers know you by.', type: 'text', placeholder: 'Acme Funding LLC', required: true },
   { key: 'industry', label: 'What industry are you in?', type: 'select', options: INDUSTRIES, required: true },
   { key: 'state', label: 'What state are you based in?', type: 'select', options: US_STATES, required: true },
-  { key: 'phone', label: 'Your business phone number?', type: 'tel', placeholder: '(555) 123-4567', required: true },
   { key: 'email', label: 'Your email address?', sublabel: 'We\'ll send your login credentials here.', type: 'email', placeholder: 'you@business.com', required: true },
+  { key: 'phone', label: 'Your phone number?', type: 'tel', placeholder: '(555) 123-4567', required: true },
   { key: 'password', label: 'Create a password', sublabel: 'At least 8 characters.', type: 'password', placeholder: '••••••••', required: true },
-  { key: 'monthlyRevenue', label: 'Average monthly revenue?', sublabel: 'Rough estimate is fine.', type: 'text', placeholder: '$50,000', required: true },
-  { key: 'dealSize', label: 'Typical deal size?', sublabel: 'Average funding amount per deal.', type: 'text', placeholder: '$25,000' },
-  { key: 'agentCount', label: 'How many sales agents?', sublabel: 'Including yourself.', type: 'number', placeholder: '1' },
 ];
 
 const inputStyle: React.CSSProperties = {
@@ -64,6 +56,7 @@ export function Step01BusinessProfile({ data, onUpdate, onNext }: StepProps) {
 
   const advance = () => {
     if (field.required && !val.trim()) return;
+    if (field.key === 'password' && val.length < 8) return;
     if (fieldIdx < FIELDS.length - 1) {
       setFieldIdx(i => i + 1);
     } else {
@@ -74,8 +67,7 @@ export function Step01BusinessProfile({ data, onUpdate, onNext }: StepProps) {
   const handleKey = (e: KeyboardEvent) => { if (e.key === 'Enter') advance(); };
 
   const handleChange = (v: string) => {
-    const parsed = field.type === 'number' ? Number(v) || 0 : v;
-    onUpdate({ [field.key]: parsed } as any);
+    onUpdate({ [field.key]: v } as any);
   };
 
   return (
@@ -84,7 +76,7 @@ export function Step01BusinessProfile({ data, onUpdate, onNext }: StepProps) {
         <span style={{ background: '#635bff', color: '#fff', width: 20, height: 20, borderRadius: '50%', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {fieldIdx + 1}
         </span>
-        BUSINESS PROFILE
+        BASIC INFO
       </div>
 
       <div style={{ fontSize: 'clamp(24px, 4vw, 40px)', fontWeight: 700, lineHeight: 1.2, marginBottom: 12, letterSpacing: -0.5 }}>
@@ -106,7 +98,7 @@ export function Step01BusinessProfile({ data, onUpdate, onNext }: StepProps) {
           style={selectStyle}
         >
           <option value="" disabled>Select…</option>
-          {field.options!.map(o => <option key={o} value={o}>{o}</option>)}
+          {field.options!.map(o => <option key={o} value={o} style={{ background: '#1a1a2e', color: '#fff' }}>{o}</option>)}
         </select>
       ) : (
         <input

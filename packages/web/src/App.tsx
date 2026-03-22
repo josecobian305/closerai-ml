@@ -143,19 +143,17 @@ function AppInner() {
     );
   }
 
-  if (showOnboarding) {
+  // Both #register and #onboarding now use the streamlined onboarding flow
+  if (showOnboarding || showRegister) {
     return (
       <OnboardingRouter
         onComplete={() => {
           setShowOnboarding(false);
+          setShowRegister(false);
           window.location.hash = '';
         }}
       />
     );
-  }
-
-  if (showRegister) {
-    return <Register />;
   }
 
   if (!user) {
