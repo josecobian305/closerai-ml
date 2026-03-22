@@ -42,8 +42,8 @@ function IntroPopup({ assetCount, onStart }: { assetCount: number; onStart: () =
   const topics = ['How you handle new leads', 'Your follow-up cadence', 'When you pitch & close', 'Documents you collect', 'Deal timeline & bottlenecks'];
 
   return (
-    <div className="fixed inset-0 z-[200] bg-black/70 backdrop-blur-sm flex items-center justify-center p-6">
-      <div className="bg-[var(--bg-card)] border border-[var(--border-active)] rounded-2xl p-10 max-w-md w-full text-center shadow-2xl shadow-indigo-500/10">
+    <div className="fixed inset-0 z-[200] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-active)] rounded-2xl p-6 sm:p-10 max-w-md w-full text-center shadow-2xl shadow-indigo-500/10 max-h-[90vh] overflow-y-auto">
         {/* Icon */}
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-6">
           <MessageCircle size={32} className="text-indigo-400" />
@@ -164,15 +164,15 @@ export function Step03SalesProcess({ data, onUpdate, onNext }: StepProps) {
   }
 
   return (
-    <div className="flex gap-4 h-[calc(100vh-100px)] px-6 pt-4 max-w-5xl mx-auto w-full">
+    <div className="flex flex-col md:flex-row gap-4 h-[calc(100vh-100px)] px-4 md:px-6 pt-4 max-w-5xl mx-auto w-full">
       {/* Chat panel */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0">
         <p className="text-xs font-semibold text-indigo-400 uppercase tracking-wider mb-3">💬 Record Your Sales Process</p>
-        <div ref={chatRef} className="flex-1 overflow-y-auto flex flex-col gap-3 pr-2 min-h-0">
+        <div ref={chatRef} className="flex-1 overflow-y-auto flex flex-col gap-3 pr-1 min-h-0">
           {messages.map(m => (
             <div
               key={m.id}
-              className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+              className={`max-w-[85%] sm:max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                 m.role === 'user'
                   ? 'self-end bg-[var(--accent)] text-white rounded-br-sm'
                   : 'self-start bg-[var(--bg-elevated)] text-[var(--text-secondary)] rounded-bl-sm border border-[var(--border)]'
