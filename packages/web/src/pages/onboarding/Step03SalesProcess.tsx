@@ -9,30 +9,21 @@ interface ChatMsg {
   ts: Date;
 }
 
-const GUIDED_QUESTIONS = [
-  "Walk me through what happens when a new lead comes in. What's the first thing you do?",
-  "How do you follow up if they don't respond after the first contact?",
-  "When do you typically send the offer — before or after you've built rapport?",
-  "What documents do you collect before underwriting?",
-  "How long does your average deal take from first contact to funded?",
-  "What's your biggest bottleneck in the sales process right now?",
-];
-
 const STAGE_KEYWORDS: Record<string, string[]> = {
-  'Lead In': ['lead', 'new lead', 'comes in', 'inbound', 'inquiry'],
-  'First Contact': ['first', 'call', 'text', 'sms', 'reach out', 'contact'],
-  'Follow Up': ['follow up', 'follow-up', 'second', 'reminder', 'check in'],
+  'Lead In': ['lead', 'new lead', 'comes in', 'inbound', 'inquiry', 'marketing'],
+  'First Contact': ['first', 'call', 'text', 'sms', 'reach out', 'contact', 'message'],
+  'Follow Up': ['follow up', 'follow-up', 'second', 'reminder', 'check in', 'drip'],
   'Docs Requested': ['document', 'bank statement', 'application', 'docs', 'paperwork'],
-  'Underwriting': ['underwrite', 'review', 'analyze', 'assess', 'risk'],
+  'Underwriting': ['underwrite', 'review', 'analyze', 'assess', 'risk', 'credit'],
   'Offer Sent': ['offer', 'proposal', 'terms', 'quote', 'pitch'],
   'Negotiation': ['negotiate', 'counter', 'adjust', 'discuss terms', 'objection'],
   'Close': ['close', 'fund', 'funded', 'signed', 'done', 'completed', 'approval'],
 };
 
 function detectStages(messages: ChatMsg[]): string[] {
-  const userTexts = messages.filter(m => m.role === 'user').map(m => m.content.toLowerCase()).join(' ');
+  const allTexts = messages.map(m => m.content.toLowerCase()).join(' ');
   return Object.entries(STAGE_KEYWORDS)
-    .filter(([_, kws]) => kws.some(kw => userTexts.includes(kw)))
+    .filter(([_, kws]) => kws.some(kw => allTexts.includes(kw)))
     .map(([stage]) => stage);
 }
 
@@ -202,23 +193,27 @@ function MessageBubble({ msg }: { msg: ChatMsg }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
+const OPENING_MESSAGE = `Hey! Let's set up your sales pipeline. 🚀
+
+I'll walk you through building your automated outreach system. Just talk to me like you're explaining your business to a new hire.
+
+Let's start: **What does your sales process look like right now?** Walk me through how you get a lead and turn them into a customer — step by step.`;
+
 export function Step03SalesProcess({ data, onUpdate, onNext, onBack }: StepProps) {
   const [showIntro, setShowIntro] = useState(true);
   const [messages, setMessages] = useState<ChatMsg[]>([
-    { id: 'intro', role: 'brain', content: "Hey! Let's map out your sales process. 🚀\n\nI'll walk you through a few questions about how you sell — answer in your own words. I'll build your pipeline as we go.\n\nLet's start:", ts: new Date() },
-    { id: 'q0', role: 'brain', content: GUIDED_QUESTIONS[0], ts: new Date() },
+    { id: 'opening', role: 'brain', content: OPENING_MESSAGE, ts: new Date() },
   ]);
   const [input, setInput] = useState('');
-  const [questionIdx, setQuestionIdx] = useState(0);
   const [detectedStages, setDetectedStages] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
-  const [typing, setTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, typing]);
+  }, [messages, loading]);
 
   useEffect(() => { setDetectedStages(detectStages(messages)); }, [messages]);
 
@@ -226,52 +221,82 @@ export function Step03SalesProcess({ data, onUpdate, onNext, onBack }: StepProps
     if (!showIntro) setTimeout(() => inputRef.current?.focus(), 300);
   }, [showIntro]);
 
-  const pushBrain = useCallback((content: string) => {
-    setTyping(true);
-    setTimeout(() => {
-      setMessages(prev => [...prev, { id: `b${Date.now()}`, role: 'brain', content, ts: new Date() }]);
-      setTyping(false);
-    }, 800 + Math.random() * 600);
-  }, []);
-
-  const sendMessage = useCallback(() => {
+  const sendMessage = useCallback(async () => {
     const text = input.trim();
-    if (!text) return;
+    if (!text || loading) return;
+
     const userMsg: ChatMsg = { id: `u${Date.now()}`, role: 'user', content: text, ts: new Date() };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
+    setLoading(true);
 
-    const nextIdx = questionIdx + 1;
+    try {
+      // Call the brain API — same endpoint as RecordProcess
+      const res = await fetch('/app/api/v1/brain/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          userId: data.email || 'onboarding-user',
+          config: {
+            businessName: data.businessName,
+            industry: data.industry,
+            state: data.state,
+            assetCount: data.assets.length,
+          },
+          mode: 'setup',
+        }),
+      });
 
-    if (nextIdx < GUIDED_QUESTIONS.length) {
-      setQuestionIdx(nextIdx);
-      pushBrain(GUIDED_QUESTIONS[nextIdx]);
-    } else if (!confirmed && questionIdx < GUIDED_QUESTIONS.length) {
-      setQuestionIdx(nextIdx);
-      const stages = detectStages([...messages, userMsg]);
-      const stageList = stages.length > 0 ? stages.join(' → ') : 'Lead In → First Contact → Follow Up → Docs Requested → Underwriting → Offer Sent → Close';
-      pushBrain(`Here's what I heard:\n\n**Your pipeline:** ${stageList}\n\nDoes this match how you sell? Type **"yes"** to lock it in, or tell me what to change.`);
-    } else if (['yes', 'yeah', 'correct', 'looks good', 'lock it in', 'confirm', 'yep', 'that works'].some(w => text.toLowerCase().includes(w))) {
-      const stages = detectStages([...messages, userMsg]);
-      const finalStages = stages.length > 0 ? stages : ['Lead In', 'First Contact', 'Follow Up', 'Docs Requested', 'Underwriting', 'Offer Sent', 'Close'];
-      onUpdate({ pipelineStages: finalStages, processSummary: messages.map(m => `${m.role}: ${m.content}`).join('\n') });
-      setConfirmed(true);
-      pushBrain('✅ Pipeline locked in! Moving to the next step.');
-      setTimeout(onNext, 2000);
-    } else {
-      pushBrain("Got it — tell me more, or type **\"yes\"** if everything looks right.");
+      const result = await res.json();
+      const reply = result.reply || "I'm here — what do you need?";
+
+      setMessages(prev => [...prev, {
+        id: `b${Date.now()}`, role: 'brain', content: reply, ts: new Date(),
+      }]);
+
+      // Check if the brain says the pipeline is ready / confirmed
+      const lower = reply.toLowerCase();
+      if (lower.includes('pipeline is live') || lower.includes('pipeline is set') || lower.includes('locked in') || lower.includes('you\'re all set')) {
+        const stages = detectStages([...messages, userMsg]);
+        const finalStages = stages.length > 0 ? stages : ['Lead In', 'First Contact', 'Follow Up', 'Docs Requested', 'Underwriting', 'Offer Sent', 'Close'];
+        onUpdate({ pipelineStages: finalStages, processSummary: messages.map(m => `${m.role}: ${m.content}`).join('\n') });
+        setConfirmed(true);
+        setTimeout(onNext, 2000);
+      }
+    } catch {
+      setMessages(prev => [...prev, {
+        id: `err${Date.now()}`, role: 'brain',
+        content: "Hmm, something went wrong on my end. Try again in a sec? 🧠",
+        ts: new Date(),
+      }]);
+    } finally {
+      setLoading(false);
+      inputRef.current?.focus();
     }
-  }, [input, messages, questionIdx, confirmed, onUpdate, onNext, pushBrain]);
+  }, [input, loading, messages, data, onUpdate, onNext]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
+  // Manual "lock in" button after enough conversation
+  const canLockIn = messages.filter(m => m.role === 'user').length >= 3;
+
+  const handleLockIn = () => {
+    const stages = detectStages(messages);
+    const finalStages = stages.length > 0 ? stages : ['Lead In', 'First Contact', 'Follow Up', 'Docs Requested', 'Underwriting', 'Offer Sent', 'Close'];
+    onUpdate({ pipelineStages: finalStages, processSummary: messages.map(m => `${m.role}: ${m.content}`).join('\n') });
+    setConfirmed(true);
+    setMessages(prev => [...prev, {
+      id: 'locked', role: 'brain', content: '✅ Pipeline locked in! Moving to the next step.', ts: new Date(),
+    }]);
+    setTimeout(onNext, 1500);
+  };
+
   if (showIntro) {
     return <IntroPopup assetCount={data.assets.length} onStart={() => setShowIntro(false)} />;
   }
-
-  const stagesForPanel = detectedStages.length > 0 ? detectedStages : ['Waiting for responses…'];
 
   return (
     <div style={{
@@ -315,7 +340,6 @@ export function Step03SalesProcess({ data, onUpdate, onNext, onBack }: StepProps
           </div>
         </div>
 
-        {/* Pipeline stage count badge */}
         {detectedStages.length > 0 && (
           <div style={{
             display: 'flex', alignItems: 'center', gap: 5,
@@ -325,12 +349,23 @@ export function Step03SalesProcess({ data, onUpdate, onNext, onBack }: StepProps
             <GitBranch size={13} /> {detectedStages.length} stages
           </div>
         )}
+
+        {/* Lock in button — appears after 3+ user messages */}
+        {canLockIn && !confirmed && (
+          <button onClick={handleLockIn} style={{
+            background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)',
+            color: '#22c55e', fontSize: 12, fontWeight: 600, padding: '6px 12px',
+            borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit',
+          }}>
+            ✅ Lock In
+          </button>
+        )}
       </div>
 
       {/* Messages area */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px 0' }}>
         {messages.map(msg => <MessageBubble key={msg.id} msg={msg} />)}
-        {typing && <TypingIndicator />}
+        {loading && <TypingIndicator />}
         <div ref={messagesEndRef} />
       </div>
 
@@ -366,13 +401,13 @@ export function Step03SalesProcess({ data, onUpdate, onNext, onBack }: StepProps
             />
             <button
               onClick={sendMessage}
-              disabled={!input.trim()}
+              disabled={!input.trim() || loading}
               style={{
                 width: 36, height: 36, borderRadius: 10, border: 'none',
-                background: !input.trim() ? 'rgba(99,91,255,0.2)' : 'linear-gradient(135deg, #635bff, #4f46e5)',
-                color: !input.trim() ? '#635bff' : 'white',
+                background: !input.trim() || loading ? 'rgba(99,91,255,0.2)' : 'linear-gradient(135deg, #635bff, #4f46e5)',
+                color: !input.trim() || loading ? '#635bff' : 'white',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: !input.trim() ? 'not-allowed' : 'pointer', flexShrink: 0,
+                cursor: !input.trim() || loading ? 'not-allowed' : 'pointer', flexShrink: 0,
               }}
             >
               <Send size={16} />
