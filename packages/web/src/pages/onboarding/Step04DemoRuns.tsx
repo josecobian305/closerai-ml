@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Play, CheckCircle, XCircle, Loader, ChevronRight } from 'lucide-react';
+import { Play, CheckCircle, XCircle, Loader, ChevronRight, Mail } from 'lucide-react';
 import type { StepProps, DemoRun } from './OnboardingRouter';
 
 const PIPELINE_STAGES = ['Lead In', 'Underwriting', 'Deal Created', 'Offer Sent', 'Pitch Review', 'Approval Link'];
@@ -9,7 +9,7 @@ const DEMO_CUSTOMERS = [
   { name: 'Sample Auto Repair', industry: 'Auto Repair', revenue: '$65,000/mo' },
 ];
 
-function simulateRun(runId: number, onProgress: (run: DemoRun) => void): Promise<DemoRun> {
+function simulateStages(runId: number, onProgress: (run: DemoRun) => void): Promise<void> {
   return new Promise(resolve => {
     const stages = PIPELINE_STAGES.map(name => ({ name, done: false }));
     const run: DemoRun = { id: runId, customerName: DEMO_CUSTOMERS[runId - 1]?.name || `Test Customer ${runId}`, status: 'running', stages };
@@ -19,13 +19,12 @@ function simulateRun(runId: number, onProgress: (run: DemoRun) => void): Promise
       if (i < stages.length) {
         stages[i].done = true; i++;
         onProgress({ ...run, stages: [...stages] });
-        setTimeout(tick, 600 + Math.random() * 800);
+        setTimeout(tick, 500 + Math.random() * 600);
       } else {
-        const final: DemoRun = { ...run, status: Math.random() > 0.05 ? 'passed' : 'failed', stages: [...stages] };
-        onProgress(final); resolve(final);
+        resolve();
       }
     };
-    setTimeout(tick, 500);
+    setTimeout(tick, 400);
   });
 }
 
@@ -37,13 +36,43 @@ export function Step04DemoRuns({ data, onUpdate, onNext }: StepProps) {
     }))
   );
   const [running, setRunning] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<Record<number, { owner: boolean; customer: boolean }>>({});
   const allPassed = runs.every(r => r.status === 'passed');
 
   const runTest = useCallback(async (runId: number) => {
     setRunning(true);
-    await simulateRun(runId, updated => setRuns(prev => prev.map(r => r.id === updated.id ? updated : r)));
+    const customer = DEMO_CUSTOMERS[runId - 1];
+
+    // Animate stages
+    await simulateStages(runId, updated => {
+      setRuns(prev => prev.map(r => r.id === updated.id ? updated : r));
+    });
+
+    // Call API to fire real emails
+    try {
+      const res = await fetch(`/app/api/v1/onboarding/demo/demo-run`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          runId,
+          customerName: customer?.name || `Test Customer ${runId}`,
+          industry: customer?.industry || 'General',
+          revenue: customer?.revenue || '$50,000/mo',
+          // Pass session data for context
+          businessName: data.businessName,
+          email: data.email,
+        }),
+      });
+      const result = await res.json();
+      setEmailStatus(prev => ({ ...prev, [runId]: result.emailsSent || { owner: false, customer: false } }));
+    } catch (e) {
+      console.error('Demo run API error:', e);
+    }
+
+    // Mark as passed
+    setRuns(prev => prev.map(r => r.id === runId ? { ...r, status: 'passed' as const } : r));
     setRunning(false);
-  }, []);
+  }, [data.businessName, data.email]);
 
   const runAll = useCallback(async () => {
     for (const run of runs) if (run.status !== 'passed') await runTest(run.id);
@@ -52,7 +81,9 @@ export function Step04DemoRuns({ data, onUpdate, onNext }: StepProps) {
   return (
     <div className="flex flex-col items-center h-full px-6 pt-8">
       <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 text-center">Prove your pipeline works</h2>
-      <p className="text-[var(--text-muted)] mb-8 text-center max-w-md">Run 3 complete cycles with test customers. Each must pass through all 6 stages.</p>
+      <p className="text-[var(--text-muted)] mb-8 text-center max-w-md">
+        Run 3 complete cycles with test customers. Each fires real emails — check your inbox!
+      </p>
 
       <div className="w-full max-w-2xl space-y-4 mb-8">
         {runs.map(run => (
@@ -74,14 +105,10 @@ export function Step04DemoRuns({ data, onUpdate, onNext }: StepProps) {
                     <Play size={12} /> Run Test
                   </button>
                 )}
-                {run.status === 'failed' && (
-                  <button onClick={() => runTest(run.id)} disabled={running}
-                    className="bg-red-500/15 text-red-400 border border-red-500/30 text-xs font-semibold px-4 py-2 rounded-lg transition-all">
-                    Retry
-                  </button>
-                )}
               </div>
             </div>
+
+            {/* Stage progress */}
             <div className="flex gap-1 items-center">
               {run.stages.map((stage, i) => (
                 <div key={stage.name} className="flex items-center gap-1 flex-1">
@@ -95,6 +122,18 @@ export function Step04DemoRuns({ data, onUpdate, onNext }: StepProps) {
                 <span key={stage.name} className={`text-[8px] text-center flex-1 ${stage.done ? 'text-indigo-400' : 'text-[var(--text-subtle)]'}`}>{stage.name}</span>
               ))}
             </div>
+
+            {/* Email status */}
+            {emailStatus[run.id] && (
+              <div className="mt-3 flex gap-3">
+                <div className={`flex items-center gap-1.5 text-[10px] font-semibold ${emailStatus[run.id].owner ? 'text-emerald-400' : 'text-red-400'}`}>
+                  <Mail size={10} /> Owner email {emailStatus[run.id].owner ? '✅' : '❌'}
+                </div>
+                <div className={`flex items-center gap-1.5 text-[10px] font-semibold ${emailStatus[run.id].customer ? 'text-emerald-400' : 'text-red-400'}`}>
+                  <Mail size={10} /> Customer email {emailStatus[run.id].customer ? '✅' : '❌'}
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
