@@ -577,7 +577,8 @@ async function executeTool(name: string, input: any): Promise<any> { // eslint-d
         
         // Send email
         try {
-          const emailMml = `From: jclaude@chccapitalgroup.com\nTo: ${ADMIN_EMAIL}\nSubject: ${bugSubject}\n\n${bugBody}`;
+          const plainBody = bugBody.replace(/\n/g, '\\n');
+          const emailMml = `From: jclaude@chccapitalgroup.com\nTo: ${ADMIN_EMAIL}\nSubject: ${bugSubject}\n\n<#multipart type=alternative>\n${bugBody}\n<#part type=text/html>\n<html><body style="font-family:Arial,sans-serif;padding:20px;background:#0b0f1a;color:#e2e8f0;"><h2 style="color:#6366f1;">${bugSubject}</h2><pre style="background:#1e293b;padding:16px;border-radius:8px;color:#e2e8f0;white-space:pre-wrap;">${bugBody}</pre><p style="color:#64748b;font-size:12px;margin-top:20px;">— CloserAI Auto-Healer</p></body></html>\n<#/multipart>`;
           execSync(`echo '${emailMml.replace(/'/g, "\\'")}' | himalaya template send`, { timeout: 10000 });
           results.push("email sent");
         } catch (e) {
