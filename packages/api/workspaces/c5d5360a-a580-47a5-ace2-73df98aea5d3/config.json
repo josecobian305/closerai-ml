@@ -1,0 +1,42 @@
+{
+  "userId": "c5d5360a-a580-47a5-ace2-73df98aea5d3",
+  "businessName": "Big boss entertainment",
+  "industry": "tech",
+  "pitch": "I sell software ",
+  "owner": {
+    "name": "John carlos",
+    "email": "josecobiansgp@gmail.com",
+    "phone": "7862804399"
+  },
+  "agent": {
+    "name": "Alex",
+    "title": "Head of Salesjohnson",
+    "email": "jcobian@chccapgroup.com"
+  },
+  "tone": "professional",
+  "leadSources": [
+    "LendingTree"
+  ],
+  "leadAge": "0-48h",
+  "documents": [
+    "bank3",
+    "dl"
+  ],
+  "phone": {
+    "areaCode": "",
+    "portExisting": false,
+    "existingNumber": ""
+  },
+  "layout": "overview_first",
+  "capabilities": {
+    "sms": true,
+    "email": true,
+    "voiceNotes": false,
+    "callBridge": false,
+    "autoReply": true,
+    "docCollection": true,
+    "courtSearch": true,
+    "notifications": true
+  },
+  "createdAt": "2026-03-22T21:04:37.008Z"
+}
