@@ -11,19 +11,21 @@ const sessions: Record<string, any> = {};
 
 const ADMIN_EMAIL = 'jcobian@chccapitalgroup.com';
 const FROM_EMAIL = 'jclaude@chccapitalgroup.com';
-const AGENT_NAME = 'Angie Ramirez';
-const AGENT_EMAIL = FROM_EMAIL;
+const JACOB_NAME = 'Jacob Claude';
+const ANGIE_NAME = 'Angie Ramirez';
 const BASE_URL = 'https://agents.chccapitalgroup.com';
 
 // ── Helper: send email via himalaya/SES ───────────────────────────────────────
-function sendEmail(to: string, subject: string, plainBody: string, htmlBody: string): boolean {
+function sendEmail(to: string, subject: string, plainBody: string, htmlBody: string, cc?: string): boolean {
   try {
-    const mml = `From: ${FROM_EMAIL}\nTo: ${to}\nSubject: ${subject}\n\n<#multipart type=alternative>\n${plainBody}\n<#part type=text/html>\n${htmlBody}\n<#/multipart>`;
+    let headers = `From: ${FROM_EMAIL}\nTo: ${to}\nSubject: ${subject}`;
+    if (cc) headers += `\nCc: ${cc}`;
+    const mml = `${headers}\n\n<#multipart type=alternative>\n${plainBody}\n<#part type=text/html>\n${htmlBody}\n<#/multipart>`;
     const tmpPath = `/tmp/onboard_email_${Date.now()}_${Math.random().toString(36).slice(2)}.mml`;
     fs.writeFileSync(tmpPath, mml);
     execSync(`cat ${tmpPath} | himalaya template send`, { timeout: 15000 });
     try { fs.unlinkSync(tmpPath); } catch {}
-    logger.info(`Email sent: ${subject} → ${to}`);
+    logger.info(`Email sent: ${subject} → ${to}${cc ? ` (CC: ${cc})` : ''}`);
     return true;
   } catch (e: any) {
     logger.error(`Email send failed: ${subject} → ${to}`, { error: String(e) });
@@ -91,11 +93,11 @@ onboardingRouter.post('/demo/demo-run', (req, res) => {
   const bName = businessName || 'Your Business';
   const userEmail = email || ADMIN_EMAIL;
 
-  // ── Email 1: Business owner notification (from Angie) ──────────────────
+  // ── Email 1: Business owner notification (FROM Jacob, CC user) ──────────
   const ownerSubject = `🧪 Demo Run #${runId} — ${customerName} just entered your pipeline`;
   const ownerHtml = emailHtml(ownerSubject, `
     <p style="color:#94a3b8;font-size:14px;line-height:1.7;margin:0 0 16px;">
-      Hi! This is <strong style="color:#a5b4fc;">${AGENT_NAME}</strong>, your AI sales agent.
+      Hi! This is <strong style="color:#a5b4fc;">${JACOB_NAME}</strong>, your operations agent.
     </p>
     <p style="color:#94a3b8;font-size:14px;line-height:1.7;margin:0 0 20px;">
       A new test lead just came through your onboarding demo. Here's what happened:
@@ -106,6 +108,7 @@ onboardingRouter.post('/demo/demo-run', (req, res) => {
         <tr><td style="color:#64748b;font-size:12px;padding:4px 0;">Industry</td><td style="color:#fff;font-size:14px;text-align:right;">${industry || 'General'}</td></tr>
         <tr><td style="color:#64748b;font-size:12px;padding:4px 0;">Revenue</td><td style="color:#fff;font-size:14px;text-align:right;">${revenue || '$50,000/mo'}</td></tr>
         <tr><td style="color:#64748b;font-size:12px;padding:4px 0;">Status</td><td style="color:#22c55e;font-size:14px;font-weight:600;text-align:right;">✅ Pipeline Complete</td></tr>
+        <tr><td style="color:#64748b;font-size:12px;padding:4px 0;">Sent by</td><td style="color:#a5b4fc;font-size:14px;text-align:right;">${JACOB_NAME}</td></tr>
       </table>
     </div>
     <p style="color:#94a3b8;font-size:14px;line-height:1.7;margin:0 0 20px;">
@@ -114,17 +117,18 @@ onboardingRouter.post('/demo/demo-run', (req, res) => {
     <a href="${BASE_URL}/app/" style="display:inline-block;background:linear-gradient(135deg,#635bff,#4f46e5);color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;">
       View in Dashboard →
     </a>
+    <p style="color:#64748b;font-size:11px;margin-top:20px;">— ${JACOB_NAME}, ${bName}</p>
   `);
-  const ownerPlain = `Demo Run #${runId} — ${customerName}\nIndustry: ${industry || 'General'}\nRevenue: ${revenue || '$50,000/mo'}\nStatus: Pipeline Complete\n\nAll 6 stages passed.\n\nView: ${BASE_URL}/app/`;
+  const ownerPlain = `From: ${JACOB_NAME}\n\nDemo Run #${runId} — ${customerName}\nIndustry: ${industry || 'General'}\nRevenue: ${revenue || '$50,000/mo'}\nStatus: Pipeline Complete\n\nAll 6 stages passed.\n\nView: ${BASE_URL}/app/`;
 
-  // ── Email 2: Customer welcome (from Angie) ─────────────────────────────
+  // ── Email 2: Customer welcome (FROM Angie, CC user) ────────────────────
   const custSubject = `${customerName} — Your funding pre-qualification is ready`;
   const custHtml = emailHtml(custSubject, `
     <p style="color:#94a3b8;font-size:14px;line-height:1.7;margin:0 0 16px;">
       Hi there! 👋
     </p>
     <p style="color:#94a3b8;font-size:14px;line-height:1.7;margin:0 0 16px;">
-      My name is <strong style="color:#a5b4fc;">${AGENT_NAME}</strong> and I work with <strong style="color:#fff;">${bName}</strong>.
+      My name is <strong style="color:#a5b4fc;">${ANGIE_NAME}</strong> and I work with <strong style="color:#fff;">${bName}</strong>.
     </p>
     <p style="color:#94a3b8;font-size:14px;line-height:1.7;margin:0 0 20px;">
       Based on your profile, we've pre-qualified you for funding. Here's a quick summary:
@@ -142,21 +146,15 @@ onboardingRouter.post('/demo/demo-run', (req, res) => {
     <a href="${BASE_URL}/offer/demo-${runId}" style="display:inline-block;background:linear-gradient(135deg,#635bff,#4f46e5);color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;">
       View Your Pre-Qualification →
     </a>
-    <p style="color:#64748b;font-size:12px;margin-top:20px;">
-      Questions? Reply to this email or call us directly.<br>
-      — ${AGENT_NAME}, ${bName}
-    </p>
+    <p style="color:#64748b;font-size:11px;margin-top:20px;">— ${ANGIE_NAME}, ${bName}</p>
   `);
-  const custPlain = `Hi! My name is ${AGENT_NAME} from ${bName}.\n\nBased on your profile, we've pre-qualified you for up to $250,000 in funding.\n\nNext steps:\n1. Reply with last 3 months bank statements\n2. Offer ready in 24h\n3. Same-day funding on approval\n\nView: ${BASE_URL}/offer/demo-${runId}`;
+  const custPlain = `From: ${ANGIE_NAME}\n\nHi! My name is ${ANGIE_NAME} from ${bName}.\n\nBased on your profile, we've pre-qualified you for up to $250,000 in funding.\n\nNext steps:\n1. Reply with last 3 months bank statements\n2. Offer ready in 24h\n3. Same-day funding on approval\n\nView: ${BASE_URL}/offer/demo-${runId}`;
 
-  // Send both emails to the admin inbox (Jose sees both sides)
-  const sent1 = sendEmail(ADMIN_EMAIL, `[Owner] ${ownerSubject}`, ownerPlain, ownerHtml);
-  const sent2 = sendEmail(ADMIN_EMAIL, `[Customer] ${custSubject}`, custPlain, custHtml);
-
-  // Also send to the registering user's email if different
-  if (userEmail && userEmail !== ADMIN_EMAIL) {
-    sendEmail(userEmail, ownerSubject, ownerPlain, ownerHtml);
-  }
+  // Jacob sends owner email → to admin, CC user
+  const ccUser = (userEmail && userEmail !== ADMIN_EMAIL) ? userEmail : undefined;
+  const sent1 = sendEmail(ADMIN_EMAIL, `[Jacob → Owner] ${ownerSubject}`, ownerPlain, ownerHtml, ccUser);
+  // Angie sends customer email → to admin, CC user
+  const sent2 = sendEmail(ADMIN_EMAIL, `[Angie → Customer] ${custSubject}`, custPlain, custHtml, ccUser);
 
   // Log the run (no session storage needed)
   logger.info(`Demo run #${runId} complete: ${customerName} — owner=${sent1}, customer=${sent2}`);
