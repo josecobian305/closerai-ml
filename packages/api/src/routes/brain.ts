@@ -7,6 +7,7 @@
  *   - get_contacts       → search/list GHL contacts
  *   - get_messages       → SMS conversation history
  *   - send_sms           → send text via TextTorrent
+ *   - send_email         → send email via SES/WorkMail (himalaya)
  *   - update_agent_config → write agent workspace files
  *   - stop_outreach      → add phone to opt-out list
  *   - navigate_ui        → instruct frontend to navigate
@@ -154,6 +155,36 @@ const TOOL_SPECS = [
             },
           },
           required: ['phone', 'message'],
+        },
+      },
+    },
+  },
+  {
+    toolSpec: {
+      name: 'send_email',
+      description: 'Send an email via SES/WorkMail (himalaya). Use this when the user says "send an email to X" or "email [address] saying..." or tests the email layer. DO NOT use TextTorrent for email.',
+      inputSchema: {
+        json: {
+          type: 'object',
+          properties: {
+            to: {
+              type: 'string',
+              description: 'Recipient email address.',
+            },
+            subject: {
+              type: 'string',
+              description: 'Email subject line.',
+            },
+            body: {
+              type: 'string',
+              description: 'Email body text.',
+            },
+            from: {
+              type: 'string',
+              description: 'Sender email address. Defaults to jclaude@chccapitalgroup.com.',
+            },
+          },
+          required: ['to', 'subject', 'body'],
         },
       },
     },
@@ -485,6 +516,22 @@ async function executeTool(name: string, input: any): Promise<any> { // eslint-d
           message,
           response: result.body,
         };
+      }
+
+      // ── send_email ─────────────────────────────────────────────────────
+      case 'send_email': {
+        const { to, subject, body, from: fromEmail } = input;
+        const sender = fromEmail || 'jclaude@chccapitalgroup.com';
+        try {
+          const htmlBody = body.replace(/\n/g, '<br>');
+          const mml = `From: ${sender}\nTo: ${to}\nSubject: ${subject}\n\n<#multipart type=alternative>\n${body}\n<#part type=text/html>\n<html><body style="font-family:Arial,sans-serif;padding:20px;background:#0b0f1a;color:#e2e8f0;">${htmlBody}</body></html>\n<#/multipart>`;
+          execSync(`echo '${mml.replace(/'/g, "\\'")}' | himalaya template send`, { timeout: 15000 });
+          logger.info('Brain sent email', { to, subject, from: sender });
+          return { success: true, to, subject, from: sender, method: 'SES/WorkMail' };
+        } catch (e: any) {
+          logger.error('Brain email send failed', { error: String(e), to, subject });
+          return { success: false, error: `Email send failed: ${String(e).slice(0, 200)}`, to, subject };
+        }
       }
 
       // ── update_agent_config ────────────────────────────────────────────
