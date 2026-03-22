@@ -345,3 +345,18 @@ input:focus, textarea:focus, select:focus {
   background: rgba(99,91,255,0.3);
   color: white;
 }
+
+/* Fix registration form inputs — dark bg, white text */
+input[type="text"], input[type="email"], input[type="tel"], input[type="password"], textarea, select {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+  border-color: #374151 !important;
+  caret-color: #6366f1 !important;
+}
+input::placeholder, textarea::placeholder {
+  color: #64748b !important;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: #6366f1 !important;
+  outline: none !important;
+}
