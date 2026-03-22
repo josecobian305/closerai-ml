@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { Step01BusinessProfile } from './Step01BusinessProfile';
 import { Step02TrainingAssets } from './Step02TrainingAssets';
 import { Step03SalesProcess } from './Step03SalesProcess';
@@ -10,10 +10,7 @@ import { Step07IqLevel } from './Step07IqLevel';
 import { Step08CostSummary } from './Step08CostSummary';
 import { Step09Complete } from './Step09Complete';
 
-// ─── Shared onboarding data shape ────────────────────────────────────────────
-
 export interface OnboardingData {
-  // Step 1 — Business Profile
   businessName: string;
   industry: string;
   state: string;
@@ -23,22 +20,16 @@ export interface OnboardingData {
   monthlyRevenue: string;
   dealSize: string;
   agentCount: number;
-  // Step 2 — Training Assets
   assets: UploadedAsset[];
-  // Step 3 — Sales Process
   pipelineStages: string[];
   processSummary: string;
-  // Step 4 — Demo Runs
   demoRuns: DemoRun[];
-  // Step 6 — AI Level
-  aiLevel: number; // 10 | 30 | 50 | 70 | 90
+  aiLevel: number;
   botCount: number;
   aiCost: number;
-  // Step 7 — IQ Level
   iqLevel: 'low' | 'medium' | 'genius';
   iqModel: string;
   iqCost: number;
-  // Session
   sessionId: string;
 }
 
@@ -80,27 +71,40 @@ export interface StepProps {
 export function OnboardingRouter({ onComplete }: { onComplete?: () => void }) {
   const [step, setStep] = useState(1);
   const [data, setData] = useState<OnboardingData>(INITIAL_DATA);
-  const [transitioning, setTransitioning] = useState(false);
+  const [direction, setDirection] = useState<'forward' | 'back'>('forward');
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const update = useCallback((patch: Partial<OnboardingData>) => {
     setData(prev => ({ ...prev, ...patch }));
   }, []);
 
+  const goTo = useCallback((nextStep: number, dir: 'forward' | 'back') => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setDirection(dir);
+    setTimeout(() => {
+      setStep(nextStep);
+      setIsAnimating(false);
+    }, 300);
+  }, [isAnimating]);
+
   const goNext = useCallback(() => {
     if (step >= TOTAL_STEPS) { onComplete?.(); return; }
-    setTransitioning(true);
-    setTimeout(() => { setStep(s => s + 1); setTransitioning(false); }, 350);
-  }, [step, onComplete]);
+    goTo(step + 1, 'forward');
+  }, [step, onComplete, goTo]);
 
   const goBack = useCallback(() => {
     if (step <= 1) return;
-    setTransitioning(true);
-    setTimeout(() => { setStep(s => s - 1); setTransitioning(false); }, 350);
-  }, [step]);
+    goTo(step - 1, 'back');
+  }, [step, goTo]);
 
-  const pct = (step / TOTAL_STEPS) * 100;
+  const pct = Math.round((step / TOTAL_STEPS) * 100);
 
   const stepProps: StepProps = { data, onUpdate: update, onNext: goNext, onBack: goBack };
+
+  const slideClass = isAnimating
+    ? direction === 'forward' ? 'opacity-0 -translate-x-8' : 'opacity-0 translate-x-8'
+    : 'opacity-100 translate-x-0';
 
   const renderStep = () => {
     switch (step) {
@@ -118,58 +122,38 @@ export function OnboardingRouter({ onComplete }: { onComplete?: () => void }) {
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: '#0d0d14', overflow: 'hidden', fontFamily: "'Inter', system-ui, sans-serif", color: '#fff' }}>
+    <div className="min-h-screen bg-[var(--bg-base)] flex flex-col">
       {/* Progress bar */}
-      <div style={{
-        position: 'fixed', top: 0, left: 0, height: 3, zIndex: 100,
-        width: `${pct}%`, background: 'linear-gradient(90deg, #635bff, #4f46e5)',
-        transition: 'width 0.4s ease',
-      }} />
+      {step > 0 && step < TOTAL_STEPS && (
+        <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-[var(--bg-elevated)]">
+          <div
+            className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500 ease-out"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      )}
 
-      {/* Top bar */}
-      <div style={{
-        position: 'fixed', top: 0, left: 0, right: 0, padding: '20px 32px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 50,
-      }}>
-        <div style={{
-          fontSize: 18, fontWeight: 800, letterSpacing: -0.5,
-          background: 'linear-gradient(135deg, #635bff, #4f46e5)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-        }}>
-          CloserAI
+      {/* Step counter */}
+      {step > 0 && step < TOTAL_STEPS && (
+        <div className="fixed top-4 right-4 z-50 text-xs font-medium text-[var(--text-muted)] bg-[var(--bg-card)]/80 px-3 py-1.5 rounded-full backdrop-blur">
+          {step} / {TOTAL_STEPS}
         </div>
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>
-          Step {step} of {TOTAL_STEPS}
-        </div>
-      </div>
+      )}
 
       {/* Back button */}
-      {step > 1 && step < 9 && (
+      {step > 1 && step < TOTAL_STEPS && (
         <button
           onClick={goBack}
-          style={{
-            position: 'fixed', top: 20, left: 100, zIndex: 51,
-            background: 'none', border: 'none', color: 'rgba(255,255,255,0.45)',
-            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 13,
-          }}
+          className="fixed top-3 left-4 z-50 flex items-center gap-1 text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors px-2 py-1.5 rounded-lg hover:bg-[var(--bg-elevated)]"
         >
-          <ArrowLeft size={14} /> Back
+          <ChevronLeft size={18} />
+          Back
         </button>
       )}
 
-      {/* Step content */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '80px 32px 40px',
-        opacity: transitioning ? 0 : 1,
-        transform: transitioning ? 'translateY(40px)' : 'translateY(0)',
-        transition: 'all 0.35s cubic-bezier(0.22,1,0.36,1)',
-        overflowY: 'auto',
-      }}>
-        <div style={{ width: '100%', maxWidth: 720 }}>
-          {renderStep()}
-        </div>
+      {/* Main content */}
+      <div className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${slideClass} ${step === TOTAL_STEPS ? '' : 'pb-24'}`}>
+        {renderStep()}
       </div>
     </div>
   );

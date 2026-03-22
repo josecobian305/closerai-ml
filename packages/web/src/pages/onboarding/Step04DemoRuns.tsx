@@ -3,7 +3,6 @@ import { Play, CheckCircle, XCircle, Loader, ChevronRight } from 'lucide-react';
 import type { StepProps, DemoRun } from './OnboardingRouter';
 
 const PIPELINE_STAGES = ['Lead In', 'Underwriting', 'Deal Created', 'Offer Sent', 'Pitch Review', 'Approval Link'];
-
 const DEMO_CUSTOMERS = [
   { name: 'Test Pizza LLC', industry: 'Food & Beverage', revenue: '$45,000/mo' },
   { name: 'Demo Construction Co', industry: 'Construction', revenue: '$120,000/mo' },
@@ -15,19 +14,15 @@ function simulateRun(runId: number, onProgress: (run: DemoRun) => void): Promise
     const stages = PIPELINE_STAGES.map(name => ({ name, done: false }));
     const run: DemoRun = { id: runId, customerName: DEMO_CUSTOMERS[runId - 1]?.name || `Test Customer ${runId}`, status: 'running', stages };
     onProgress({ ...run });
-
     let i = 0;
     const tick = () => {
       if (i < stages.length) {
-        stages[i].done = true;
-        i++;
+        stages[i].done = true; i++;
         onProgress({ ...run, stages: [...stages] });
         setTimeout(tick, 600 + Math.random() * 800);
       } else {
-        const passed = Math.random() > 0.05; // 95% pass rate for demo
-        const final: DemoRun = { ...run, status: passed ? 'passed' : 'failed', stages: [...stages] };
-        onProgress(final);
-        resolve(final);
+        const final: DemoRun = { ...run, status: Math.random() > 0.05 ? 'passed' : 'failed', stages: [...stages] };
+        onProgress(final); resolve(final);
       }
     };
     setTimeout(tick, 500);
@@ -42,135 +37,82 @@ export function Step04DemoRuns({ data, onUpdate, onNext }: StepProps) {
     }))
   );
   const [running, setRunning] = useState(false);
-
   const allPassed = runs.every(r => r.status === 'passed');
 
   const runTest = useCallback(async (runId: number) => {
     setRunning(true);
-    await simulateRun(runId, updated => {
-      setRuns(prev => prev.map(r => r.id === updated.id ? updated : r));
-    });
+    await simulateRun(runId, updated => setRuns(prev => prev.map(r => r.id === updated.id ? updated : r)));
     setRunning(false);
   }, []);
 
   const runAll = useCallback(async () => {
-    for (const run of runs) {
-      if (run.status !== 'passed') {
-        await runTest(run.id);
-      }
-    }
+    for (const run of runs) if (run.status !== 'passed') await runTest(run.id);
   }, [runs, runTest]);
 
-  const handleContinue = () => {
-    onUpdate({ demoRuns: runs });
-    onNext();
-  };
-
   return (
-    <div>
-      <div style={{ fontSize: 13, fontWeight: 600, color: '#635bff', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 16 }}>
-        🧪 RUN 3 DEMO TESTS
-      </div>
-      <div style={{ fontSize: 'clamp(24px, 4vw, 36px)', fontWeight: 700, lineHeight: 1.2, marginBottom: 12, letterSpacing: -0.5 }}>
-        Prove your pipeline works
-      </div>
-      <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.45)', marginBottom: 32, lineHeight: 1.6 }}>
-        Run 3 complete cycles with test customers. Each must pass through all 6 stages before you can go live.
-      </div>
+    <div className="flex flex-col items-center h-full px-6 pt-8">
+      <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 text-center">Prove your pipeline works</h2>
+      <p className="text-[var(--text-muted)] mb-8 text-center max-w-md">Run 3 complete cycles with test customers. Each must pass through all 6 stages.</p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
+      <div className="w-full max-w-2xl space-y-4 mb-8">
         {runs.map(run => (
-          <div key={run.id} style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: `1px solid ${run.status === 'passed' ? 'rgba(34,197,94,0.3)' : run.status === 'failed' ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.08)'}`,
-            borderRadius: 12, padding: 20,
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div key={run.id} className={`bg-[var(--bg-card)] rounded-xl border p-5 transition-colors ${
+            run.status === 'passed' ? 'border-emerald-500/30' : run.status === 'failed' ? 'border-red-500/30' : 'border-[var(--border)]'
+          }`}>
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <div style={{ fontSize: 16, fontWeight: 600 }}>{run.customerName}</div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
-                  {DEMO_CUSTOMERS[run.id - 1]?.industry} · {DEMO_CUSTOMERS[run.id - 1]?.revenue}
-                </div>
+                <div className="text-base font-semibold text-white">{run.customerName}</div>
+                <div className="text-xs text-[var(--text-subtle)]">{DEMO_CUSTOMERS[run.id - 1]?.industry} · {DEMO_CUSTOMERS[run.id - 1]?.revenue}</div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                {run.status === 'passed' && <CheckCircle size={20} style={{ color: '#22c55e' }} />}
-                {run.status === 'failed' && <XCircle size={20} style={{ color: '#ef4444' }} />}
-                {run.status === 'running' && <Loader size={20} className="spin" style={{ color: '#635bff' }} />}
+              <div className="flex items-center gap-2">
+                {run.status === 'passed' && <CheckCircle size={20} className="text-emerald-400" />}
+                {run.status === 'failed' && <XCircle size={20} className="text-red-400" />}
+                {run.status === 'running' && <Loader size={20} className="text-indigo-400 animate-spin" />}
                 {run.status === 'pending' && (
-                  <button
-                    onClick={() => runTest(run.id)}
-                    disabled={running}
-                    style={{
-                      background: '#635bff', color: '#fff', border: 'none', borderRadius: 6,
-                      padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: running ? 'not-allowed' : 'pointer',
-                      display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'inherit',
-                      opacity: running ? 0.5 : 1,
-                    }}
-                  >
-                    <Play size={14} /> Run Test
+                  <button onClick={() => runTest(run.id)} disabled={running}
+                    className="bg-[var(--accent)] text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center gap-1.5 disabled:opacity-40 transition-all">
+                    <Play size={12} /> Run Test
                   </button>
                 )}
                 {run.status === 'failed' && (
-                  <button
-                    onClick={() => runTest(run.id)}
-                    disabled={running}
-                    style={{
-                      background: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)',
-                      borderRadius: 6, padding: '8px 16px', fontSize: 13, fontWeight: 600,
-                      cursor: running ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
-                    }}
-                  >
+                  <button onClick={() => runTest(run.id)} disabled={running}
+                    className="bg-red-500/15 text-red-400 border border-red-500/30 text-xs font-semibold px-4 py-2 rounded-lg transition-all">
                     Retry
                   </button>
                 )}
               </div>
             </div>
-
-            {/* Stage progress */}
-            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+            <div className="flex gap-1 items-center">
               {run.stages.map((stage, i) => (
-                <div key={stage.name} style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1 }}>
-                  <div style={{
-                    height: 4, flex: 1, borderRadius: 2,
-                    background: stage.done ? '#635bff' : 'rgba(255,255,255,0.08)',
-                    transition: 'background 0.3s',
-                  }} />
-                  {i < run.stages.length - 1 && <ChevronRight size={10} style={{ color: 'rgba(255,255,255,0.2)', flexShrink: 0 }} />}
+                <div key={stage.name} className="flex items-center gap-1 flex-1">
+                  <div className={`h-1 flex-1 rounded transition-colors duration-300 ${stage.done ? 'bg-indigo-500' : 'bg-[var(--bg-elevated)]'}`} />
+                  {i < run.stages.length - 1 && <ChevronRight size={8} className="text-[var(--text-subtle)] shrink-0" />}
                 </div>
               ))}
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
+            <div className="flex justify-between mt-1.5">
               {run.stages.map(stage => (
-                <div key={stage.name} style={{ fontSize: 9, color: stage.done ? '#635bff' : 'rgba(255,255,255,0.25)', textAlign: 'center', flex: 1 }}>
-                  {stage.name}
-                </div>
+                <span key={stage.name} className={`text-[8px] text-center flex-1 ${stage.done ? 'text-indigo-400' : 'text-[var(--text-subtle)]'}`}>{stage.name}</span>
               ))}
             </div>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-        {!allPassed && (
-          <button onClick={runAll} disabled={running} style={{
-            background: 'rgba(99,91,255,0.15)', color: '#635bff', border: '1px solid rgba(99,91,255,0.3)',
-            padding: '14px 28px', borderRadius: 8, fontSize: 15, fontWeight: 600,
-            cursor: running ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
-          }}>
-            {running ? 'Running…' : 'Run All Tests'}
+      <div className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 bg-gradient-to-t from-gray-950 via-gray-950/90 to-transparent">
+        <div className="flex gap-3 max-w-lg mx-auto">
+          {!allPassed && (
+            <button onClick={runAll} disabled={running}
+              className="flex-1 bg-[var(--bg-elevated)] border border-indigo-500/30 text-indigo-400 font-semibold py-4 rounded-xl disabled:opacity-40 transition-all">
+              {running ? 'Running…' : 'Run All Tests'}
+            </button>
+          )}
+          <button onClick={() => { onUpdate({ demoRuns: runs }); onNext(); }} disabled={!allPassed}
+            className="flex-1 bg-[var(--accent)] hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-xl transition-all">
+            {allPassed ? 'All Passed → Continue' : 'Pass all 3 to continue'}
           </button>
-        )}
-        <button onClick={handleContinue} disabled={!allPassed} style={{
-          background: allPassed ? '#635bff' : 'rgba(255,255,255,0.06)',
-          color: allPassed ? '#fff' : 'rgba(255,255,255,0.3)',
-          border: 'none', padding: '14px 28px', borderRadius: 8, fontSize: 15, fontWeight: 600,
-          cursor: allPassed ? 'pointer' : 'not-allowed', fontFamily: 'inherit',
-        }}>
-          {allPassed ? 'All Tests Passed → Continue' : 'Pass all 3 tests to continue'}
-        </button>
+        </div>
       </div>
-
-      <style>{`.spin { animation: spin 1s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

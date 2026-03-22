@@ -1,12 +1,23 @@
 import { useState, useRef, useEffect, type KeyboardEvent } from 'react';
+import { Building2, Heart, UtensilsCrossed, ShoppingBag, Car, Scale, Home, Wind, Truck, Cpu, Leaf, Users, BarChart3, Megaphone, HelpCircle, ArrowRight, Zap } from 'lucide-react';
 import type { StepProps } from './OnboardingRouter';
 
 const INDUSTRIES = [
-  'Auto Repair / Dealership', 'Construction / Contracting', 'E-Commerce / Retail',
-  'Food & Beverage / Restaurant', 'Healthcare / Medical', 'HVAC / Plumbing / Electrical',
-  'Landscaping / Lawn Care', 'Legal / Law Firm', 'Manufacturing / Wholesale',
-  'Real Estate', 'Staffing / Recruiting', 'Transportation / Trucking',
-  'Merchant Cash Advance / Finance', 'SaaS / Technology', 'Marketing / Agency', 'Other',
+  { id: 'construction', label: 'Construction', icon: Building2 },
+  { id: 'healthcare', label: 'Healthcare', icon: Heart },
+  { id: 'restaurant', label: 'Restaurant', icon: UtensilsCrossed },
+  { id: 'retail', label: 'Retail', icon: ShoppingBag },
+  { id: 'auto', label: 'Auto', icon: Car },
+  { id: 'legal', label: 'Legal', icon: Scale },
+  { id: 'real_estate', label: 'Real Estate', icon: Home },
+  { id: 'hvac', label: 'HVAC', icon: Wind },
+  { id: 'trucking', label: 'Trucking', icon: Truck },
+  { id: 'tech', label: 'Tech', icon: Cpu },
+  { id: 'landscaping', label: 'Landscaping', icon: Leaf },
+  { id: 'staffing', label: 'Staffing', icon: Users },
+  { id: 'mca', label: 'MCA / Finance', icon: BarChart3 },
+  { id: 'marketing', label: 'Marketing', icon: Megaphone },
+  { id: 'other', label: 'Other', icon: HelpCircle },
 ];
 
 const US_STATES = [
@@ -15,125 +26,166 @@ const US_STATES = [
   'OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC',
 ];
 
-interface Field {
-  key: string;
-  label: string;
-  sublabel?: string;
-  type: 'text' | 'email' | 'password' | 'tel' | 'select';
-  placeholder?: string;
-  options?: string[];
-  required?: boolean;
-}
-
-const FIELDS: Field[] = [
-  { key: 'businessName', label: 'What\'s your business name?', sublabel: 'The name your customers know you by.', type: 'text', placeholder: 'Acme Funding LLC', required: true },
-  { key: 'industry', label: 'What industry are you in?', type: 'select', options: INDUSTRIES, required: true },
-  { key: 'state', label: 'What state are you based in?', type: 'select', options: US_STATES, required: true },
-  { key: 'email', label: 'Your email address?', sublabel: 'We\'ll send your login credentials here.', type: 'email', placeholder: 'you@business.com', required: true },
-  { key: 'phone', label: 'Your phone number?', type: 'tel', placeholder: '(555) 123-4567', required: true },
-  { key: 'password', label: 'Create a password', sublabel: 'At least 8 characters.', type: 'password', placeholder: '••••••••', required: true },
-];
-
-const inputStyle: React.CSSProperties = {
-  width: '100%', background: 'transparent', border: 'none',
-  borderBottom: '2px solid rgba(255,255,255,0.08)', color: '#fff',
-  fontSize: 'clamp(18px, 3vw, 28px)', fontFamily: 'inherit', fontWeight: 500,
-  padding: '12px 0', outline: 'none', caretColor: '#635bff',
-};
-
-const selectStyle: React.CSSProperties = {
-  ...inputStyle, appearance: 'none' as const, cursor: 'pointer',
-};
+type Phase = 'welcome' | 'business' | 'contact' | 'state';
 
 export function Step01BusinessProfile({ data, onUpdate, onNext }: StepProps) {
-  const [fieldIdx, setFieldIdx] = useState(0);
-  const inputRef = useRef<HTMLInputElement | HTMLSelectElement>(null);
-  const field = FIELDS[fieldIdx];
+  const [phase, setPhase] = useState<Phase>('welcome');
 
-  useEffect(() => { inputRef.current?.focus(); }, [fieldIdx]);
-
-  const val = String((data as any)[field.key] ?? '');
-
-  const advance = () => {
-    if (field.required && !val.trim()) return;
-    if (field.key === 'password' && val.length < 8) return;
-    if (fieldIdx < FIELDS.length - 1) {
-      setFieldIdx(i => i + 1);
-    } else {
-      onNext();
-    }
-  };
-
-  const handleKey = (e: KeyboardEvent) => { if (e.key === 'Enter') advance(); };
-
-  const handleChange = (v: string) => {
-    onUpdate({ [field.key]: v } as any);
-  };
-
-  return (
-    <div>
-      <div style={{ fontSize: 13, fontWeight: 600, color: '#635bff', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ background: '#635bff', color: '#fff', width: 20, height: 20, borderRadius: '50%', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {fieldIdx + 1}
-        </span>
-        BASIC INFO
-      </div>
-
-      <div style={{ fontSize: 'clamp(24px, 4vw, 40px)', fontWeight: 700, lineHeight: 1.2, marginBottom: 12, letterSpacing: -0.5 }}>
-        {field.label}
-      </div>
-
-      {field.sublabel && (
-        <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.45)', marginBottom: 36, lineHeight: 1.6 }}>
-          {field.sublabel}
+  // ─── Welcome ────────────────────────────────────────────────────────────────
+  if (phase === 'welcome') {
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-center px-6">
+        <div className="w-20 h-20 rounded-[10px] bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-8 shadow-2xl shadow-indigo-500/30">
+          <Zap size={40} className="text-white" />
         </div>
-      )}
-
-      {field.type === 'select' ? (
-        <select
-          ref={inputRef as any}
-          value={val}
-          onChange={e => { handleChange(e.target.value); }}
-          onKeyDown={handleKey}
-          style={selectStyle}
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
+          Let's build your<br />
+          <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+            AI sales team
+          </span>
+        </h1>
+        <p className="text-xl text-[var(--text-muted)] mb-12 max-w-md">
+          In 5 minutes, you'll have a fully configured AI agent ready to qualify leads, collect docs, and follow up 24/7.
+        </p>
+        <button
+          onClick={() => setPhase('business')}
+          className="group flex items-center gap-3 bg-[var(--accent)] hover:opacity-90 text-white text-lg font-semibold px-8 py-4 rounded-[10px] transition-all duration-200 shadow-lg shadow-indigo-600/30 hover:shadow-indigo-500/40 hover:scale-105"
         >
-          <option value="" disabled>Select…</option>
-          {field.options!.map(o => <option key={o} value={o} style={{ background: '#1a1a2e', color: '#fff' }}>{o}</option>)}
-        </select>
-      ) : (
-        <input
-          ref={inputRef as any}
-          type={field.type}
-          value={val}
-          placeholder={field.placeholder}
-          onChange={e => handleChange(e.target.value)}
-          onKeyDown={handleKey}
-          style={inputStyle}
-        />
-      )}
-
-      <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
-        <button onClick={advance} style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          background: '#635bff', color: '#fff', border: 'none',
-          padding: '14px 28px', borderRadius: 8, fontSize: 15, fontWeight: 600,
-          cursor: 'pointer', fontFamily: 'inherit',
-        }}>
-          {fieldIdx < FIELDS.length - 1 ? 'OK ✓' : 'Continue →'}
+          Get Started
+          <ArrowRight size={22} className="transition-transform group-hover:translate-x-1" />
         </button>
-        <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>
-          press <span style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 5, padding: '3px 8px', fontSize: 11, fontWeight: 600 }}>Enter ↵</span>
-        </span>
+        <p className="text-sm text-[var(--text-subtle)] mt-6">No credit card required · Free 14-day trial</p>
       </div>
+    );
+  }
 
-      {fieldIdx > 0 && (
-        <button onClick={() => setFieldIdx(i => i - 1)} style={{
-          marginTop: 16, background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)',
-          cursor: 'pointer', fontSize: 13, fontFamily: 'inherit',
-        }}>
-          ← Previous
+  // ─── Business Name + Industry ───────────────────────────────────────────────
+  if (phase === 'business') {
+    return (
+      <div className="flex flex-col items-center h-full px-6 pt-8">
+        <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 text-center">
+          Tell us about your business
+        </h2>
+        <p className="text-[var(--text-muted)] mb-8 text-center">We'll personalize everything to your industry.</p>
+        <div className="w-full max-w-lg space-y-6">
+          <input
+            type="text"
+            value={data.businessName}
+            onChange={e => onUpdate({ businessName: e.target.value })}
+            placeholder="Business name"
+            className="w-full bg-[var(--bg-elevated)]/60 border border-[var(--border)] focus:border-[var(--accent)] rounded-xl px-5 py-4 text-xl text-white placeholder-[var(--text-subtle)] outline-none transition-colors"
+          />
+          <div>
+            <p className="text-sm font-medium text-[var(--text-muted)] mb-3">Industry</p>
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+              {INDUSTRIES.map(({ id, label, icon: Icon }) => (
+                <button
+                  key={id}
+                  onClick={() => onUpdate({ industry: id })}
+                  className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all duration-150 ${
+                    data.industry === id
+                      ? 'bg-[var(--accent)]/20 border-indigo-500 text-indigo-300'
+                      : 'bg-[var(--bg-elevated)]/40 border-[var(--border)]/60 text-[var(--text-muted)] hover:border-[var(--border)] hover:text-gray-200'
+                  }`}
+                >
+                  <Icon size={22} />
+                  <span className="text-xs font-medium">{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 bg-gradient-to-t from-gray-950 via-gray-950/90 to-transparent">
+          <button
+            onClick={() => setPhase('contact')}
+            disabled={!data.businessName.trim() || !data.industry}
+            className="w-full max-w-lg mx-auto flex items-center justify-center gap-2 bg-[var(--accent)] hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold text-base py-4 rounded-xl transition-all duration-200 block"
+          >
+            Continue →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Contact Info ───────────────────────────────────────────────────────────
+  if (phase === 'contact') {
+    const canContinue = data.email.trim() && data.phone.trim() && data.password.length >= 8;
+    return (
+      <div className="flex flex-col items-center h-full px-6 pt-8">
+        <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 text-center">
+          Your contact info
+        </h2>
+        <p className="text-[var(--text-muted)] mb-8 text-center">We'll send your login credentials here.</p>
+        <div className="w-full max-w-lg space-y-4">
+          <input
+            type="email"
+            value={data.email}
+            onChange={e => onUpdate({ email: e.target.value })}
+            placeholder="Email address"
+            className="w-full bg-[var(--bg-elevated)]/60 border border-[var(--border)] focus:border-[var(--accent)] rounded-xl px-5 py-4 text-lg text-white placeholder-[var(--text-subtle)] outline-none transition-colors"
+          />
+          <input
+            type="tel"
+            value={data.phone}
+            onChange={e => onUpdate({ phone: e.target.value })}
+            placeholder="Phone number"
+            className="w-full bg-[var(--bg-elevated)]/60 border border-[var(--border)] focus:border-[var(--accent)] rounded-xl px-5 py-4 text-lg text-white placeholder-[var(--text-subtle)] outline-none transition-colors"
+          />
+          <input
+            type="password"
+            value={data.password}
+            onChange={e => onUpdate({ password: e.target.value })}
+            placeholder="Create a password (8+ chars)"
+            className="w-full bg-[var(--bg-elevated)]/60 border border-[var(--border)] focus:border-[var(--accent)] rounded-xl px-5 py-4 text-lg text-white placeholder-[var(--text-subtle)] outline-none transition-colors"
+          />
+        </div>
+        <div className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 bg-gradient-to-t from-gray-950 via-gray-950/90 to-transparent">
+          <button
+            onClick={() => setPhase('state')}
+            disabled={!canContinue}
+            className="w-full max-w-lg mx-auto flex items-center justify-center gap-2 bg-[var(--accent)] hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold text-base py-4 rounded-xl transition-all duration-200 block"
+          >
+            Continue →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── State ──────────────────────────────────────────────────────────────────
+  return (
+    <div className="flex flex-col items-center h-full px-6 pt-8">
+      <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 text-center">
+        Where are you based?
+      </h2>
+      <p className="text-[var(--text-muted)] mb-8 text-center">Select your state.</p>
+      <div className="w-full max-w-lg">
+        <div className="grid grid-cols-6 sm:grid-cols-9 gap-2">
+          {US_STATES.map(st => (
+            <button
+              key={st}
+              onClick={() => onUpdate({ state: st })}
+              className={`py-2.5 rounded-lg text-sm font-semibold border transition-all duration-150 ${
+                data.state === st
+                  ? 'bg-[var(--accent)]/20 border-indigo-500 text-indigo-300'
+                  : 'bg-[var(--bg-elevated)]/40 border-[var(--border)]/60 text-[var(--text-muted)] hover:border-[var(--border)] hover:text-gray-200'
+              }`}
+            >
+              {st}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 bg-gradient-to-t from-gray-950 via-gray-950/90 to-transparent">
+        <button
+          onClick={onNext}
+          disabled={!data.state}
+          className="w-full max-w-lg mx-auto flex items-center justify-center gap-2 bg-[var(--accent)] hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold text-base py-4 rounded-xl transition-all duration-200 block"
+        >
+          Continue →
         </button>
-      )}
+      </div>
     </div>
   );
 }

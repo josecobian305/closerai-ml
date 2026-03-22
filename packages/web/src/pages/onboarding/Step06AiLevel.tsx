@@ -2,15 +2,7 @@ import { useState } from 'react';
 import { Check } from 'lucide-react';
 import type { StepProps } from './OnboardingRouter';
 
-interface AiOption {
-  pct: number;
-  label: string;
-  desc: string;
-  bots: number;
-  cost: number;
-}
-
-const OPTIONS: AiOption[] = [
+const OPTIONS = [
   { pct: 10, label: 'Human-First', desc: 'AI only routes leads + schedules', bots: 1, cost: 49 },
   { pct: 30, label: 'AI-Assisted', desc: 'AI drafts, human approves before send', bots: 2, cost: 149 },
   { pct: 50, label: 'Co-Pilot', desc: 'AI handles follow-ups, human closes', bots: 3, cost: 299 },
@@ -21,63 +13,41 @@ const OPTIONS: AiOption[] = [
 export function Step06AiLevel({ data, onUpdate, onNext }: StepProps) {
   const [selected, setSelected] = useState<number>(data.aiLevel);
 
-  const handleSelect = (opt: AiOption) => {
+  const handleSelect = (opt: typeof OPTIONS[0]) => {
     setSelected(opt.pct);
     onUpdate({ aiLevel: opt.pct, botCount: opt.bots, aiCost: opt.cost });
   };
 
   return (
-    <div>
-      <div style={{ fontSize: 13, fontWeight: 600, color: '#635bff', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 16 }}>
-        🤖 AI INTERVENTION LEVEL
-      </div>
-      <div style={{ fontSize: 'clamp(24px, 4vw, 36px)', fontWeight: 700, lineHeight: 1.2, marginBottom: 12, letterSpacing: -0.5 }}>
-        How much should AI handle?
-      </div>
-      <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.45)', marginBottom: 32, lineHeight: 1.6 }}>
-        Choose how involved AI is in your sales process. You can always change this later.
-      </div>
+    <div className="flex flex-col items-center h-full px-6 pt-8">
+      <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 text-center">How much should AI handle?</h2>
+      <p className="text-[var(--text-muted)] mb-8 text-center">Choose your AI involvement level. You can always change this later.</p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
+      <div className="w-full max-w-lg space-y-3 mb-8">
         {OPTIONS.map(opt => {
           const isSelected = selected === opt.pct;
           return (
-            <button
-              key={opt.pct}
-              onClick={() => handleSelect(opt)}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                width: '100%', textAlign: 'left',
-                background: isSelected ? 'rgba(99,91,255,0.12)' : 'rgba(255,255,255,0.04)',
-                border: `2px solid ${isSelected ? '#635bff' : 'rgba(255,255,255,0.08)'}`,
-                borderRadius: 12, padding: '18px 22px', cursor: 'pointer',
-                transition: 'all 0.15s', fontFamily: 'inherit', color: '#fff',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                <div style={{
-                  width: 48, height: 48, borderRadius: 10,
-                  background: isSelected ? '#635bff' : 'rgba(255,255,255,0.06)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 18, fontWeight: 800, flexShrink: 0,
-                  transition: 'background 0.15s',
-                }}>
+            <button key={opt.pct} onClick={() => handleSelect(opt)}
+              className={`w-full flex items-center justify-between text-left px-5 py-4 rounded-xl border-2 transition-all duration-150 ${
+                isSelected
+                  ? 'bg-[var(--accent)]/12 border-indigo-500'
+                  : 'bg-[var(--bg-elevated)]/40 border-[var(--border)] hover:border-[var(--border-active)]'
+              }`}>
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-extrabold shrink-0 transition-colors ${
+                  isSelected ? 'bg-[var(--accent)] text-white' : 'bg-[var(--bg-elevated)] text-[var(--text-muted)]'
+                }`}>
                   {opt.pct}%
                 </div>
                 <div>
-                  <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 2 }}>{opt.label}</div>
-                  <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>{opt.desc}</div>
-                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>
-                    {opt.bots} bot{opt.bots > 1 ? 's' : ''} · ~${opt.cost}/mo
-                  </div>
+                  <div className="text-base font-semibold text-white">{opt.label}</div>
+                  <div className="text-xs text-[var(--text-muted)]">{opt.desc}</div>
+                  <div className="text-[10px] text-[var(--text-subtle)] mt-1">{opt.bots} bot{opt.bots > 1 ? 's' : ''} · ~${opt.cost}/mo</div>
                 </div>
               </div>
               {isSelected && (
-                <div style={{
-                  width: 28, height: 28, borderRadius: '50%', background: '#635bff',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                }}>
-                  <Check size={16} />
+                <div className="w-7 h-7 rounded-full bg-[var(--accent)] flex items-center justify-center shrink-0">
+                  <Check size={16} className="text-white" />
                 </div>
               )}
             </button>
@@ -85,13 +55,12 @@ export function Step06AiLevel({ data, onUpdate, onNext }: StepProps) {
         })}
       </div>
 
-      <button onClick={onNext} style={{
-        background: '#635bff', color: '#fff', border: 'none',
-        padding: '14px 28px', borderRadius: 8, fontSize: 15, fontWeight: 600,
-        cursor: 'pointer', fontFamily: 'inherit',
-      }}>
-        Continue →
-      </button>
+      <div className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 bg-gradient-to-t from-gray-950 via-gray-950/90 to-transparent">
+        <button onClick={onNext}
+          className="w-full max-w-lg mx-auto bg-[var(--accent)] hover:opacity-90 text-white font-semibold py-4 rounded-xl transition-all block">
+          Continue →
+        </button>
+      </div>
     </div>
   );
 }

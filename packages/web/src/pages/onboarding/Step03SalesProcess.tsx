@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, GitBranch, MessageCircle, Sparkles, X } from 'lucide-react';
+import { Send, GitBranch, MessageCircle, Sparkles } from 'lucide-react';
 import type { StepProps } from './OnboardingRouter';
 
 interface ChatMsg {
@@ -39,71 +39,42 @@ function detectStages(messages: ChatMsg[]): string[] {
 // ─── Intro Popup ──────────────────────────────────────────────────────────────
 
 function IntroPopup({ assetCount, onStart }: { assetCount: number; onStart: () => void }) {
+  const topics = ['How you handle new leads', 'Your follow-up cadence', 'When you pitch & close', 'Documents you collect', 'Deal timeline & bottlenecks'];
+
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 200,
-      background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: 24,
-    }}>
-      <div style={{
-        background: '#12121c', border: '1px solid rgba(99,91,255,0.3)',
-        borderRadius: 20, padding: 40, maxWidth: 460, width: '100%',
-        textAlign: 'center', position: 'relative',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(99,91,255,0.1)',
-      }}>
+    <div className="fixed inset-0 z-[200] bg-black/70 backdrop-blur-sm flex items-center justify-center p-6">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-active)] rounded-2xl p-10 max-w-md w-full text-center shadow-2xl shadow-indigo-500/10">
         {/* Icon */}
-        <div style={{
-          width: 64, height: 64, borderRadius: 16,
-          background: 'linear-gradient(135deg, rgba(99,91,255,0.2), rgba(99,91,255,0.05))',
-          border: '1px solid rgba(99,91,255,0.3)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: '0 auto 24px',
-        }}>
-          <MessageCircle size={32} style={{ color: '#635bff' }} />
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-6">
+          <MessageCircle size={32} className="text-indigo-400" />
         </div>
 
-        <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 12, letterSpacing: -0.5 }}>
+        <h2 className="text-2xl font-extrabold text-white mb-3">
           Let's Design Your Sales Process
-        </div>
-
-        <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: 8 }}>
+        </h2>
+        <p className="text-[var(--text-muted)] mb-2 leading-relaxed">
           I'm going to ask you a few questions about how you sell — from first contact to close.
-        </div>
-
-        <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: 24 }}>
-          Your answers will become the <strong style={{ color: '#635bff' }}>blueprint</strong> your AI agents follow. I'll build your pipeline in real time as we talk.
-        </div>
+        </p>
+        <p className="text-[var(--text-muted)] mb-6 leading-relaxed">
+          Your answers will become the <strong className="text-indigo-400">blueprint</strong> your AI agents follow.
+        </p>
 
         {assetCount > 0 && (
-          <div style={{
-            background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)',
-            borderRadius: 10, padding: '12px 16px', marginBottom: 24,
-            display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center',
-          }}>
-            <Sparkles size={16} style={{ color: '#22c55e' }} />
-            <span style={{ fontSize: 13, color: '#22c55e' }}>
+          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3 mb-6 flex items-center gap-2 justify-center">
+            <Sparkles size={16} className="text-emerald-400" />
+            <span className="text-xs text-emerald-400">
               {assetCount} training asset{assetCount > 1 ? 's' : ''} uploaded — I'll reference {assetCount > 1 ? 'these' : 'this'} while we build
             </span>
           </div>
         )}
 
-        <div style={{
-          background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: 16,
-          marginBottom: 28, textAlign: 'left',
-        }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.4)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>
-            What we'll cover:
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {['How you handle new leads', 'Your follow-up cadence', 'When you pitch & close', 'Documents you collect', 'Deal timeline & bottlenecks'].map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: 'rgba(255,255,255,0.6)' }}>
-                <div style={{
-                  width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
-                  background: 'rgba(99,91,255,0.15)', border: '1px solid rgba(99,91,255,0.3)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 10, fontWeight: 700, color: '#635bff',
-                }}>
+        {/* Topics */}
+        <div className="bg-[var(--bg-elevated)]/60 rounded-xl p-4 mb-8 text-left">
+          <p className="text-[10px] font-semibold text-[var(--text-subtle)] uppercase tracking-wider mb-3">What we'll cover</p>
+          <div className="space-y-2.5">
+            {topics.map((item, i) => (
+              <div key={i} className="flex items-center gap-3 text-sm text-[var(--text-muted)]">
+                <div className="w-5 h-5 rounded-full bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-[10px] font-bold text-indigo-400 shrink-0">
                   {i + 1}
                 </div>
                 {item}
@@ -112,20 +83,13 @@ function IntroPopup({ assetCount, onStart }: { assetCount: number; onStart: () =
           </div>
         </div>
 
-        <button onClick={onStart} style={{
-          width: '100%',
-          background: 'linear-gradient(135deg, #635bff, #4f46e5)', color: '#fff', border: 'none',
-          padding: '16px 32px', borderRadius: 12, fontSize: 16, fontWeight: 700,
-          cursor: 'pointer', fontFamily: 'inherit',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-          boxShadow: '0 4px 20px rgba(99,91,255,0.3)',
-        }}>
+        <button
+          onClick={onStart}
+          className="w-full bg-[var(--accent)] hover:opacity-90 text-white font-semibold py-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20"
+        >
           <MessageCircle size={18} /> Start Conversation
         </button>
-
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 12 }}>
-          Takes about 2-3 minutes · You can adjust everything later
-        </div>
+        <p className="text-[10px] text-[var(--text-subtle)] mt-3">Takes about 2-3 minutes · You can adjust everything later</p>
       </div>
     </div>
   );
@@ -154,11 +118,8 @@ export function Step03SalesProcess({ data, onUpdate, onNext }: StepProps) {
     setDetectedStages(detectStages(messages));
   }, [messages]);
 
-  // Auto-focus input when intro popup closes
   useEffect(() => {
-    if (!showIntro) {
-      setTimeout(() => inputRef.current?.focus(), 300);
-    }
+    if (!showIntro) setTimeout(() => inputRef.current?.focus(), 300);
   }, [showIntro]);
 
   const sendMessage = useCallback(() => {
@@ -175,7 +136,7 @@ export function Step03SalesProcess({ data, onUpdate, onNext }: StepProps) {
       const stageList = stages.length > 0 ? stages.join(' → ') : 'Lead In → First Contact → Follow Up → Docs Requested → Underwriting → Offer Sent → Close';
       newMsgs.push({
         id: 'summary', role: 'brain',
-        content: `Here's what I heard:\n\n**Your pipeline:** ${stageList}\n\nDoes this match how you sell? Type "yes" to lock it in, or tell me what to change.`,
+        content: `Here's what I heard:\n\nYour pipeline: ${stageList}\n\nDoes this match how you sell? Type "yes" to lock it in, or tell me what to change.`,
         ts: new Date(),
       });
       setQuestionIdx(nextIdx);
@@ -184,7 +145,6 @@ export function Step03SalesProcess({ data, onUpdate, onNext }: StepProps) {
     setMessages(prev => [...prev, ...newMsgs]);
     setInput('');
 
-    // Check if user confirmed
     if (questionIdx >= GUIDED_QUESTIONS.length && ['yes', 'yeah', 'correct', 'looks good', 'lock it in', 'confirm'].some(w => input.toLowerCase().includes(w))) {
       const stages = detectStages([...messages, userMsg]);
       const finalStages = stages.length > 0 ? stages : ['Lead In', 'First Contact', 'Follow Up', 'Docs Requested', 'Underwriting', 'Offer Sent', 'Close'];
@@ -199,88 +159,74 @@ export function Step03SalesProcess({ data, onUpdate, onNext }: StepProps) {
     }
   }, [input, messages, questionIdx, confirmed, onUpdate, onNext]);
 
-  // ─── Intro popup ────────────────────────────────────────────────────────────
   if (showIntro) {
     return <IntroPopup assetCount={data.assets.length} onStart={() => setShowIntro(false)} />;
   }
 
-  // ─── Chat UI ────────────────────────────────────────────────────────────────
   return (
-    <div style={{ display: 'flex', gap: 24, height: 'calc(100vh - 160px)', maxHeight: 700 }}>
+    <div className="flex gap-4 h-[calc(100vh-100px)] px-6 pt-4 max-w-5xl mx-auto w-full">
       {/* Chat panel */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: '#635bff', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 }}>
-          💬 RECORD YOUR SALES PROCESS
-        </div>
-
-        <div ref={chatRef} style={{
-          flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12,
-          padding: '12px 0', minHeight: 0,
-        }}>
+      <div className="flex-1 flex flex-col min-w-0">
+        <p className="text-xs font-semibold text-indigo-400 uppercase tracking-wider mb-3">💬 Record Your Sales Process</p>
+        <div ref={chatRef} className="flex-1 overflow-y-auto flex flex-col gap-3 pr-2 min-h-0">
           {messages.map(m => (
-            <div key={m.id} style={{
-              alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
-              maxWidth: '80%', padding: '12px 16px', borderRadius: 12,
-              background: m.role === 'user' ? '#635bff' : 'rgba(255,255,255,0.06)',
-              fontSize: 14, lineHeight: 1.6, whiteSpace: 'pre-wrap',
-            }}>
+            <div
+              key={m.id}
+              className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+                m.role === 'user'
+                  ? 'self-end bg-[var(--accent)] text-white rounded-br-sm'
+                  : 'self-start bg-[var(--bg-elevated)] text-[var(--text-secondary)] rounded-bl-sm border border-[var(--border)]'
+              }`}
+            >
               {m.content}
             </div>
           ))}
         </div>
-
-        {/* Input */}
         {!confirmed && (
-          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+          <div className="flex gap-2 mt-3 mb-2">
             <input
               ref={inputRef}
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') sendMessage(); }}
               placeholder="Type your answer…"
-              style={{
-                flex: 1, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: 8, padding: '12px 16px', color: '#fff', fontSize: 14,
-                fontFamily: 'inherit', outline: 'none',
-              }}
+              className="flex-1 bg-[var(--bg-elevated)]/60 border border-[var(--border)] focus:border-[var(--accent)] rounded-xl px-4 py-3 text-sm text-white placeholder-[var(--text-subtle)] outline-none transition-colors"
             />
-            <button onClick={sendMessage} style={{
-              background: '#635bff', border: 'none', borderRadius: 8,
-              width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: '#fff', flexShrink: 0,
-            }}>
+            <button
+              onClick={sendMessage}
+              className="w-11 h-11 bg-[var(--accent)] hover:opacity-90 rounded-xl flex items-center justify-center text-white shrink-0 transition-all"
+            >
               <Send size={18} />
             </button>
           </div>
         )}
       </div>
 
-      {/* Pipeline map panel */}
-      <div style={{
-        width: 240, flexShrink: 0, background: 'rgba(255,255,255,0.03)',
-        borderRadius: 12, padding: 20, overflowY: 'auto',
-        display: 'flex', flexDirection: 'column', gap: 8,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: '#635bff', fontSize: 13, fontWeight: 600 }}>
-          <GitBranch size={16} /> Pipeline Map
+      {/* Pipeline map */}
+      <div className="w-56 shrink-0 bg-[var(--bg-card)] rounded-2xl p-5 border border-[var(--border)] overflow-y-auto hidden md:flex flex-col gap-2">
+        <div className="flex items-center gap-2 text-indigo-400 text-xs font-semibold mb-2">
+          <GitBranch size={14} /> Pipeline Map
         </div>
-        {(detectedStages.length > 0 ? detectedStages : ['Waiting for responses…']).map((stage, i) => (
-          <div key={stage} style={{
-            display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
-            background: detectedStages.includes(stage) ? 'rgba(99,91,255,0.1)' : 'rgba(255,255,255,0.04)',
-            border: `1px solid ${detectedStages.includes(stage) ? 'rgba(99,91,255,0.3)' : 'rgba(255,255,255,0.06)'}`,
-            borderRadius: 8, fontSize: 13, fontWeight: 500,
-          }}>
-            <span style={{
-              width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: detectedStages.includes(stage) ? '#635bff' : 'rgba(255,255,255,0.08)',
-              fontSize: 11, fontWeight: 700, flexShrink: 0,
-            }}>
-              {detectedStages.includes(stage) ? '✓' : i + 1}
-            </span>
-            {stage}
-          </div>
-        ))}
+        {(detectedStages.length > 0 ? detectedStages : ['Waiting for responses…']).map((stage, i) => {
+          const active = detectedStages.includes(stage);
+          return (
+            <div
+              key={stage}
+              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-medium border transition-all ${
+                active
+                  ? 'bg-[var(--accent)]/10 border-indigo-500/30 text-indigo-300'
+                  : 'bg-[var(--bg-elevated)]/40 border-[var(--border)] text-[var(--text-muted)]'
+              }`}
+            >
+              <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
+                active ? 'bg-[var(--accent)] text-white' : 'bg-[var(--bg-elevated)] text-[var(--text-subtle)]'
+              }`}>
+                {active ? '✓' : i + 1}
+              </div>
+              {stage}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

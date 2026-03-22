@@ -1,26 +1,20 @@
 import { useState, useRef, useCallback } from 'react';
-import { Upload, FileText, MessageSquare, Video, Mail, Phone, X, Tag } from 'lucide-react';
+import { Upload, FileText, MessageSquare, Video, Mail, Phone, X, Tag, ArrowRight } from 'lucide-react';
 import type { StepProps, UploadedAsset } from './OnboardingRouter';
 
 const TAGS = ['objection_handling', 'opener', 'follow_up', 'closing', 'pitch'] as const;
 
 const CATEGORIES = [
-  { key: 'scripts', label: 'Sales Scripts', icon: <FileText size={24} />, accept: '.pdf,.docx,.txt,.doc', desc: 'PDF, DOCX, TXT' },
-  { key: 'messages', label: 'Message Templates', icon: <MessageSquare size={24} />, accept: '.txt,.csv,.json', desc: 'TXT, CSV, or paste below' },
-  { key: 'recordings', label: 'Call Recordings', icon: <Video size={24} />, accept: '.mp4,.mp3,.m4a,.wav,.webm', desc: 'MP4, MP3, M4A' },
-  { key: 'emails', label: 'Email Sequences', icon: <Mail size={24} />, accept: '.txt,.html,.eml,.csv', desc: 'TXT, HTML, EML' },
-  { key: 'sms', label: 'SMS Sequences', icon: <Phone size={24} />, accept: '.txt,.csv,.json', desc: 'TXT, CSV, JSON' },
+  { key: 'scripts', label: 'Sales Scripts', icon: FileText, accept: '.pdf,.docx,.txt,.doc', desc: 'PDF, DOCX, TXT' },
+  { key: 'messages', label: 'Message Templates', icon: MessageSquare, accept: '.txt,.csv,.json', desc: 'TXT, CSV, or paste' },
+  { key: 'recordings', label: 'Call Recordings', icon: Video, accept: '.mp4,.mp3,.m4a,.wav,.webm', desc: 'MP4, MP3, M4A' },
+  { key: 'emails', label: 'Email Sequences', icon: Mail, accept: '.txt,.html,.eml,.csv', desc: 'TXT, HTML, EML' },
+  { key: 'sms', label: 'SMS Sequences', icon: Phone, accept: '.txt,.csv,.json', desc: 'TXT, CSV, JSON' },
 ];
-
-const cardStyle: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.04)', border: '2px dashed rgba(255,255,255,0.1)',
-  borderRadius: 12, padding: 24, textAlign: 'center', cursor: 'pointer',
-  transition: 'all 0.15s',
-};
 
 export function Step02TrainingAssets({ data, onUpdate, onNext }: StepProps) {
   const [dragOver, setDragOver] = useState<string | null>(null);
-  const [tagging, setTagging] = useState<string | null>(null); // asset id being tagged
+  const [tagging, setTagging] = useState<string | null>(null);
   const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const addAssets = useCallback((files: FileList, category: string) => {
@@ -46,99 +40,97 @@ export function Step02TrainingAssets({ data, onUpdate, onNext }: StepProps) {
   const formatSize = (b: number) => b < 1024 ? `${b}B` : b < 1048576 ? `${(b / 1024).toFixed(1)}KB` : `${(b / 1048576).toFixed(1)}MB`;
 
   return (
-    <div>
-      <div style={{ fontSize: 13, fontWeight: 600, color: '#635bff', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 16 }}>
-        📁 UPLOAD TRAINING ASSETS
-      </div>
-      <div style={{ fontSize: 'clamp(24px, 4vw, 36px)', fontWeight: 700, lineHeight: 1.2, marginBottom: 12, letterSpacing: -0.5 }}>
-        Upload anything that captures how you sell
-      </div>
-      <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.45)', marginBottom: 32, lineHeight: 1.6 }}>
+    <div className="flex flex-col items-center h-full px-6 pt-8">
+      <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 text-center">
+        Upload your training assets
+      </h2>
+      <p className="text-[var(--text-muted)] mb-8 text-center max-w-md">
         Scripts, recordings, templates — these become the training data for your AI agents. You can always add more later.
-      </div>
+      </p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12, marginBottom: 24 }}>
-        {CATEGORIES.map(cat => (
-          <div
-            key={cat.key}
-            style={{
-              ...cardStyle,
-              borderColor: dragOver === cat.key ? '#635bff' : 'rgba(255,255,255,0.1)',
-              background: dragOver === cat.key ? 'rgba(99,91,255,0.08)' : 'rgba(255,255,255,0.04)',
-            }}
-            onClick={() => fileRefs.current[cat.key]?.click()}
-            onDragOver={e => { e.preventDefault(); setDragOver(cat.key); }}
-            onDragLeave={() => setDragOver(null)}
-            onDrop={e => { e.preventDefault(); setDragOver(null); addAssets(e.dataTransfer.files, cat.key); }}
-          >
-            <input
-              ref={el => { fileRefs.current[cat.key] = el; }}
-              type="file" accept={cat.accept} multiple hidden
-              onChange={e => { if (e.target.files) addAssets(e.target.files, cat.key); }}
-            />
-            <div style={{ marginBottom: 8, color: '#635bff' }}>{cat.icon}</div>
-            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{cat.label}</div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{cat.desc}</div>
-          </div>
-        ))}
+      {/* Upload cards grid */}
+      <div className="w-full max-w-2xl grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+        {CATEGORIES.map(cat => {
+          const Icon = cat.icon;
+          const isDraggedOver = dragOver === cat.key;
+          return (
+            <div
+              key={cat.key}
+              onClick={() => fileRefs.current[cat.key]?.click()}
+              onDragOver={e => { e.preventDefault(); setDragOver(cat.key); }}
+              onDragLeave={() => setDragOver(null)}
+              onDrop={e => { e.preventDefault(); setDragOver(null); addAssets(e.dataTransfer.files, cat.key); }}
+              className={`flex flex-col items-center gap-2 p-5 rounded-xl border-2 border-dashed cursor-pointer transition-all duration-150 ${
+                isDraggedOver
+                  ? 'border-indigo-500 bg-[var(--accent)]/10'
+                  : 'border-[var(--border)] bg-[var(--bg-elevated)]/40 hover:border-[var(--border-active)] hover:bg-[var(--bg-elevated)]/60'
+              }`}
+            >
+              <input
+                ref={el => { fileRefs.current[cat.key] = el; }}
+                type="file" accept={cat.accept} multiple hidden
+                onChange={e => { if (e.target.files) addAssets(e.target.files, cat.key); }}
+              />
+              <Icon size={24} className={isDraggedOver ? 'text-indigo-400' : 'text-[var(--text-muted)]'} />
+              <span className="text-sm font-semibold text-white">{cat.label}</span>
+              <span className="text-[10px] text-[var(--text-subtle)]">{cat.desc}</span>
+            </div>
+          );
+        })}
       </div>
 
       {/* Uploaded assets list */}
       {data.assets.length > 0 && (
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>
+        <div className="w-full max-w-2xl mb-6">
+          <p className="text-xs font-semibold text-[var(--text-muted)] mb-2">
             {data.assets.length} file{data.assets.length > 1 ? 's' : ''} uploaded
-          </div>
-          {data.assets.map(a => (
-            <div key={a.id} style={{
-              display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
-              background: 'rgba(255,255,255,0.04)', borderRadius: 8, marginBottom: 6,
-            }}>
-              <FileText size={16} style={{ color: '#635bff', flexShrink: 0 }} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 14, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</div>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{a.type} · {formatSize(a.size)}</div>
-              </div>
-              <button
-                onClick={() => setTagging(tagging === a.id ? null : a.id)}
-                style={{
-                  background: 'rgba(99,91,255,0.15)', border: 'none', borderRadius: 4,
-                  color: '#635bff', fontSize: 11, padding: '4px 8px', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', gap: 4,
-                }}
-              >
-                <Tag size={10} /> {a.tag}
-              </button>
-              <button onClick={() => removeAsset(a.id)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer' }}>
-                <X size={14} />
-              </button>
-              {tagging === a.id && (
-                <div style={{
-                  position: 'absolute', right: 60, background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: 8, padding: 6, display: 'flex', flexDirection: 'column', gap: 2, zIndex: 10,
-                }}>
-                  {TAGS.map(t => (
-                    <button key={t} onClick={() => setTag(a.id, t)} style={{
-                      background: a.tag === t ? 'rgba(99,91,255,0.2)' : 'transparent',
-                      border: 'none', color: '#fff', padding: '6px 12px', borderRadius: 4,
-                      cursor: 'pointer', fontSize: 12, textAlign: 'left', fontFamily: 'inherit',
-                    }}>
-                      {t.replace(/_/g, ' ')}
-                    </button>
-                  ))}
+          </p>
+          <div className="space-y-2">
+            {data.assets.map(a => (
+              <div key={a.id} className="flex items-center gap-3 px-4 py-3 bg-[var(--bg-card)] rounded-xl border border-[var(--border)]">
+                <FileText size={16} className="text-indigo-400 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-white truncate">{a.name}</div>
+                  <div className="text-[10px] text-[var(--text-subtle)]">{a.type} · {formatSize(a.size)}</div>
                 </div>
-              )}
-            </div>
-          ))}
+                <div className="relative">
+                  <button
+                    onClick={() => setTagging(tagging === a.id ? null : a.id)}
+                    className="text-[10px] font-semibold bg-[var(--accent)]/15 text-indigo-400 px-2 py-1 rounded flex items-center gap-1"
+                  >
+                    <Tag size={10} /> {a.tag.replace(/_/g, ' ')}
+                  </button>
+                  {tagging === a.id && (
+                    <div className="absolute right-0 top-8 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg shadow-xl p-1.5 z-10 min-w-[140px]">
+                      {TAGS.map(t => (
+                        <button
+                          key={t}
+                          onClick={() => setTag(a.id, t)}
+                          className={`block w-full text-left text-xs px-3 py-2 rounded ${
+                            a.tag === t ? 'bg-[var(--accent)]/20 text-indigo-300' : 'text-[var(--text-muted)] hover:bg-[var(--bg-card)]'
+                          }`}
+                        >
+                          {t.replace(/_/g, ' ')}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <button onClick={() => removeAsset(a.id)} className="text-[var(--text-subtle)] hover:text-red-400 transition-colors">
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: 12 }}>
-        <button onClick={onNext} style={{
-          background: '#635bff', color: '#fff', border: 'none',
-          padding: '14px 28px', borderRadius: 8, fontSize: 15, fontWeight: 600,
-          cursor: 'pointer', fontFamily: 'inherit',
-        }}>
+      {/* Bottom nav */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 px-6 py-4 bg-gradient-to-t from-gray-950 via-gray-950/90 to-transparent">
+        <button
+          onClick={onNext}
+          className="w-full max-w-lg mx-auto flex items-center justify-center gap-2 bg-[var(--accent)] hover:opacity-90 text-white font-semibold text-base py-4 rounded-xl transition-all duration-200 block"
+        >
           {data.assets.length > 0 ? 'Continue →' : 'Skip for now →'}
         </button>
       </div>

@@ -1,4 +1,4 @@
-import { GitBranch, Lock } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import type { StepProps } from './OnboardingRouter';
 
 export function Step05ConfirmProcess({ data, onNext }: StepProps) {
@@ -7,51 +7,30 @@ export function Step05ConfirmProcess({ data, onNext }: StepProps) {
     : ['Lead In', 'First Contact', 'Follow Up', 'Docs Requested', 'Underwriting', 'Offer Sent', 'Close'];
 
   return (
-    <div style={{ textAlign: 'center' }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: '#635bff', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 16 }}>
-        ✅ CONFIRM YOUR PROCESS
-      </div>
-      <div style={{ fontSize: 'clamp(24px, 4vw, 36px)', fontWeight: 700, lineHeight: 1.2, marginBottom: 12, letterSpacing: -0.5 }}>
-        This is your sales process
-      </div>
-      <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.45)', marginBottom: 40, lineHeight: 1.6 }}>
+    <div className="flex flex-col items-center h-full px-6 pt-8 text-center">
+      <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">This is your sales process</h2>
+      <p className="text-[var(--text-muted)] mb-10">
         {stages.length} stages · {data.demoRuns.filter(r => r.status === 'passed').length} successful demo runs · AI will follow this exact flow
-      </div>
+      </p>
 
-      {/* Pipeline visualization */}
-      <div style={{
-        display: 'flex', flexDirection: 'column', gap: 0, alignItems: 'center',
-        marginBottom: 48, maxWidth: 400, margin: '0 auto 48px',
-      }}>
+      <div className="flex flex-col items-center gap-0 mb-12 max-w-sm w-full">
         {stages.map((stage, i) => (
-          <div key={stage} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 14, width: '100%',
-              padding: '14px 20px', background: 'rgba(99,91,255,0.08)',
-              border: '1px solid rgba(99,91,255,0.2)', borderRadius: 10,
-            }}>
-              <div style={{
-                width: 32, height: 32, borderRadius: '50%', background: '#635bff',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 14, fontWeight: 700, flexShrink: 0,
-              }}>
+          <div key={stage} className="flex flex-col items-center w-full">
+            <div className="flex items-center gap-3 w-full px-5 py-3.5 bg-[var(--accent)]/10 border border-indigo-500/20 rounded-xl">
+              <div className="w-8 h-8 rounded-full bg-[var(--accent)] flex items-center justify-center text-sm font-bold text-white shrink-0">
                 {i + 1}
               </div>
-              <span style={{ fontSize: 15, fontWeight: 600 }}>{stage}</span>
+              <span className="text-sm font-semibold text-white">{stage}</span>
             </div>
-            {i < stages.length - 1 && (
-              <div style={{ width: 2, height: 20, background: 'rgba(99,91,255,0.2)' }} />
-            )}
+            {i < stages.length - 1 && <div className="w-0.5 h-4 bg-indigo-500/20" />}
           </div>
         ))}
       </div>
 
-      <button onClick={onNext} style={{
-        background: 'linear-gradient(135deg, #635bff, #4f46e5)', color: '#fff', border: 'none',
-        padding: '18px 48px', borderRadius: 12, fontSize: 17, fontWeight: 700,
-        cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 10,
-        boxShadow: '0 4px 20px rgba(99,91,255,0.3)',
-      }}>
+      <button
+        onClick={onNext}
+        className="group flex items-center gap-2 bg-[var(--accent)] hover:opacity-90 text-white text-lg font-bold px-10 py-4 rounded-xl transition-all duration-200 shadow-lg shadow-indigo-600/20"
+      >
         <Lock size={18} /> This is how I sell → Lock It In
       </button>
     </div>
