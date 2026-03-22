@@ -794,8 +794,29 @@ async function callBedrockWithTools(
  *
  * Response: { reply: string, action?: { type: string, payload: object }, timestamp: string }
  */
+const SETUP_MODE_PROMPT = `
+SETUP MODE — You are guiding the user through setting up their sales pipeline.
+
+Your job:
+1. Ask about their current process (lead source, outreach method, follow-up, closing)
+2. Identify what can be automated
+3. Test each step live:
+   - "Let me send a test SMS..." → call send_sms tool
+   - "Here's your test offer page..." → return link to /offer/demo
+   - "Let me check your integrations..." → call get_agent_workspace tool
+4. After each test, ask for feedback
+5. Adjust based on their input
+6. When all steps are configured, save the config:
+   - Call update_preferences with the pipeline config
+   - Confirm: "Your pipeline is live! Here's what's running..."
+
+Be conversational. Ask one question at a time. Show links inline.
+Don't overwhelm with options — guide them step by step.
+Reference their business name and industry.
+`;
+
 router.post('/chat', async (req: Request, res: Response) => {
-  const { message, userId, config } = req.body;
+  const { message, userId, config, mode } = req.body;
 
   if (!message) {
     return res.status(400).json({ error: 'message required' });
@@ -816,7 +837,10 @@ router.post('/chat', async (req: Request, res: Response) => {
       history.splice(0, history.length - 40);
     }
 
-    const systemPrompt = buildSystemPrompt(config);
+    const basePrompt = buildSystemPrompt(config);
+    const systemPrompt = mode === 'setup'
+      ? `${basePrompt}\n\n${SETUP_MODE_PROMPT}`
+      : basePrompt;
 
     // Reset pending action before each call
     pendingAction = null;
