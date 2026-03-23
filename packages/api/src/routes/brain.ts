@@ -1042,6 +1042,9 @@ CRITICAL RULES:
 - Do NOT reference any real contacts, phone numbers, or existing data
 - Do NOT try to call get_stats, get_contacts, get_messages, get_agent_workspace, get_agent_leads, send_sms, or stop_outreach — these tools are NOT available to you
 - You CAN use: send_email, navigate_ui, update_preferences, report_bug
+- The platform domain is closerai.apipay.cash — all links should use this domain
+- Each user gets their own subdirectory: closerai.apipay.cash/{businessSlug}
+- Do NOT reference agents.chccapitalgroup.com — that is the internal admin domain
 
 IMPORTANT — DYNAMIC TEST DATA:
 When running demo tests or showing pipeline examples, ALWAYS use the user's actual industry and business type.

@@ -13,7 +13,7 @@ const ADMIN_EMAIL = 'jcobian@chccapitalgroup.com';
 const FROM_EMAIL = 'jclaude@chccapitalgroup.com';
 const JACOB_NAME = 'Jacob Claude';
 const ANGIE_NAME = 'Angie Ramirez';
-const BASE_URL = 'https://agents.chccapitalgroup.com';
+const BASE_URL = 'https://closerai.apipay.cash';
 
 // ── Helper: send email via himalaya/SES ───────────────────────────────────────
 function sendEmail(to: string, subject: string, plainBody: string, htmlBody: string, cc?: string): boolean {
@@ -48,7 +48,7 @@ function emailHtml(title: string, bodyContent: string): string {
   </div>
   <div style="text-align:center;margin-top:24px;font-size:11px;color:#475569;">
     CloserAI by CHC Capital Group · Powered by AI<br>
-    <a href="${BASE_URL}" style="color:#635bff;text-decoration:none;">agents.chccapitalgroup.com</a>
+    <a href="${BASE_URL}" style="color:#635bff;text-decoration:none;">closerai.apipay.cash</a>
   </div>
 </div></body></html>`;
 }
