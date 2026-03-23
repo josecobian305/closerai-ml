@@ -259,7 +259,7 @@ export function Step03SalesProcess({ data, onUpdate, onNext, onBack }: StepProps
       const lower = reply.toLowerCase();
       if (lower.includes('pipeline is live') || lower.includes('pipeline is set') || lower.includes('locked in') || lower.includes('you\'re all set')) {
         const stages = detectStages([...messages, userMsg]);
-        const finalStages = stages.length > 0 ? stages : ['Lead In', 'First Contact', 'Follow Up', 'Docs Requested', 'Underwriting', 'Offer Sent', 'Close'];
+        const finalStages = stages.length > 0 ? stages : [...getPipelineStagesForIndustry(data.industry)];
         onUpdate({ pipelineStages: finalStages, processSummary: messages.map(m => `${m.role}: ${m.content}`).join('\n') });
         setConfirmed(true);
         setTimeout(onNext, 2000);
@@ -285,11 +285,43 @@ export function Step03SalesProcess({ data, onUpdate, onNext, onBack }: StepProps
 
   const handleLockIn = () => {
     const stages = detectStages(messages);
-    const finalStages = stages.length > 0 ? stages : ['Lead In', 'First Contact', 'Follow Up', 'Docs Requested', 'Underwriting', 'Offer Sent', 'Close'];
+    const industry = data.industry?.toLowerCase() || 'default';
+    const INDUSTRY_STAGES: Record<string, string[]> = {
+      construction: ['Lead In', 'Site Visit', 'Estimate Sent', 'Contract Signed', 'Project Start', 'Final Payment'],
+      healthcare: ['Referral In', 'Intake Call', 'Insurance Verify', 'Appointment Set', 'Treatment Start', 'Follow-up'],
+      restaurant: ['Lead In', 'First Visit', 'Reservation', 'Dining Experience', 'Feedback', 'Loyalty Signup'],
+      'auto repair': ['Lead In', 'Inspection', 'Quote Sent', 'Approval', 'Repair Started', 'Pickup Ready'],
+      'auto sales': ['Lead In', 'Test Drive', 'Trade-In Appraisal', 'Financing', 'Contract', 'Delivery'],
+      automotive: ['Lead In', 'Test Drive', 'Trade-In Appraisal', 'Financing', 'Contract', 'Delivery'],
+      'real estate': ['Lead In', 'Showing Scheduled', 'Property Tour', 'Offer Made', 'Under Contract', 'Closed'],
+      legal: ['Lead In', 'Consultation', 'Engagement Letter', 'Case Filed', 'Discovery', 'Resolution'],
+      insurance: ['Lead In', 'Needs Analysis', 'Quote Presented', 'Application', 'Underwriting', 'Policy Issued'],
+      finance: ['Lead In', 'Docs Requested', 'Underwriting', 'Offer Sent', 'Approval', 'Funded'],
+      default: ['Lead In', 'First Contact', 'Follow Up', 'Proposal', 'Negotiation', 'Close'],
+    };
+    const finalStages = stages.length > 0 ? stages : (INDUSTRY_STAGES[industry] || INDUSTRY_STAGES.default);
+    
+    // Show confirmation message with the stages BEFORE moving forward
+    const stageList = finalStages.map((s, i) => `${i + 1}. ${s}`).join('\n');
+    setMessages(prev => [...prev, {
+      id: 'confirm', role: 'brain', 
+      content: `Here's your pipeline I built from our conversation:\n\n${stageList}\n\n**Does this look right?** If you want to change anything, just tell me. Otherwise say "looks good" and we'll move to testing!`,
+      ts: new Date(),
+    }]);
+    
+    // Save stages but don't move forward yet — wait for confirmation
     onUpdate({ pipelineStages: finalStages, processSummary: messages.map(m => `${m.role}: ${m.content}`).join('\n') });
+    
+    // Override sendMessage to listen for confirmation
+    const origConfirmed = confirmed;
+    if (!origConfirmed) {
+      // Don't auto-advance — user needs to confirm
+      return;
+    }
+    
     setConfirmed(true);
     setMessages(prev => [...prev, {
-      id: 'locked', role: 'brain', content: '✅ Pipeline locked in! Moving to the next step.', ts: new Date(),
+      id: 'locked', role: 'brain', content: '✅ Pipeline locked in! Moving to demo tests.', ts: new Date(),
     }]);
     setTimeout(onNext, 1500);
   };
