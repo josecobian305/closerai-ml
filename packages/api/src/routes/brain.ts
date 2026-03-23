@@ -820,9 +820,14 @@ async function executeTool(name: string, input: any): Promise<any> { // eslint-d
         html = html.replace(/Nail Art • Manicures • Pedicures • Self-Care/g, tag);
         html = html.replace(/💅 <span>/g, `✨ <span>`);
         
-        // Replace services block
-        const svcRegex = /<div class="services">[\s\S]*?<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*<\/div>/;
-        // Simpler: just write the whole file from template
+        // Replace services block — find the <div class="services"> and replace its contents
+        const servicesStart = html.indexOf('<div class="services">');
+        const servicesEnd = html.indexOf('</div>\n\n<div class="calendar-section"');
+        if (servicesStart !== -1 && servicesEnd !== -1) {
+          html = html.substring(0, servicesStart) +
+            '<div class="services">\n  ' + serviceCards + '\n</div>' +
+            html.substring(servicesEnd);
+        }
         
         // Write the file
         const bookDir = '/home/ubuntu/.openclaw/workspace/closerai-app/demos/book';
@@ -1093,6 +1098,16 @@ IMPORTANT:
 - Ask ONE question at a time — don't overwhelm
 - Reference their business name and industry from the config
 - Keep it conversational and natural
+
+REVENUE OPTIMIZATION — PROACTIVE SUGGESTIONS:
+While designing the touch sequence, actively look for opportunities to help the user:
+- **Digital products/subscriptions**: If their workflow involves recurring services, suggest adding a subscription tier or membership program touch (e.g. "VIP maintenance plan", "monthly retainer", "premium access")
+- **Upsell/cross-sell touches**: Suggest adding a touch that offers complementary services after the main sale closes (e.g. "30-day check-in + upsell email", "referral bonus SMS", "seasonal promo touch")
+- **Lead magnets**: If they don't have one, suggest creating a free resource or tool that captures leads (e.g. "free estimate calculator page", "cost comparison guide", "industry report download")
+- **Automation-ready services**: If they mention manual steps that could become a paid digital service, flag it (e.g. "You do site assessments manually — we could create a self-service assessment form that pre-qualifies leads AND charges a deposit")
+- **Recurring revenue**: Always ask "Do you have any recurring or subscription revenue? If not, would you want to add a maintenance/retainer touch to your sequence?"
+
+Frame these as natural suggestions during the conversation, not a sales pitch. Be helpful, not pushy.
 `;
 
 router.post('/chat', async (req: Request, res: Response) => {
