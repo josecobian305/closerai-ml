@@ -22,6 +22,7 @@ const STAGE_KEYWORDS: Record<string, string[]> = {
 
 // Parse explicit PIPELINE_TOUCHES from brain messages (preferred over keyword detection)
 function parseBrainTouches(messages: ChatMsg[]): string[] {
+  // First look for explicit PIPELINE_TOUCHES format
   for (let i = messages.length - 1; i >= 0; i--) {
     const m = messages[i];
     if (m.role !== 'brain') continue;
@@ -31,9 +32,17 @@ function parseBrainTouches(messages: ChatMsg[]): string[] {
         const parsed = JSON.parse(`[${match[1]}]`);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       } catch {
-        // Try splitting by comma if JSON parse fails
         return match[1].split(',').map(s => s.trim().replace(/^["']|["']$/g, '')).filter(Boolean);
       }
+    }
+  }
+  // Fall back: extract numbered lists from brain messages (e.g. "1. SMS Intro\n2. Follow-up Call")
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const m = messages[i];
+    if (m.role !== 'brain') continue;
+    const numbered = m.content.match(/^\d+[\.)\s]\s*.+/gm);
+    if (numbered && numbered.length >= 3) {
+      return numbered.map(line => line.replace(/^\d+[\.)\s]\s*/, '').replace(/\s*[—–-]\s+.*$/, '').trim()).filter(Boolean);
     }
   }
   return [];
@@ -57,9 +66,12 @@ function renderContent(text: string) {
     if (part.startsWith('**') && part.endsWith('**')) {
       return <strong key={i}>{part.slice(2, -2)}</strong>;
     }
-    return part.split('\n').map((line, j, arr) => (
-      <span key={`${i}-${j}`}>{line}{j < arr.length - 1 && <br />}</span>
-    ));
+    return part.split('\n').map((line, j, arr) => {
+      if (line.trim() === '---' || line.trim() === '***' || line.trim() === '___') {
+        return <hr key={`${i}-${j}`} style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.1)', margin: '12px 0' }} />;
+      }
+      return <span key={`${i}-${j}`}>{line}{j < arr.length - 1 && <br />}</span>;
+    });
   });
 }
 
@@ -205,7 +217,7 @@ function MessageBubble({ msg }: { msg: ChatMsg }) {
         }}>🧠</div>
       )}
       <div style={{
-        maxWidth: '75%', padding: '12px 16px',
+        maxWidth: 'min(75%, calc(100vw - 80px))', padding: '12px 16px',
         borderRadius: isBrain ? '4px 16px 16px 16px' : '16px 4px 16px 16px',
         background: isBrain ? 'rgba(99,91,255,0.12)' : 'linear-gradient(135deg, #635bff, #4f46e5)',
         border: isBrain ? '1px solid rgba(99,91,255,0.25)' : 'none',
@@ -438,7 +450,7 @@ export function Step03SalesProcess({ data, onUpdate, onNext, onBack }: StepProps
       {!confirmed && (
         <div style={{
           borderTop: '1px solid var(--border, rgba(255,255,255,0.08))',
-          background: 'var(--bg-surface, #0d0d1a)', padding: '16px 20px', flexShrink: 0,
+          background: 'var(--bg-surface, #0d0d1a)', padding: '16px 20px', paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))', flexShrink: 0,
         }}>
           <div style={{
             display: 'flex', alignItems: 'flex-end', gap: 10,
