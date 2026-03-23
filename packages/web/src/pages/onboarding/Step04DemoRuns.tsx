@@ -1,18 +1,103 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Play, CheckCircle, XCircle, Loader, ChevronRight, Mail } from 'lucide-react';
 import type { StepProps, DemoRun } from './OnboardingRouter';
 
 const PIPELINE_STAGES = ['Lead In', 'Underwriting', 'Deal Created', 'Offer Sent', 'Pitch Review', 'Approval Link'];
-const DEMO_CUSTOMERS = [
-  { name: 'Test Pizza LLC', industry: 'Food & Beverage', revenue: '$45,000/mo' },
-  { name: 'Demo Construction Co', industry: 'Construction', revenue: '$120,000/mo' },
-  { name: 'Sample Auto Repair', industry: 'Auto Repair', revenue: '$65,000/mo' },
+
+// Generate demo customers based on the user's industry
+const INDUSTRY_CUSTOMERS: Record<string, Array<{ name: string; revenue: string }>> = {
+  construction: [
+    { name: 'Apex Builders LLC', revenue: '$185,000/mo' },
+    { name: 'Summit Contracting', revenue: '$95,000/mo' },
+    { name: 'Ironworks Development', revenue: '$240,000/mo' },
+  ],
+  healthcare: [
+    { name: 'Sunrise Medical Group', revenue: '$320,000/mo' },
+    { name: 'Premier Dental Care', revenue: '$75,000/mo' },
+    { name: 'Coastal Chiropractic', revenue: '$55,000/mo' },
+  ],
+  restaurant: [
+    { name: 'Bella Cucina Italian', revenue: '$68,000/mo' },
+    { name: 'Golden Dragon Express', revenue: '$42,000/mo' },
+    { name: 'Harbor View Grill', revenue: '$95,000/mo' },
+  ],
+  retail: [
+    { name: 'Urban Style Boutique', revenue: '$38,000/mo' },
+    { name: 'TechGear Electronics', revenue: '$125,000/mo' },
+    { name: 'Green Leaf Market', revenue: '$72,000/mo' },
+  ],
+  auto: [
+    { name: 'Precision Auto Works', revenue: '$85,000/mo' },
+    { name: 'Elite Motors Group', revenue: '$210,000/mo' },
+    { name: 'QuickFix Tire & Brake', revenue: '$48,000/mo' },
+  ],
+  legal: [
+    { name: 'Sterling Law Partners', revenue: '$145,000/mo' },
+    { name: 'Justice First Legal', revenue: '$88,000/mo' },
+    { name: 'Park & Associates', revenue: '$195,000/mo' },
+  ],
+  real_estate: [
+    { name: 'Skyline Realty Group', revenue: '$175,000/mo' },
+    { name: 'Coastal Properties LLC', revenue: '$92,000/mo' },
+    { name: 'Metro Home Sales', revenue: '$130,000/mo' },
+  ],
+  hvac: [
+    { name: 'CoolBreeze HVAC', revenue: '$65,000/mo' },
+    { name: 'AllSeason Comfort', revenue: '$110,000/mo' },
+    { name: 'Arctic Air Solutions', revenue: '$78,000/mo' },
+  ],
+  trucking: [
+    { name: 'Eagle Freight Lines', revenue: '$280,000/mo' },
+    { name: 'CrossCountry Logistics', revenue: '$165,000/mo' },
+    { name: 'FastLane Transport', revenue: '$95,000/mo' },
+  ],
+  tech: [
+    { name: 'NovaTech Solutions', revenue: '$155,000/mo' },
+    { name: 'CloudPeak SaaS', revenue: '$88,000/mo' },
+    { name: 'DataForge Analytics', revenue: '$210,000/mo' },
+  ],
+  mca: [
+    { name: 'Velocity Funding Corp', revenue: '$320,000/mo' },
+    { name: 'Merchant Growth Capital', revenue: '$145,000/mo' },
+    { name: 'FastTrack Business Loans', revenue: '$225,000/mo' },
+  ],
+  landscaping: [
+    { name: 'GreenScape Pro', revenue: '$55,000/mo' },
+    { name: 'Evergreen Lawn Care', revenue: '$42,000/mo' },
+    { name: 'Nature\'s Edge Landscaping', revenue: '$78,000/mo' },
+  ],
+  staffing: [
+    { name: 'TalentBridge Staffing', revenue: '$195,000/mo' },
+    { name: 'ProStaff Solutions', revenue: '$130,000/mo' },
+    { name: 'WorkForce One', revenue: '$88,000/mo' },
+  ],
+  marketing: [
+    { name: 'BrandSpark Agency', revenue: '$72,000/mo' },
+    { name: 'Digital Edge Marketing', revenue: '$115,000/mo' },
+    { name: 'Conversion Kings', revenue: '$58,000/mo' },
+  ],
+};
+
+const DEFAULT_CUSTOMERS = [
+  { name: 'Acme Services LLC', revenue: '$85,000/mo' },
+  { name: 'Premier Solutions Co', revenue: '$120,000/mo' },
+  { name: 'National Group Inc', revenue: '$65,000/mo' },
 ];
 
-function simulateStages(runId: number, onProgress: (run: DemoRun) => void): Promise<void> {
+function getIndustryLabel(id: string): string {
+  const labels: Record<string, string> = {
+    construction: 'Construction', healthcare: 'Healthcare', restaurant: 'Food & Beverage',
+    retail: 'Retail', auto: 'Auto Repair', legal: 'Legal', real_estate: 'Real Estate',
+    hvac: 'HVAC', trucking: 'Trucking', tech: 'Technology', mca: 'MCA / Finance',
+    landscaping: 'Landscaping', staffing: 'Staffing', marketing: 'Marketing', other: 'General',
+  };
+  return labels[id] || id || 'General';
+}
+
+function simulateStages(runId: number, customerName: string, onProgress: (run: DemoRun) => void): Promise<void> {
   return new Promise(resolve => {
     const stages = PIPELINE_STAGES.map(name => ({ name, done: false }));
-    const run: DemoRun = { id: runId, customerName: DEMO_CUSTOMERS[runId - 1]?.name || `Test Customer ${runId}`, status: 'running', stages };
+    const run: DemoRun = { id: runId, customerName, status: 'running', stages };
     onProgress({ ...run });
     let i = 0;
     const tick = () => {
@@ -29,9 +114,15 @@ function simulateStages(runId: number, onProgress: (run: DemoRun) => void): Prom
 }
 
 export function Step04DemoRuns({ data, onUpdate, onNext }: StepProps) {
+  const industryLabel = getIndustryLabel(data.industry);
+  const demoCustomers = useMemo(() => {
+    const matched = INDUSTRY_CUSTOMERS[data.industry] || DEFAULT_CUSTOMERS;
+    return matched.map(c => ({ ...c, industry: industryLabel }));
+  }, [data.industry, industryLabel]);
+
   const [runs, setRuns] = useState<DemoRun[]>(
     data.demoRuns.length > 0 ? data.demoRuns : [1, 2, 3].map(id => ({
-      id, customerName: DEMO_CUSTOMERS[id - 1]?.name || `Test Customer ${id}`,
+      id, customerName: demoCustomers[id - 1]?.name || `Test Customer ${id}`,
       status: 'pending' as const, stages: PIPELINE_STAGES.map(name => ({ name, done: false })),
     }))
   );
@@ -41,10 +132,10 @@ export function Step04DemoRuns({ data, onUpdate, onNext }: StepProps) {
 
   const runTest = useCallback(async (runId: number) => {
     setRunning(true);
-    const customer = DEMO_CUSTOMERS[runId - 1];
+    const customer = demoCustomers[runId - 1];
 
     // Animate stages
-    await simulateStages(runId, updated => {
+    await simulateStages(runId, customer?.name || `Test Customer ${runId}`, updated => {
       setRuns(prev => prev.map(r => r.id === updated.id ? updated : r));
     });
 
@@ -72,7 +163,7 @@ export function Step04DemoRuns({ data, onUpdate, onNext }: StepProps) {
     // Mark as passed
     setRuns(prev => prev.map(r => r.id === runId ? { ...r, status: 'passed' as const } : r));
     setRunning(false);
-  }, [data.businessName, data.email]);
+  }, [data.businessName, data.email, demoCustomers]);
 
   const runAll = useCallback(async () => {
     for (const run of runs) if (run.status !== 'passed') await runTest(run.id);
@@ -93,7 +184,7 @@ export function Step04DemoRuns({ data, onUpdate, onNext }: StepProps) {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <div className="text-base font-semibold text-white">{run.customerName}</div>
-                <div className="text-xs text-[var(--text-subtle)]">{DEMO_CUSTOMERS[run.id - 1]?.industry} · {DEMO_CUSTOMERS[run.id - 1]?.revenue}</div>
+                <div className="text-xs text-[var(--text-subtle)]">{demoCustomers[run.id - 1]?.industry} · {demoCustomers[run.id - 1]?.revenue}</div>
               </div>
               <div className="flex items-center gap-2">
                 {run.status === 'passed' && <CheckCircle size={20} className="text-emerald-400" />}

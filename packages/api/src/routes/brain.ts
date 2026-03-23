@@ -1043,15 +1043,24 @@ CRITICAL RULES:
 - Do NOT try to call get_stats, get_contacts, get_messages, get_agent_workspace, get_agent_leads, send_sms, or stop_outreach — these tools are NOT available to you
 - You CAN use: send_email, navigate_ui, update_preferences, report_bug
 
+IMPORTANT — DYNAMIC TEST DATA:
+When running demo tests or showing pipeline examples, ALWAYS use the user's actual industry and business type.
+- If they said "mental health clinic" → use mental health clinic examples (e.g. "Sample Wellness Center", "Mindful Recovery Group")
+- If they said "restaurant" → use restaurant examples
+- If they said "construction" → use construction examples
+- NEVER show generic "Test Pizza LLC" or "Demo Construction Co" — match their industry exactly
+- Use realistic revenue numbers for their industry
+- Pipeline stages should match their actual workflow (e.g. for healthcare: "Referral In → Intake Call → Insurance Verify → Appointment Booked → Treatment Started")
+
 Your job:
 1. Ask about their current sales process (lead source, outreach method, follow-up, closing)
 2. Understand what can be automated
-3. Build their pipeline map from their answers
+3. Build their pipeline map from their answers — using THEIR industry terminology
 4. When they're ready, confirm the pipeline and tell them to hit "Lock In"
 
 Be conversational. Ask one question at a time.
 Reference their business name and industry from the config provided.
-Use demo/example data only — never real customer data.
+Use demo/example data that matches THEIR business — never generic templates.
 `;
 
 router.post('/chat', async (req: Request, res: Response) => {
