@@ -92,8 +92,17 @@ function TypingIndicator() {
 
 // ─── Intro Popup ──────────────────────────────────────────────────────────────
 
-function IntroPopup({ assetCount, onStart }: { assetCount: number; onStart: () => void }) {
-  const topics = ['Your first outreach (SMS, call, email)', 'Follow-up sequence & timing', 'Links you send (offers, forms, portals)', 'Document collection steps', 'Closing touches & final follow-ups'];
+function IntroPopup({ assetCount, businessName, industry, onStart }: { assetCount: number; businessName: string; industry: string; onStart: () => void }) {
+  // Generate topics based on user's actual business
+  const biz = businessName || 'your business';
+  const ind = industry || 'your industry';
+  const topics = [
+    `How ${biz} gets new leads and makes first contact`,
+    `Your follow-up sequence when ${ind} prospects go quiet`,
+    `Pages and links you share with customers (offers, forms, portals)`,
+    `How ${biz} collects documents or information from clients`,
+    `Your closing process and final follow-up touches`,
+  ];
 
   return (
     <div style={{
@@ -351,7 +360,7 @@ export function Step03SalesProcess({ data, onUpdate, onNext, onBack }: StepProps
   };
 
   if (showIntro) {
-    return <IntroPopup assetCount={data.assets.length} onStart={() => setShowIntro(false)} />;
+    return <IntroPopup assetCount={data.assets.length} businessName={data.businessName} industry={data.industry} onStart={() => setShowIntro(false)} />;
   }
 
   return (
