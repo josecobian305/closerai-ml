@@ -93,7 +93,7 @@ function TypingIndicator() {
 // ─── Intro Popup ──────────────────────────────────────────────────────────────
 
 function IntroPopup({ assetCount, onStart }: { assetCount: number; onStart: () => void }) {
-  const topics = ['How you handle new leads', 'Your follow-up cadence', 'When you pitch & close', 'Documents you collect', 'Deal timeline & bottlenecks'];
+  const topics = ['Your first outreach (SMS, call, email)', 'Follow-up sequence & timing', 'Links you send (offers, forms, portals)', 'Document collection steps', 'Closing touches & final follow-ups'];
 
   return (
     <div style={{
@@ -118,13 +118,13 @@ function IntroPopup({ assetCount, onStart }: { assetCount: number; onStart: () =
         </div>
 
         <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 12, color: 'var(--text-primary, #e2e8f0)' }}>
-          Let's Design Your Sales Process
+          Let's Define Your Touch Sequence
         </div>
         <p style={{ fontSize: 14, color: 'var(--text-muted, #94a3b8)', lineHeight: 1.7, marginBottom: 8 }}>
-          I'm going to ask you a few questions about how you sell — from first contact to close.
+          I'll help you map out every outreach action — texts, emails, calls, links, and pages your customers see.
         </p>
         <p style={{ fontSize: 14, color: 'var(--text-muted, #94a3b8)', lineHeight: 1.7, marginBottom: 24 }}>
-          Your answers will become the <strong style={{ color: '#a5b4fc' }}>blueprint</strong> your AI agents follow.
+          Your approved touches become the <strong style={{ color: '#a5b4fc' }}>exact playbook</strong> your AI agents follow.
         </p>
 
         {assetCount > 0 && (
@@ -217,11 +217,11 @@ function MessageBubble({ msg }: { msg: ChatMsg }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-const OPENING_MESSAGE = `Hey! Let's set up your sales pipeline. 🚀
+const OPENING_MESSAGE = `Hey! Let's build your touch sequence. 🚀
 
-I'll walk you through building your automated outreach system. Just talk to me like you're explaining your business to a new hire.
+I'll help you map out every outreach action your AI agents will run — texts, emails, calls, voicemails, links — the whole playbook.
 
-Let's start: **What does your sales process look like right now?** Walk me through how you get a lead and turn them into a customer — step by step.`;
+**What's the first thing you do when a new lead comes in?** Do you text them, call them, email them? Walk me through that first move.`;
 
 export function Step03SalesProcess({ data, onUpdate, onNext, onBack }: StepProps) {
   const [showIntro, setShowIntro] = useState(true);
@@ -388,7 +388,7 @@ export function Step03SalesProcess({ data, onUpdate, onNext, onBack }: StepProps
         }}>🧠</div>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary, #e2e8f0)' }}>
-            Brain — Process Recording
+            Brain — Touch Sequence Builder
           </div>
           <div style={{ fontSize: 12, color: '#22c55e', display: 'flex', alignItems: 'center', gap: 4 }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
@@ -402,7 +402,7 @@ export function Step03SalesProcess({ data, onUpdate, onNext, onBack }: StepProps
             background: 'rgba(99,91,255,0.12)', border: '1px solid rgba(99,91,255,0.25)',
             borderRadius: 8, padding: '5px 10px', fontSize: 12, color: '#a5b4fc', fontWeight: 600,
           }}>
-            <GitBranch size={13} /> {detectedStages.length} stages
+            <GitBranch size={13} /> {detectedStages.length} touches
           </div>
         )}
 
