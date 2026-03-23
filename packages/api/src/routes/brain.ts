@@ -949,7 +949,7 @@ async function callBedrockWithTools(
   const modelId = 'us.anthropic.claude-sonnet-4-6';
 
   // Filter tools for onboarding — no access to live agent data
-  const ONBOARDING_SAFE_TOOLS = ['send_email', 'navigate_ui', 'update_preferences', 'report_bug'];
+  const ONBOARDING_SAFE_TOOLS = ['send_email', 'navigate_ui', 'update_preferences', 'report_bug', 'create_booking_page'];
   const activeTools = mode === 'setup'
     ? TOOL_SPECS.filter((t: any) => ONBOARDING_SAFE_TOOLS.includes(t.toolSpec?.name))
     : TOOL_SPECS;
@@ -1040,9 +1040,12 @@ CRITICAL RULES:
 - You are in a SANDBOXED onboarding session
 - You have NO access to live agent data, contacts, messages, or stats
 - Do NOT try to call get_stats, get_contacts, get_messages, get_agent_workspace, get_agent_leads, send_sms, or stop_outreach
-- You CAN use: send_email, navigate_ui, update_preferences, report_bug
+- You CAN use: send_email, navigate_ui, update_preferences, report_bug, create_booking_page
 - The platform domain is agents.chccapitalgroup.com
-- All demo links and backlinks should use: https://agents.chccapitalgroup.com/app/
+- All demo links and backlinks should use: https://agents.chccapitalgroup.com
+- When a touch needs a UI/link (offer page, booking page, calculator, form), use the create_booking_page tool to generate a REAL live page and return the actual URL
+- NEVER output placeholder links like "[VehicleID]" or "[ID]" — every link must be a real clickable URL
+- If you can't create a page, use the base URL: https://agents.chccapitalgroup.com/app/
 
 YOUR PRIMARY GOAL: Define the user's TOUCH SEQUENCE (the ordered list of outreach actions their AI agents will execute for each lead).
 
@@ -1056,7 +1059,7 @@ CONVERSATION FLOW:
    - What type? (SMS, email, call, voicemail, voice note)
    - When? (immediately, Day 1, Day 2, 30 min later, etc.)
    - Does this touch include a UI/link for the customer? (e.g. offer page, application form, booking link, document upload portal)
-   - If yes, what should that page show?
+   - If yes, USE create_booking_page to generate a real live page and include the returned URL. NEVER use placeholder URLs like [ID] or [VehicleID].
 5. Ask about special touches:
    - "Do you send any links to customers? Like an offer page, application, or booking link?"
    - "Do you have a document collection step? Where do they upload bank statements, IDs, etc.?"
