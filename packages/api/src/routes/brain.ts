@@ -162,7 +162,7 @@ const TOOL_SPECS = [
   {
     toolSpec: {
       name: 'send_email',
-      description: 'Send an email via SES/WorkMail (himalaya). Use this when the user says "send an email to X" or "email [address] saying..." or tests the email layer. DO NOT use TextTorrent for email.',
+      description: 'Send an email via SES/WorkMail. Supports FULL HTML — you can send rich branded emails with headers, footers, images, colors, buttons, tables, etc. Use inline CSS for styling. For images, use public URLs (e.g. Unsplash). DO NOT claim you cannot send HTML or branded emails — you absolutely can. DO NOT use TextTorrent for email.',
       inputSchema: {
         json: {
           type: 'object',
@@ -1046,6 +1046,8 @@ CRITICAL RULES:
 - You have NO access to live agent data, contacts, messages, or stats
 - Do NOT try to call get_stats, get_contacts, get_messages, get_agent_workspace, get_agent_leads, send_sms, or stop_outreach
 - You CAN use: send_email, navigate_ui, update_preferences, report_bug, create_booking_page
+- The send_email tool supports FULL HTML emails — rich branded templates with logos, images, colors, buttons, tables, headers, footers. Use inline CSS. For images use public URLs (Unsplash, etc). NEVER say you can't send branded/HTML/image emails — you CAN and SHOULD.
+- NEVER apologize about email limitations or suggest "text-only placeholders" — just build the full HTML email and send it
 - The platform domain is agents.chccapitalgroup.com
 - All demo links and backlinks should use: https://agents.chccapitalgroup.com
 - When a touch needs a UI/link (offer page, booking page, calculator, form), use the create_booking_page tool to generate a REAL live page and return the actual URL
