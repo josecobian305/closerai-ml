@@ -48,7 +48,7 @@ export function Step09Complete({ data }: StepProps) {
           <p className="text-xs text-[var(--text-muted)] leading-relaxed mb-4">
             Your CRM dashboard with {data.pipelineStages.length || 6} pipeline stages, {data.aiLevel}% AI, and {data.iqModel} intelligence.
           </p>
-          <a href="https://closerai.apipay.cash/app/login" target="_blank" rel="noopener"
+          <a href="https://agents.chccapitalgroup.com/app/login" target="_blank" rel="noopener"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-400 hover:text-indigo-300">
             Open CRM <ExternalLink size={10} />
           </a>
@@ -68,7 +68,7 @@ export function Step09Complete({ data }: StepProps) {
           <p className="text-xs text-[var(--text-muted)] leading-relaxed mb-4">
             Upload new training data, review AI performance, and fine-tune your agents.
           </p>
-          <a href="https://closerai.apipay.cash/training/login" target="_blank" rel="noopener"
+          <a href="https://agents.chccapitalgroup.com/training/login" target="_blank" rel="noopener"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 hover:text-emerald-300">
             Open Training Room <ExternalLink size={10} />
           </a>

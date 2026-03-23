@@ -13,7 +13,7 @@ const ADMIN_EMAIL = 'jcobian@chccapitalgroup.com';
 const FROM_EMAIL = 'jclaude@chccapitalgroup.com';
 const JACOB_NAME = 'Jacob Claude';
 const ANGIE_NAME = 'Angie Ramirez';
-const BASE_URL = 'https://closerai.apipay.cash';
+const BASE_URL = 'https://agents.chccapitalgroup.com';
 
 // ── Helper: send email via himalaya/SES ───────────────────────────────────────
 function sendEmail(to: string, subject: string, plainBody: string, htmlBody: string, cc?: string): boolean {
