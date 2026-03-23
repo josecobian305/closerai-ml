@@ -246,6 +246,8 @@ I'll help you map out every outreach action your AI agents will run — texts, e
 
 export function Step03SalesProcess({ data, onUpdate, onNext, onBack }: StepProps) {
   const [showIntro, setShowIntro] = useState(true);
+  // Generate unique session ID for this onboarding flow
+  const [sessionId] = useState(() => `onboard-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
   const [messages, setMessages] = useState<ChatMsg[]>([
     { id: 'opening', role: 'brain', content: OPENING_MESSAGE, ts: new Date() },
   ]);
@@ -282,7 +284,7 @@ export function Step03SalesProcess({ data, onUpdate, onNext, onBack }: StepProps
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: text,
-          userId: data.email || 'onboarding-user',
+          userId: sessionId,
           config: {
             businessName: data.businessName,
             industry: data.industry,
