@@ -248,6 +248,31 @@ export function Step04DemoRuns({ data, onUpdate, onNext }: StepProps) {
                 </div>
               </div>
             )}
+
+            {/* Approve / Deny / Rerun buttons */}
+            {(run.status === 'passed' || run.status === 'failed') && (
+              <div className="mt-4 flex gap-2">
+                <button 
+                  onClick={() => setRuns(prev => prev.map(r => r.id === run.id ? { ...r, status: 'passed' as const } : r))}
+                  className="flex-1 bg-emerald-600/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold py-2.5 rounded-lg hover:bg-emerald-600/30 transition-all"
+                >
+                  ✅ Approve
+                </button>
+                <button 
+                  onClick={() => setRuns(prev => prev.map(r => r.id === run.id ? { ...r, status: 'failed' as const } : r))}
+                  className="flex-1 bg-red-600/20 border border-red-500/40 text-red-300 text-xs font-semibold py-2.5 rounded-lg hover:bg-red-600/30 transition-all"
+                >
+                  ❌ Deny
+                </button>
+                <button 
+                  onClick={() => { setRuns(prev => prev.map(r => r.id === run.id ? { ...r, status: 'pending' as const, stages: r.stages.map(s => ({...s, done: false})) } : r)); runTest(run.id); }}
+                  disabled={running}
+                  className="flex-1 bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold py-2.5 rounded-lg hover:bg-indigo-600/30 transition-all disabled:opacity-40"
+                >
+                  🔄 Rerun
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>
