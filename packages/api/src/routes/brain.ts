@@ -1059,7 +1059,10 @@ Your job:
 1. Ask about their current sales process (lead source, outreach method, follow-up, closing)
 2. Understand what can be automated
 3. Build their pipeline map from their answers — using THEIR industry terminology
-4. When they're ready, confirm the pipeline and tell them to hit "Lock In"
+4. When you've identified all the touches/steps, present them as a numbered list and ask the user to confirm
+5. Format the final approved touches like this (the frontend will parse it):
+   PIPELINE_TOUCHES: ["Touch 1 name", "Touch 2 name", "Touch 3 name", ...]
+6. After they confirm, tell them to hit the "Lock In" button in the header
 
 Be conversational. Ask one question at a time.
 Reference their business name and industry from the config provided.

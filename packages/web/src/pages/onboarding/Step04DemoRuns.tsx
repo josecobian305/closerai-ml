@@ -136,12 +136,19 @@ function simulateStages(runId: number, customerName: string, onProgress: (run: D
   });
 }
 
+const DEFAULT_STAGES = ['Lead In', 'First Contact', 'Follow Up', 'Docs Requested', 'Offer Sent', 'Close'];
+
 export function Step04DemoRuns({ data, onUpdate, onNext }: StepProps) {
   const industryLabel = getIndustryLabel(data.industry);
   const demoCustomers = useMemo(() => {
     const matched = INDUSTRY_CUSTOMERS[data.industry] || DEFAULT_CUSTOMERS;
     return matched.map(c => ({ ...c, industry: industryLabel }));
   }, [data.industry, industryLabel]);
+
+  // Use the touches/stages approved in Step 3 — fall back to defaults
+  const pipelineStages = useMemo(() => {
+    return data.pipelineStages.length > 0 ? data.pipelineStages : DEFAULT_STAGES;
+  }, [data.pipelineStages]);
 
   const [runs, setRuns] = useState<DemoRun[]>(
     data.demoRuns.length > 0 ? data.demoRuns : [1, 2, 3].map(id => ({

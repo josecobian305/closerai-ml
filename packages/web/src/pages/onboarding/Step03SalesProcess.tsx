@@ -20,7 +20,31 @@ const STAGE_KEYWORDS: Record<string, string[]> = {
   'Close': ['close', 'fund', 'funded', 'signed', 'done', 'completed', 'approval'],
 };
 
+// Parse explicit PIPELINE_TOUCHES from brain messages (preferred over keyword detection)
+function parseBrainTouches(messages: ChatMsg[]): string[] {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const m = messages[i];
+    if (m.role !== 'brain') continue;
+    const match = m.content.match(/PIPELINE_TOUCHES:\s*\[([^\]]+)\]/);
+    if (match) {
+      try {
+        const parsed = JSON.parse(`[${match[1]}]`);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch {
+        // Try splitting by comma if JSON parse fails
+        return match[1].split(',').map(s => s.trim().replace(/^["']|["']$/g, '')).filter(Boolean);
+      }
+    }
+  }
+  return [];
+}
+
 function detectStages(messages: ChatMsg[]): string[] {
+  // First try to get explicit touches from the brain
+  const brainTouches = parseBrainTouches(messages);
+  if (brainTouches.length > 0) return brainTouches;
+  
+  // Fall back to keyword detection
   const allTexts = messages.map(m => m.content.toLowerCase()).join(' ');
   return Object.entries(STAGE_KEYWORDS)
     .filter(([_, kws]) => kws.some(kw => allTexts.includes(kw)))
