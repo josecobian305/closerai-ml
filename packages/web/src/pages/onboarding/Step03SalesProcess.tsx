@@ -338,7 +338,7 @@ export function Step03SalesProcess({ data, onUpdate, onNext, onBack }: StepProps
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: 'Summarize the touch sequence we discussed as a numbered list. Output PIPELINE_TOUCHES: ["touch1", "touch2", ...] at the end.',
+          message: 'Summarize the touch sequence we discussed as a numbered list. Then suggest 3 realistic test customer names that match this user\'s industry (not generic — use names that feel real for their business type). Output at the end:\nPIPELINE_TOUCHES: ["touch1", "touch2", ...]\nTEST_CUSTOMERS: ["Customer Name 1", "Customer Name 2", "Customer Name 3"]',
           userId: sessionId,
           config: { businessName: data.businessName, industry: data.industry },
           mode: 'setup',
@@ -370,7 +370,18 @@ export function Step03SalesProcess({ data, onUpdate, onNext, onBack }: StepProps
         touches = INDUSTRY_STAGES[industry] || INDUSTRY_STAGES.default;
       }
       
-      onUpdate({ pipelineStages: touches, processSummary: messages.map(m => `${m.role}: ${m.content}`).join('\n') });
+      // Parse test customers from brain reply
+      let testCustomers: string[] = [];
+      const custMatch = reply.match(/TEST_CUSTOMERS:\s*\[([^\]]+)\]/);
+      if (custMatch) {
+        try {
+          testCustomers = JSON.parse(`[${custMatch[1]}]`);
+        } catch {
+          testCustomers = custMatch[1].split(',').map((s: string) => s.trim().replace(/^["']|["']$/g, '')).filter(Boolean);
+        }
+      }
+      
+      onUpdate({ pipelineStages: touches, testCustomers, processSummary: messages.map(m => `${m.role}: ${m.content}`).join('\n') });
       setConfirmed(true);
       setTimeout(onNext, 1500);
     } catch (e) {

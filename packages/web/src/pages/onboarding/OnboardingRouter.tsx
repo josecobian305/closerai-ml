@@ -30,6 +30,7 @@ export interface OnboardingData {
   iqLevel: 'low' | 'medium' | 'genius';
   iqModel: string;
   iqCost: number;
+  testCustomers: string[];
   sessionId: string;
 }
 
@@ -58,6 +59,7 @@ const INITIAL_DATA: OnboardingData = {
   demoRuns: [],
   aiLevel: 50, botCount: 3, aiCost: 299,
   iqLevel: 'medium', iqModel: 'Sonnet', iqCost: 100,
+  testCustomers: [],
   sessionId: '',
 };
 
