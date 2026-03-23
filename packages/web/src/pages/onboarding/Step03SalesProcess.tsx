@@ -330,40 +330,59 @@ export function Step03SalesProcess({ data, onUpdate, onNext, onBack }: StepProps
   // Manual "lock in" button after enough conversation
   const canLockIn = messages.filter(m => m.role === 'user').length >= 3;
 
-  const handleLockIn = () => {
-    const stages = detectStages(messages);
-    const industry = data.industry?.toLowerCase() || 'default';
-    const INDUSTRY_STAGES: Record<string, string[]> = {
-      construction: ['Lead In', 'Site Visit', 'Estimate Sent', 'Contract Signed', 'Project Start', 'Final Payment'],
-      healthcare: ['Referral In', 'Intake Call', 'Insurance Verify', 'Appointment Set', 'Treatment Start', 'Follow-up'],
-      restaurant: ['Lead In', 'First Visit', 'Reservation', 'Dining Experience', 'Feedback', 'Loyalty Signup'],
-      'auto repair': ['Lead In', 'Inspection', 'Quote Sent', 'Approval', 'Repair Started', 'Pickup Ready'],
-      'auto sales': ['Lead In', 'Test Drive', 'Trade-In Appraisal', 'Financing', 'Contract', 'Delivery'],
-      automotive: ['Lead In', 'Test Drive', 'Trade-In Appraisal', 'Financing', 'Contract', 'Delivery'],
-      'real estate': ['Lead In', 'Showing Scheduled', 'Property Tour', 'Offer Made', 'Under Contract', 'Closed'],
-      legal: ['Lead In', 'Consultation', 'Engagement Letter', 'Case Filed', 'Discovery', 'Resolution'],
-      insurance: ['Lead In', 'Needs Analysis', 'Quote Presented', 'Application', 'Underwriting', 'Policy Issued'],
-      finance: ['Lead In', 'Docs Requested', 'Underwriting', 'Offer Sent', 'Approval', 'Funded'],
-      default: ['Lead In', 'First Contact', 'Follow Up', 'Proposal', 'Negotiation', 'Close'],
-    };
-    const finalStages = stages.length > 0 ? stages : (INDUSTRY_STAGES[industry] || INDUSTRY_STAGES.default);
-    
-    // Show confirmation message with the stages BEFORE moving forward
-    const stageList = finalStages.map((s, i) => `${i + 1}. ${s}`).join('\n');
-    setMessages(prev => [...prev, {
-      id: 'confirm', role: 'brain', 
-      content: `Here's your pipeline I built from our conversation:\n\n${stageList}\n\n**Does this look right?** If you want to change anything, just tell me. Otherwise say "looks good" and we'll move to testing!`,
-      ts: new Date(),
-    }]);
-    
-    // Save stages but don't move forward yet — wait for confirmation
-    onUpdate({ pipelineStages: finalStages, processSummary: messages.map(m => `${m.role}: ${m.content}`).join('\n') });
-    
-    // Override sendMessage to listen for confirmation
-    const origConfirmed = confirmed;
-    if (!origConfirmed) {
-      // Don't auto-advance — user needs to confirm
-      return;
+  const handleLockIn = async () => {
+    // Ask the brain to summarize the touches
+    setLoading(true);
+    try {
+      const res = await fetch('/app/api/v1/brain/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: 'Summarize the touch sequence we discussed as a numbered list. Output PIPELINE_TOUCHES: ["touch1", "touch2", ...] at the end.',
+          userId: sessionId,
+          config: { businessName: data.businessName, industry: data.industry },
+          mode: 'setup',
+        }),
+      });
+      const result = await res.json();
+      const reply = result.reply || '';
+      
+      // Add the summary to chat
+      setMessages(prev => [...prev, { id: `summary${Date.now()}`, role: 'brain', content: reply, ts: new Date() }]);
+      
+      // Try to parse touches from the summary
+      let touches = parseBrainTouches([...messages, { id: 'tmp', role: 'brain', content: reply, ts: new Date() }]);
+      
+      // If still empty, use industry defaults
+      if (touches.length === 0) {
+        const industry = data.industry?.toLowerCase() || 'default';
+        const INDUSTRY_STAGES: Record<string, string[]> = {
+          construction: ['Lead In', 'Site Visit', 'Estimate Sent', 'Contract Signed', 'Project Start', 'Final Payment'],
+          healthcare: ['Referral In', 'Intake Call', 'Insurance Verify', 'Appointment Set', 'Treatment Start', 'Follow-up'],
+          restaurant: ['Lead In', 'First Visit', 'Menu Pitch', 'Reservation', 'Dining', 'Loyalty Signup'],
+          auto: ['Lead In', 'Inspection', 'Quote Sent', 'Approval', 'Repair Started', 'Pickup Ready'],
+          real_estate: ['Lead In', 'Showing', 'Property Tour', 'Offer Made', 'Under Contract', 'Closed'],
+          legal: ['Lead In', 'Consultation', 'Engagement Letter', 'Case Filed', 'Discovery', 'Resolution'],
+          finance: ['Lead In', 'Docs Requested', 'Underwriting', 'Offer Sent', 'Approval', 'Funded'],
+          mca: ['Lead In', 'Docs Requested', 'Underwriting', 'Offer Sent', 'Approval', 'Funded'],
+          default: ['Lead In', 'First Contact', 'Follow Up', 'Proposal', 'Negotiation', 'Close'],
+        };
+        touches = INDUSTRY_STAGES[industry] || INDUSTRY_STAGES.default;
+      }
+      
+      onUpdate({ pipelineStages: touches, processSummary: messages.map(m => `${m.role}: ${m.content}`).join('\n') });
+      setConfirmed(true);
+      setTimeout(onNext, 1500);
+    } catch (e) {
+      console.error('Lock in error:', e);
+      // Fall back to detected stages
+      const stages = detectStages(messages);
+      const finalStages = stages.length > 0 ? stages : ['Lead In', 'First Contact', 'Follow Up', 'Proposal', 'Negotiation', 'Close'];
+      onUpdate({ pipelineStages: finalStages, processSummary: messages.map(m => `${m.role}: ${m.content}`).join('\n') });
+      setConfirmed(true);
+      setTimeout(onNext, 1000);
+    } finally {
+      setLoading(false);
     }
     
     setConfirmed(true);
