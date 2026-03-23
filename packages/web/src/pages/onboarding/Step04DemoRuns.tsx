@@ -2,7 +2,30 @@ import { useState, useCallback, useMemo } from 'react';
 import { Play, CheckCircle, XCircle, Loader, ChevronRight, Mail } from 'lucide-react';
 import type { StepProps, DemoRun } from './OnboardingRouter';
 
-const PIPELINE_STAGES = ['Lead In', 'Underwriting', 'Deal Created', 'Offer Sent', 'Pitch Review', 'Approval Link'];
+// Industry-specific pipeline stages
+const INDUSTRY_STAGES: Record<string, string[]> = {
+  construction: ['Lead In', 'Site Visit', 'Estimate Sent', 'Contract Signed', 'Project Start', 'Final Payment'],
+  healthcare: ['Referral In', 'Intake Call', 'Insurance Verify', 'Appointment Set', 'Treatment Start', 'Follow-up'],
+  restaurant: ['Lead In', 'First Visit', 'Reservation', 'Dining Experience', 'Feedback', 'Loyalty Signup'],
+  'auto repair': ['Lead In', 'Inspection', 'Quote Sent', 'Approval', 'Repair Started', 'Pickup Ready'],
+  'auto sales': ['Lead In', 'Test Drive', 'Trade-In Appraisal', 'Financing', 'Contract', 'Delivery'],
+  automotive: ['Lead In', 'Test Drive', 'Trade-In Appraisal', 'Financing', 'Contract', 'Delivery'],
+  retail: ['Lead In', 'Store Visit', 'Product Demo', 'Quote', 'Purchase', 'Follow-up'],
+  'real estate': ['Lead In', 'Showing Scheduled', 'Property Tour', 'Offer Made', 'Under Contract', 'Closed'],
+  legal: ['Lead In', 'Consultation', 'Engagement Letter', 'Case Filed', 'Discovery', 'Resolution'],
+  insurance: ['Lead In', 'Needs Analysis', 'Quote Presented', 'Application', 'Underwriting', 'Policy Issued'],
+  plumbing: ['Lead In', 'Site Visit', 'Estimate', 'Approval', 'Job Started', 'Invoice Sent'],
+  hvac: ['Lead In', 'Site Assessment', 'Quote', 'Scheduling', 'Installation', 'Final Inspection'],
+  trucking: ['Lead In', 'Load Match', 'Rate Negotiation', 'Dispatch', 'Delivery', 'Payment'],
+  finance: ['Lead In', 'Docs Requested', 'Underwriting', 'Offer Sent', 'Approval', 'Funded'],
+  default: ['Lead In', 'First Contact', 'Follow Up', 'Proposal', 'Negotiation', 'Close'],
+};
+
+function getPipelineStages(industry: string, userStages?: string[]): string[] {
+  if (userStages && userStages.length > 0) return userStages;
+  const key = industry?.toLowerCase() || 'default';
+  return INDUSTRY_STAGES[key] || INDUSTRY_STAGES.default;
+}
 
 // Generate demo customers based on the user's industry
 const INDUSTRY_CUSTOMERS: Record<string, Array<{ name: string; revenue: string }>> = {
@@ -96,7 +119,7 @@ function getIndustryLabel(id: string): string {
 
 function simulateStages(runId: number, customerName: string, onProgress: (run: DemoRun) => void): Promise<void> {
   return new Promise(resolve => {
-    const stages = PIPELINE_STAGES.map(name => ({ name, done: false }));
+    const stages = getPipelineStages(data.industry, data.pipelineStages).map(name => ({ name, done: false }));
     const run: DemoRun = { id: runId, customerName, status: 'running', stages };
     onProgress({ ...run });
     let i = 0;
@@ -123,7 +146,7 @@ export function Step04DemoRuns({ data, onUpdate, onNext }: StepProps) {
   const [runs, setRuns] = useState<DemoRun[]>(
     data.demoRuns.length > 0 ? data.demoRuns : [1, 2, 3].map(id => ({
       id, customerName: demoCustomers[id - 1]?.name || `Test Customer ${id}`,
-      status: 'pending' as const, stages: PIPELINE_STAGES.map(name => ({ name, done: false })),
+      status: 'pending' as const, stages: getPipelineStages(data.industry, data.pipelineStages).map(name => ({ name, done: false })),
     }))
   );
   const [running, setRunning] = useState(false);
