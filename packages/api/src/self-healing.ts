@@ -79,7 +79,7 @@ const SERVICES: ServiceConfig[] = [
   {
     name: 'closerai-api',
     healthUrl: 'http://localhost:3002/health',
-    restartCmd: 'cd /tmp/closerai-ml/packages/api && GHL_API_KEY="$GHL_API_KEY" PORT=3002 nohup npx ts-node --transpile-only src/index.ts > /tmp/cai.log 2>&1 &',
+    restartCmd: 'cd /tmp/closerai-ml/packages/api && GHL_API_KEY="$GHL_API_KEY" TT_SID="$TT_SID" TT_KEY="$TT_KEY" TT_FROM_NUMBER="$TT_FROM_NUMBER" TT_FROM_ANGIE="$TT_FROM_ANGIE" PORT=3002 nohup npx ts-node --transpile-only src/index.ts > /tmp/cai.log 2>&1 &',
     killCmd: 'fuser -k 3002/tcp',
     port: 3002,
     maxRestarts: 5,

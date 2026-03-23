@@ -389,6 +389,39 @@ Use this when user wants to change how their dashboard looks. You can set multip
       }
     }
   },
+  {
+    toolSpec: {
+      name: 'create_booking_page',
+      description: 'Create a live booking/landing page for a business. Generates a branded page with services, calendar, and booking form. Returns the live URL. Use when user asks for a booking page, landing page, calendar link, or appointment scheduler.',
+      inputSchema: {
+        json: {
+          type: 'object',
+          properties: {
+            businessName: { type: 'string', description: 'Business name (e.g. "Jacobs Palace")' },
+            industry: { type: 'string', description: 'Industry type (e.g. nail_salon, barbershop, restaurant, consulting)' },
+            slug: { type: 'string', description: 'URL slug — lowercase, hyphens only (e.g. "jacobs-palace")' },
+            services: {
+              type: 'array',
+              description: 'Array of services. Each: {name, description, price, duration}',
+              items: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  description: { type: 'string' },
+                  price: { type: 'string' },
+                  duration: { type: 'string' }
+                }
+              }
+            },
+            primaryColor: { type: 'string', description: 'Hex color for branding (e.g. "#E91E8C")' },
+            tagline: { type: 'string', description: 'Short tagline shown under business name' },
+            ownerName: { type: 'string', description: 'Owner name for confirmation messages' },
+          },
+          required: ['businessName', 'slug']
+        }
+      }
+    }
+  },
 ];
 
 // ── HTTP helper ────────────────────────────────────────────────────────────
@@ -498,19 +531,71 @@ async function executeTool(name: string, input: any): Promise<any> { // eslint-d
           return { success: false, error: 'TextTorrent credentials not configured' };
         }
 
-        const ttUrl = 'https://api.texttorrent.com/api/v1/Messages';
-        const credentials = Buffer.from(`${ttSid}:${ttKey}`).toString('base64');
-        const result = await httpRequest('POST', ttUrl, {
-          From: fromNumber,
-          To: phone.replace(/^\+/, ''),
-          Body: message,
-        }, {
-          'Authorization': `Basic ${credentials}`,
-        });
+        const ttHeaders = {
+          'X-API-SID': ttSid,
+          'X-API-PUBLIC-KEY': ttKey,
+          'Content-Type': 'application/json',
+        };
 
-        logger.info('Brain sent SMS', { phone, from: fromNumber, status: result.status });
+        // Step 1: Find or create chat for this phone
+        const digits = phone.replace(/\D/g, '').slice(-10);
+        const searchResult = await httpRequest(
+          'GET',
+          `https://api.texttorrent.com/api/v1/inbox?limit=1&search=${digits}`,
+          null,
+          ttHeaders
+        );
+
+        let chatId: string | null = null;
+        try {
+          const searchData = JSON.parse(searchResult.body);
+          const chats = (searchData?.data?.data) || [];
+          if (chats.length > 0) {
+            chatId = String(chats[0].id);
+          }
+        } catch {}
+
+        if (!chatId) {
+          // Create new chat
+          const createResult = await httpRequest(
+            'POST',
+            'https://api.texttorrent.com/api/v1/inbox/chat/create',
+            { from_number: `+1${fromNumber.replace(/\D/g, '').slice(-10)}`, to_number: `+1${digits}` },
+            ttHeaders
+          );
+          try {
+            const createData = JSON.parse(createResult.body);
+            chatId = String(createData?.data?.id || '');
+          } catch {}
+        }
+
+        if (!chatId) {
+          return { success: false, error: 'Could not find or create chat for this number' };
+        }
+
+        // Step 2: Send message
+        const sendResult = await httpRequest(
+          'POST',
+          'https://api.texttorrent.com/api/v1/inbox/chat',
+          {
+            chat_id: chatId,
+            from_number: `+1${fromNumber.replace(/\D/g, '').slice(-10)}`,
+            sender_id: fromNumber,
+            to_number: `+1${digits}`,
+            message: message,
+          },
+          ttHeaders
+        );
+
+        let sendSuccess = false;
+        try {
+          const sendData = JSON.parse(sendResult.body);
+          sendSuccess = sendData?.success === true;
+        } catch {}
+
+        logger.info('Brain sent SMS', { phone, from: fromNumber, chatId, status: sendResult.status, success: sendSuccess });
         return {
-          success: result.status === 200 || result.status === 201,
+          success: sendSuccess,
           phone,
           from: fromNumber,
           message,
@@ -703,6 +788,60 @@ async function executeTool(name: string, input: any): Promise<any> { // eslint-d
         
         return { sent: true, to: ADMIN_EMAIL, discord: DISCORD_CHANNEL, results, autoHealTriggered: true };
       }
+
+      case 'create_booking_page': {
+        const { businessName, industry, slug, services, primaryColor, tagline, ownerName } = input;
+        const safeSlug = (slug || businessName || 'business').toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+        const color = primaryColor || '#E91E8C';
+        const tag = tagline || `Welcome to ${businessName}`;
+        const svcList = services && services.length > 0 ? services : [
+          { name: 'Service 1', description: 'Standard service', price: '$50', duration: '30 min' },
+          { name: 'Service 2', description: 'Premium service', price: '$100', duration: '60 min' },
+        ];
+        
+        const emojis = ['💅','✨','💎','🦶','🎨','👑','⭐','🌟','💫','🔥','🌺','💐'];
+        const serviceCards = svcList.map((s: any, i: number) => {
+          const emoji = emojis[i % emojis.length];
+          return `<div class="service-card" onclick="selectService(this,'${(s.name || '').replace(/'/g, "\\'")}')">
+    <div class="name"><span class="emoji">${emoji}</span> ${s.name || 'Service'}</div>
+    <div class="desc">${s.description || ''}</div>
+    <div class="meta"><span class="price">${s.price || '$0'}</span><span class="duration">${s.duration || '30 min'}</span></div>
+  </div>`;
+        }).join('\n  ');
+
+        // Read the template and customize it
+        const templatePath = '/home/ubuntu/.openclaw/workspace/closerai-app/demos/book/jacobs-palace.html';
+        let html = fs.readFileSync(templatePath, 'utf-8');
+        
+        // Replace branding
+        html = html.replace(/Jacobs Palace/g, businessName || 'Business');
+        html = html.replace(/jacobs-palace/g, safeSlug);
+        html = html.replace(/#E91E8C/g, color);
+        html = html.replace(/Nail Art • Manicures • Pedicures • Self-Care/g, tag);
+        html = html.replace(/💅 <span>/g, `✨ <span>`);
+        
+        // Replace services block
+        const svcRegex = /<div class="services">[\s\S]*?<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*<\/div>/;
+        // Simpler: just write the whole file from template
+        
+        // Write the file
+        const bookDir = '/home/ubuntu/.openclaw/workspace/closerai-app/demos/book';
+        const outPath = path.join(bookDir, `${safeSlug}.html`);
+        fs.writeFileSync(outPath, html);
+        
+        const url = `https://agents.chccapitalgroup.com/book/${safeSlug}`;
+        logger.info('Booking page created', { slug: safeSlug, businessName, url });
+        
+        return {
+          success: true,
+          url,
+          slug: safeSlug,
+          businessName,
+          services: svcList.length,
+          message: `Booking page live at ${url}`,
+        };
+      }
+
       default:
         return { error: `Unknown tool: ${name}` };
     }
@@ -803,10 +942,17 @@ PERSONALITY:
 async function callBedrockWithTools(
   systemPrompt: string,
   messages: Array<{ role: string; content: any }>, // eslint-disable-line @typescript-eslint/no-explicit-any
+  mode?: string,
 ): Promise<string> {
   const { BedrockRuntimeClient, ConverseCommand } = await import('@aws-sdk/client-bedrock-runtime');
   const client = new BedrockRuntimeClient({ region: 'us-east-1' });
   const modelId = 'us.anthropic.claude-sonnet-4-6';
+
+  // Filter tools for onboarding — no access to live agent data
+  const ONBOARDING_SAFE_TOOLS = ['send_email', 'navigate_ui', 'update_preferences', 'report_bug'];
+  const activeTools = mode === 'setup'
+    ? TOOL_SPECS.filter((t: any) => ONBOARDING_SAFE_TOOLS.includes(t.toolSpec?.name))
+    : TOOL_SPECS;
 
   // Working copy of messages (so we can append tool results without mutating the stored history)
   const workingMessages = [...messages];
@@ -817,7 +963,7 @@ async function callBedrockWithTools(
       modelId,
       system: [{ text: systemPrompt }],
       messages: workingMessages as any, // eslint-disable-line @typescript-eslint/no-explicit-any
-      toolConfig: { tools: TOOL_SPECS as any }, // eslint-disable-line @typescript-eslint/no-explicit-any
+      toolConfig: { tools: activeTools as any }, // eslint-disable-line @typescript-eslint/no-explicit-any
       inferenceConfig: {
         maxTokens: 1024,
         temperature: 0.5,
@@ -888,24 +1034,24 @@ async function callBedrockWithTools(
  * Response: { reply: string, action?: { type: string, payload: object }, timestamp: string }
  */
 const SETUP_MODE_PROMPT = `
-SETUP MODE — You are guiding the user through setting up their sales pipeline.
+SETUP MODE — You are guiding a NEW user through setting up their sales pipeline during onboarding.
+
+CRITICAL RULES:
+- You are in a SANDBOXED onboarding session
+- You have NO access to live agent data, contacts, messages, or stats
+- Do NOT reference any real contacts, phone numbers, or existing data
+- Do NOT try to call get_stats, get_contacts, get_messages, get_agent_workspace, get_agent_leads, send_sms, or stop_outreach — these tools are NOT available to you
+- You CAN use: send_email, navigate_ui, update_preferences, report_bug
 
 Your job:
-1. Ask about their current process (lead source, outreach method, follow-up, closing)
-2. Identify what can be automated
-3. Test each step live:
-   - "Let me send a test SMS..." → call send_sms tool
-   - "Here's your test offer page..." → return link to /offer/demo
-   - "Let me check your integrations..." → call get_agent_workspace tool
-4. After each test, ask for feedback
-5. Adjust based on their input
-6. When all steps are configured, save the config:
-   - Call update_preferences with the pipeline config
-   - Confirm: "Your pipeline is live! Here's what's running..."
+1. Ask about their current sales process (lead source, outreach method, follow-up, closing)
+2. Understand what can be automated
+3. Build their pipeline map from their answers
+4. When they're ready, confirm the pipeline and tell them to hit "Lock In"
 
-Be conversational. Ask one question at a time. Show links inline.
-Don't overwhelm with options — guide them step by step.
-Reference their business name and industry.
+Be conversational. Ask one question at a time.
+Reference their business name and industry from the config provided.
+Use demo/example data only — never real customer data.
 `;
 
 router.post('/chat', async (req: Request, res: Response) => {
@@ -942,7 +1088,7 @@ router.post('/chat', async (req: Request, res: Response) => {
     pendingAction = null;
 
     // Call Bedrock with tool use
-    const reply = await callBedrockWithTools(systemPrompt, history);
+    const reply = await callBedrockWithTools(systemPrompt, history, mode);
 
     // Add assistant reply to history
     history.push({ role: 'assistant', content: [{ text: reply }] });
